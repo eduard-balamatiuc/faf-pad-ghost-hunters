@@ -1,0 +1,24 @@
+on:
+    pull_request:
+        types: [opened, edited, synchronize]
+
+jobs:
+    gitflow_convention_branch_naming_check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - run: |
+                # The branch name is available in the 'github.head_ref' context variable
+                BRANCH_NAME="${{ github.head_ref }}"
+                
+                REGEX="^(main|develop|((feature|bugfix|release|hotfix|support)\/[a-zA-Z0-9._-]+))$"
+
+                if [[ $BRANCH_NAME =~ $REGEX ]]; then
+                    echo "Branch name '$BRANCH_NAME' is valid according to GitFlow."
+                    exit 0
+                else
+                    echo "Error: Branch name '$BRANCH_NAME' does not follow GitFlow conventions."
+                    echo "Valid branch names are 'main', 'develop', or prefixed with 'feature/', 'bugfix/', 'release/', 'hotfix/', or 'support/'."
+                    exit 1
+                fi
