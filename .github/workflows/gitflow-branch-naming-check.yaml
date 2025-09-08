@@ -3,7 +3,7 @@ on:
         types: [opened, edited, synchronize]
 
 jobs:
-    gitflow_convention_branch_naming_check:
+    check_gitflow_convention_branch_naming:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
