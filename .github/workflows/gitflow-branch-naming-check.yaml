@@ -1,3 +1,4 @@
+name: check_gitflow_convention_branch_naming
 on:
     pull_request:
         types: [opened, edited, synchronize]
@@ -8,7 +9,8 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - run: |
+            - name: Validate branch name
+              run: |
                 # The branch name is available in the 'github.head_ref' context variable
                 BRANCH_NAME="${{ github.head_ref }}"
                 
