@@ -33,3 +33,7 @@
 [submodule "ghost-service"]
 	path = ghost-service
 	url = https://github.com/MarinBizarreAdventure/ghost-service
+	
+[submodule "location-service"]
+	path = location-service
+	url = https://github.com/MarinBizarreAdventure/location-service
