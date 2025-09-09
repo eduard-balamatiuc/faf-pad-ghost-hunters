@@ -5,3 +5,6 @@
 [submodule "lobby-service"]
 	path = lobby-service
 	url = git@github.com:eduard-balamatiuc/faf-pad-lobby-service.git
+[submodule "shop-service"]
+	path = shop-service
+	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
