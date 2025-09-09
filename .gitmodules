@@ -5,3 +5,7 @@
 [submodule "lobby-service"]
 	path = lobby-service
 	url = git@github.com:eduard-balamatiuc/faf-pad-lobby-service.git
+
+[submodule "inventory-service"]
+	path = inventory-service
+	url = git@github.com:danielavornic/ghost-hunters-inventory-service.git
