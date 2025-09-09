@@ -22,6 +22,10 @@
 	path = journal-service
 	url = https://github.com/Ghenntoggy1/PAD-Journal-Service.git
 
+[submodule "user-management-service"]
+	path = user-management-service
+	url = git@grumpy:grumpycatyo-collab/ghost-hunters-user-management-service.git
+
 [submodule "ghost-ai-service"]
 	path = ghost-ai-service
 	url = git@grumpy:grumpycatyo-collab/ghost-hunters-ghost-ai-service.git
