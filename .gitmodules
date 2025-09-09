@@ -13,3 +13,7 @@
 [submodule "chat-service"]
 	path = chat-service
 	url = git@github.com:danielavornic/ghost-hunters-chat-service.git
+  
+[submodule "shop-service"]
+	path = shop-service
+	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
