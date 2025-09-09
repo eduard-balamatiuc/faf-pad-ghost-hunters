@@ -1,3 +1,7 @@
 [submodule "map-service"]
 	path = map-service
 	url = git@github.com:eduard-balamatiuc/faf-pad-map-service.git
+
+[submodule "lobby-service"]
+	path = lobby-service
+	url = git@github.com:eduard-balamatiuc/faf-pad-lobby-service.git
