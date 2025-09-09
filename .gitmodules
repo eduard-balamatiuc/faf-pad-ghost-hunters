@@ -9,3 +9,7 @@
 [submodule "inventory-service"]
 	path = inventory-service
 	url = git@github.com:danielavornic/ghost-hunters-inventory-service.git
+  
+[submodule "chat-service"]
+	path = chat-service
+	url = git@github.com:danielavornic/ghost-hunters-chat-service.git
