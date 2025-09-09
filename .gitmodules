@@ -29,6 +29,7 @@
 [submodule "ghost-ai-service"]
 	path = ghost-ai-service
 	url = git@grumpy:grumpycatyo-collab/ghost-hunters-ghost-ai-service.git
+
 [submodule "ghost-service"]
 	path = ghost-service
 	url = https://github.com/MarinBizarreAdventure/ghost-service
