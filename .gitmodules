@@ -17,3 +17,7 @@
 [submodule "shop-service"]
 	path = shop-service
 	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
+
+[submodule "journal-service"]
+	path = journal-service
+	url = https://github.com/Ghenntoggy1/PAD-Journal-Service.git
