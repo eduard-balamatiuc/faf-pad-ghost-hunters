@@ -5,6 +5,19 @@
 [submodule "lobby-service"]
 	path = lobby-service
 	url = git@github.com:eduard-balamatiuc/faf-pad-lobby-service.git
+
+[submodule "inventory-service"]
+	path = inventory-service
+	url = git@github.com:danielavornic/ghost-hunters-inventory-service.git
+  
+[submodule "chat-service"]
+	path = chat-service
+	url = git@github.com:danielavornic/ghost-hunters-chat-service.git
+  
+[submodule "shop-service"]
+	path = shop-service
+	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
+
 [submodule "journal-service"]
 	path = journal-service
 	url = https://github.com/Ghenntoggy1/PAD-Journal-Service.git
