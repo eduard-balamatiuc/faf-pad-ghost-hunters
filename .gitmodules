@@ -18,6 +18,12 @@
 	path = shop-service
 	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
 
+[submodule "journal-service"]
+	path = journal-service
+	url = https://github.com/Ghenntoggy1/PAD-Journal-Service.git
+  
 [submodule "user-management-service"]
 	path = user-management-service
 	url = git@grumpy:grumpycatyo-collab/ghost-hunters-user-management-service.git
+
+
