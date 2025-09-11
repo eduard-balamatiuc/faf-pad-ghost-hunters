@@ -34,7 +34,7 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 
 ### User Management Service
 
-- **TODO: Add specific service description**
+Microservice responsible for every user and it’s data (email, password, currency, level, friends). Responsible for authentication and security, while also having a friends system that manages users friends. The service doesn’t communicate with any other service except the Inventory for doing transactions.
 
 ### Ghost AI Service
 
