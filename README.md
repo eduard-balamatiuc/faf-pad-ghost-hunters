@@ -16,8 +16,7 @@ A ghost hunting game built with microservices architecture for the PAD (Parallel
 
 ## Project Overview
 
-**TODO: Add project description, game rules, and objectives**
-
+Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a microservices-oriented architecture. Players form teams to investigate haunted locations, gather evidence about supernatural entities and identify ghost types to earn currency in the game. The system handles real-time gameplay for multiple concurrent lobbies, with dynamic ghost AI, inventory management, location-based communication and game session tracking.
 
 ## Service Boundaries
 
