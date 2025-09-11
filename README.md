@@ -2526,23 +2526,50 @@ Key responsibilities:
 
 ## Development Guidelines
 
-### Git Workflow & Branch Strategy
+### Git Workflow & Branch Strategy & Naming Convention
 
 #### GitFlow Model
 We follow the **GitFlow** model without releases:
 
 ```
-main (production-ready code)
+main (official release history)
 ├── develop (integration branch)
     ├── feature/feature-name (new features)
-    ├── bugfix/bug-description (bug fixes)
+    ├── release/vX.Y.Z (preparation branches for new releases)
     └── hotfix/critical-fix (production hotfixes)
 ```
 
 #### Branch Naming Convention
-- **Feature branches**: `feature/add-player-authentication`
-- **Bug fixes**: `bugfix/fix-lobby-connection-issue`
-- **Hotfixes**: `hotfix/fix-critical-security-vulnerability`
+- **Feature branches**: `feature/lab-X-service-name` or `feature/lab-X-functionality`
+  - Example: `feature/lab-2-ghost-ai`, `feature/lab-3-inventory-crud`
+- **Release branches**: `release/vX.Y.Z`
+  - Example: `release/v2.0.0`, `release/v3.1.0`
+- **Hotfix branches**: `hotfix/vX.Y.Z`
+  - Example: `hotfix/v2.0.1`, `hotfix/v1.0.3`
+- **Bugfix branches**: `bugfix/issue-description`
+  - Example: `bugfix/ghost-ai-memory-leak`
+- **Documentation branches**: `docs/update-description`
+  - Example: `docs/api-contract-updates`
+
+### Release Strategy
+
+- **Lab-based versioning:**
+  - `v{lab}.{iteration}.{patch}`
+  - Lab completion: `v1.0.0`, `v2.0.0`, etc.
+  - Feature iterations: `v2.1.0`, `v2.2.0`
+  - Bug fixes: `v2.0.1`, `v2.0.2`
+
+- **Release workflow:**
+  1. Create `release/vX.0.0` from `develop`
+  2. Team integration testing in release branch
+  3. Merge to `main` and tag `vX.0.0`
+  4. Demo/submit from tagged version
+
+- **Hotfix workflow:**
+  1. Create `hotfix/vX.Y.Z` from `main`
+  2. Fix critical issues
+  3. Merge to both `main` and `develop`
+  4. Tag new patch version
 
 #### Merging Strategy
 - **Feature → Develop**: Squash and merge
