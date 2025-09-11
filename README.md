@@ -668,6 +668,147 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
+### Shop Service
+
+#### Consumed API Endpoints
+
+`None` - Shop Service is primarily a data provider for item catalog information.
+
+#### Exposed API Endpoints
+
+- `GET /shop/items` - Consumed by Inventory Service
+    - Description
+        
+        Retrieves all shop items or filtered items by category. Supports optional category query parameter for filtering.
+        
+    - Query Parameters
+        
+        - `category` (optional): Category type used for filtering shop items (e.g., "INVESTIGATIVE", "PROTECTIVE")
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response (All items)
+        
+        ```json
+        {
+          "shopItems": [
+            {
+              "id": "emf",
+              "title": "EMF Reader",
+              "description": "Measures EMF Level.",
+              "category": "INVESTIGATIVE",
+              "durability": 5,
+              "price": 50
+            },
+            {
+              "id": "crucifix",
+              "title": "Crucifix",
+              "description": "Prevents Ghost Attacks.",
+              "category": "PROTECTIVE",
+              "durability": 3,
+              "price": 150
+            },
+            {
+              "id": "radio",
+              "title": "Radio",
+              "description": "Enables communication across rooms.",
+              "category": "COMMUNICATION",
+              "durability": 10,
+              "price": 150
+            }
+          ]
+        }
+        ```
+        
+    - Response (Filtered by category: `?category=INVESTIGATIVE`)
+        
+        ```json
+        {
+          "shopItems": [
+            {
+              "id": "emf",
+              "title": "EMF Reader",
+              "description": "Measures EMF Level.",
+              "category": "INVESTIGATIVE",
+              "durability": 5,
+              "price": 50
+            },
+            {
+              "id": "salt",
+              "title": "Salt",
+              "description": "Salt used to track ghost footprints.",
+              "category": "INVESTIGATIVE",
+              "durability": 4,
+              "price": 100
+            },
+            {
+              "id": "uv_light",
+              "title": "UV Light",
+              "description": "Ultra-Violet Light that is used to highlight fingerprints and footprints",
+              "category": "INVESTIGATIVE",
+              "durability": 10,
+              "price": 120
+            }
+          ]
+        }
+        ```
+        
+- `GET /shop/categories` - Consumed by Inventory Service
+    - Description
+        
+        Retrieves all available shop item categories for filtering and organization purposes.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "categories": [
+            "INVESTIGATIVE",
+            "PROTECTIVE",
+            "COMMUNICATION",
+            "CONSUMABLES"
+          ]
+        }
+        ```
+        
+- `GET /shop/items/{itemId}` - Consumed by Inventory Service
+    - Description
+        
+        Retrieves detailed information about a specific shop item by its ID.
+        
+    - Path Parameters
+        
+        - `itemId`: Unique identifier of the shop item
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "emf",
+          "title": "EMF Reader",
+          "description": "Measures EMF Level.",
+          "category": "INVESTIGATIVE",
+          "durability": 5,
+          "price": 50
+        }
+        ```
+
 ### Lobby Service
 
 #### Consumed API Endpoints
