@@ -222,7 +222,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             "currency": 100,
             "createdAt": "2025-09-09T10:00:00Z"
           },
-          "access_token": "jwt-token-here"
+          "accessToken": "jwt-token-here"
         }
         ```
         
@@ -252,8 +252,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             "currency": 2500,
             "lastLogin": "2025-09-09T10:00:00Z"
           },
-          "access_token": "jwt-token-here",
-          "refresh_token": "refresh-token-here"
+          "accessToken": "jwt-token-here",
+          "refreshToken": "refresh-token-here"
         }
         ```
         
@@ -266,7 +266,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "refresh_token": "refresh-token-here"
+          "refreshToken": "refresh-token-here"
         }
         ```
         
@@ -274,9 +274,9 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "access_token": "new-jwt-token-here",
+          "accessToken": "new-jwt-token-here",
           "expiresIn": 3600,
-          "refresh_token": "refresh-token-here",
+          "refreshToken": "refresh-token-here",
           "refreshExpiresIn": 1800000
         }
         ```
@@ -380,7 +380,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         {
           "type": "reward",
           "amount": 100,
-          "exp_gained": 1030
+          "expGained": 1030
         }
         ```
         
@@ -388,7 +388,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "transaction_status": "success"
+          "transactionStatus": "success"
         }
         ```
         
@@ -591,11 +591,11 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
-          "host_id": "player_host_123",
-          "map_id": "map_id_farmhouse_123",
+          "lobbyId": "lobby_xyz_789",
+          "hostId": "player_host_123",
+          "mapId": "map_id_farmhouse_123",
           "difficulty": "medium",
-          "ghost_type": "demon",
+          "ghostType": "demon",
           "session": "active",
           "players": ["player_1", "player_2"]
         }
@@ -606,8 +606,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "status": "started",
-          "ghost_thread_id": "ghost_thread_123",
-          "lobby_id": "lobby_xyz_789"
+          "ghostThreadId": "ghost_thread_123",
+          "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -620,7 +620,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789"
+          "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -629,7 +629,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "status": "terminated",
-          "lobby_id": "lobby_xyz_789"
+          "lobbyId": "lobby_xyz_789"
         }
         ```
 
@@ -644,9 +644,9 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
-          "event_type": "hunt_started",
-          "ghost_location": "kitchen_01",
+          "lobbyId": "lobby_xyz_789",
+          "eventType": "huntStarted",
+          "ghostLocation": "kitchen_01",
           "timestamp": "2025-09-09T10:00:00Z"
         }
         ```
@@ -660,10 +660,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "user_id": "player_1",
+          "userId": "player_1",
           "location": "hallway_01",
           "action": "speaking",
-          "sanity_level": 65,
+          "sanityLevel": 65,
           "timestamp": "2025-09-09T10:00:00Z"
         }
         ```
@@ -746,7 +746,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
               "price": 100
             },
             {
-              "id": "uv_light",
+              "id": "uvLight",
               "title": "UV Light",
               "description": "Ultra-Violet Light that is used to highlight fingerprints and footprints",
               "category": "INVESTIGATIVE",
@@ -867,26 +867,26 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         {
           "symptoms": [
             { 
-              "id": "emf_5", 
+              "id": "emfFive", 
               "name": "EMF Level 5", 
               "type": "typeA", 
               "description": "Electromagnetic field readings at maximum level" 
             },
             { 
-              "id": "objects_thrown", 
+              "id": "objectsThrown", 
               "name": "Objects Thrown", 
               "type": "typeA", 
               "description": "Physical objects being moved or thrown" 
             },
             { 
-              "id": "cold_temperatures", 
+              "id": "coldTemperatures", 
               "name": "Freezing Temperatures", 
               "type": "typeA", 
               "description": "Room temperature drops below freezing" 
             },
             ...
             { 
-              "id": "hunts_alone_players", 
+              "id": "huntsAlonePlayers", 
               "name": "Hunts Alone Players", 
               "type": "typeB", 
               "description": "Preferentially targets isolated players" 
@@ -914,16 +914,16 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             {
               "id": "poltergeist",
               "name": "Poltergeist",
-              "typeASymptoms": ["emf_5", "cold_temperatures", "ghost_writing"],
-              "typeBSymptoms": ["objects_thrown", "hunts_low_sanity"],
+              "typeASymptoms": ["emfFive", "coldTemperatures", "ghostWriting"],
+              "typeBSymptoms": ["objectsThrown", "huntsLowSanity"],
               "description": "Aggressive ghost that manipulates objects"
             },
             ...
             {
               "id": "demon",
               "name": "Demon",
-              "typeASymptoms": ["emf_5", "fingerprints", "ghost_writing"],
-              "typeBSymptoms": ["objects_thrown", "hunts_high_sanity"],
+              "typeASymptoms": ["emfFive", "fingerprints", "ghostWriting"],
+              "typeBSymptoms": ["objectsThrown", "huntsHighSanity"],
               "description": "Aggressive ghost that manipulates objects"
             }
           ]
@@ -946,7 +946,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "true_ghost_id": "demon"
+          "trueGhostId": "demon"
         }
         ```
         
@@ -961,7 +961,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         {
           "type": "reward",
           "amount": 70,
-          "exp_gained": 50
+          "expGained": 50
         }
         ```
         
@@ -969,7 +969,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "transaction_status": "success"
+          "transactionStatus": "success"
         }
         ```
 
@@ -985,7 +985,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "typeASymptoms": ["freezing_temperature"],
+          "typeASymptoms": ["freezingTemperature"],
           "typeBSymptoms": []
         }
         ```
@@ -995,8 +995,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
-          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
+          "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
           "ghostType": [
             {
               "id": "demon",
@@ -1015,8 +1015,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
-          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
+          "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
           "ghostType": [
             {
               "id": "demon",
@@ -1036,8 +1036,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", ..., "ghost_writing"],
-          "typeBSymptoms": ["hunts_alone_players", ..., "hunts_low_sanity"],
+          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", ..., "ghostWriting"],
+          "typeBSymptoms": ["huntsAlonePlayers", ..., "huntsLowSanity"],
           "ghostType": [
             {
               "id": "demon",
@@ -1080,8 +1080,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "lobbyId": "lobby123",
-          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
-          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
+          "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
           "ghostType": [
             {
               "id": "demon",
@@ -1109,8 +1109,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             "id": "demon",
             "name": "Demon"
           },
-          "typeASymptoms": ["emf_5", "objects_thrown", "cold_temperatures"],
-          "typeBSymptoms": ["hunts_alone_players", "aggressive_when_provoked"]
+          "typeASymptoms": ["emfFive", "objectsThrown", "coldTemperatures"],
+          "typeBSymptoms": ["huntsAlonePlayers", "aggressiveWhenProvoked"]
         }
         ```
         
@@ -1124,7 +1124,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             "id": "demon",
             "name": "Demon"
           },
-          "submitted_type": {
+          "submittedType": {
             "id": "demon",
             "name": "Demon"
           },
@@ -1132,8 +1132,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
           "rewardMoney": 70,
           "rewardExp": 50,
           "explanation": "Correctly identified with 3/5 symptoms observed",
-          "correctSymptoms": ["emf_5", "objects_thrown", "aggressive_when_provoked"],
-          "incorrectSymptoms": ["hunts_alone_players", "freezing_temperatures"]
+          "correctSymptoms": ["emfFive", "objectsThrown", "aggressiveWhenProvoked"],
+          "incorrectSymptoms": ["huntsAlonePlayers", "freezingTemperatures"]
         }
         ```
 
@@ -1150,11 +1150,11 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "lobby_id": "lobby_xyz_789",
-        "host_id": "player_host_123",
-        "map_id": "map_id_farmhouse_123",
+        "lobbyId": "lobby_xyz_789",
+        "hostId": "player_host_123",
+        "mapId": "map_id_farmhouse_123",
         "difficulty": "medium",
-        "ghost_type": "demon",
+        "ghostType": "demon",
         "session": "active",
         "players": ["player_1", "player_2"]
         }
@@ -1168,7 +1168,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "lobby_id": "lobby_xyz_789"
+        "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -1180,11 +1180,11 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "lobby_id": "lobby_xyz_789",
-        "host_id": "player_host_123",
-        "map_id": "map_id_farmhouse_123",
+        "lobbyId": "lobby_xyz_789",
+        "hostId": "player_host_123",
+        "mapId": "map_id_farmhouse_123",
         "difficulty": "medium",
-        "ghost_type": "demon",
+        "ghostType": "demon",
         "session": "active",
         "players": ["player_1", "player_2"]
         }
@@ -1198,7 +1198,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "lobby_id": "lobby_xyz_789"
+        "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -1217,9 +1217,9 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "host_id": "user_1",
+          "hostId": "user_1",
           "difficulty": "medium",
-          "ghost_type": "type-1",
+          "ghostType": "type-1",
         }
         ```
         
@@ -1227,11 +1227,11 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
-          "host_id": "player_host_123",
-          "map_id": "map_farmhouse_123",
+          "lobbyId": "lobby_xyz_789",
+          "hostId": "player_host_123",
+          "mapId": "map_farmhouse_123",
           "difficulty": "medium",
-          "ghost_type": "type-1",
+          "ghostType": "type-1",
           "session": "inactive",
         }
         ```
@@ -1251,11 +1251,11 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "lobby_id": "lobby_xyz_789",
-        "host_id": "player_host_123",
-        "map_id": "map_id_farmhouse_123",
+        "lobbyId": "lobby_xyz_789",
+        "hostId": "player_host_123",
+        "mapId": "map_id_farmhouse_123",
         "difficulty": "medium",
-        "ghost_type": "demon",
+        "ghostType": "demon",
         "session": "active",
         "players": ["player_1", "player_2"]
         }
@@ -1287,7 +1287,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "user_id": "user_2"
+        "userId": "user_2"
         }
         ```
         
@@ -1324,8 +1324,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
         	"items": [
-        		{"item_id": "temp_reader"},
-        		{"item_id": "camera"}
+        		{"itemId": "tempReader"},
+        		{"itemId": "camera"}
         	]
         }
         ```
@@ -1351,7 +1351,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
+          "lobbyId": "lobby_xyz_789",
           "users": ["user_1", "user_2", "user_3"]
         }
         ```
@@ -1371,8 +1371,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-            "death_status": false,
-            "sanity_level": 85
+            "deathStatus": false,
+            "sanityLevel": 85
         }
         ```
         
@@ -1385,8 +1385,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "death_status": true, // optional
-          "sanity_level": 0 // optional
+          "deathStatus": true, // optional
+          "sanityLevel": 0 // optional
         }
         ```
         
@@ -1411,8 +1411,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
-          "true_ghost_id": "demon"
+          "lobbyId": "lobby_xyz_789",
+          "trueGhostId": "demon"
         }
         ```
         
@@ -1435,8 +1435,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
         	"items": [
-        		{"item_id": "emf"},
-            {"item_id": "crucifix"}
+        		{"itemId": "emf"},
+            {"itemId": "crucifix"}
         	]
         }
         ```
@@ -1465,7 +1465,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "map_id": "map_farmhouse_123",
+          "mapId": "map_farmhouse_123",
           "name": "User's Custom Farmhouse"
         }
         ```
@@ -1485,19 +1485,19 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-          "map_id": "map_farmhouse_123",
+          "mapId": "map_farmhouse_123",
           "name": "User's Custom Farmhouse",
           "rooms": [
             {
-              "room_id": "kitchen_01",
+              "roomId": "kitchen_01",
               "name": "Kitchen",
               "connections": ["hallway_01", "dining_room_01"],
               "objects": [
-                {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
-                {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+                {"name": "Fridge", "isGhosted": true, "trigger": "any"},
+                {"name": "Sink", "isGhosted": false, "trigger": "uvLamp"}
               ],
-              "hiding_places": [
-        	      {"name": "Pantry", "is_ghost_accessible": false}
+              "hidingPlaces": [
+        	      {"name": "Pantry", "isGhostAccessible": false}
         	    ]
             }
           ]
@@ -1519,15 +1519,15 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-            "room_id": "kitchen_01",
+            "roomId": "kitchen_01",
             "name": "Kitchen",
             "connections": ["hallway_01"],
             "objects": [
-                {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
-                {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+                {"name": "Fridge", "isGhosted": true, "trigger": "any"},
+                {"name": "Sink", "isGhosted": false, "trigger": "uvLamp"}
             ],
-            "hiding_places": [
-                {"name": "Pantry", "is_ghost_accessible": false}
+            "hidingPlaces": [
+                {"name": "Pantry", "isGhostAccessible": false}
             ]
         }
         ```
@@ -1541,7 +1541,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         
         ```json
         {
-        "is_ghosted": true
+        "isGhosted": true
         }
         ```
         
@@ -1578,15 +1578,15 @@ Leveraged by Location and Ghost Services for effective communication, since one 
             {
               "id": "poltergeist",
               "name": "Poltergeist",
-              "typeASymptoms": ["emf_5", "objects_thrown", "cold_temperatures"],
-              "typeBSymptoms": ["hunts_alone_players", "aggressive_when_provoked"],
+              "typeASymptoms": ["emfFive", "objectsThrown", "coldTemperatures"],
+              "typeBSymptoms": ["huntsAlonePlayers", "aggressiveWhenProvoked"],
               "description": "Aggressive ghost that manipulates objects"
             },
             {
               "id": "demon",
               "name": "Demon",
-              "typeASymptoms": ["emf_5", "fingerprints", "ghost_writing"],
-              "typeBSymptoms": ["objects_thrown", "hunts_high_sanity"],
+              "typeASymptoms": ["emfFive", "fingerprints", "ghostWriting"],
+              "typeBSymptoms": ["objectsThrown", "huntsHighSanity"],
               "description": "Extremely aggressive entity with high hunting frequency"
             }
           ]
@@ -1609,8 +1609,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```json
         {
           "ghostId": "poltergeist",
-          "huntingTriggers": ["sanity_below_50", "player_alone", "provoked_by_objects"],
-          "abilities": ["throw_objects", "manipulate_electronics", "temperature_drop"],
+          "huntingTriggers": ["sanityBelow50", "playerAlone", "provokedByObjects"],
+          "abilities": ["throwObjects", "manipulateElectronics", "temperatureDrop"],
           "huntingCooldown": 30000,
           "aggressionLevel": "high"
         }
@@ -1633,25 +1633,25 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         {
           "symptoms": [
             { 
-              "id": "emf_5", 
+              "id": "emfFive", 
               "name": "EMF Level 5", 
               "type": "typeA", 
               "description": "Electromagnetic field readings at maximum level" 
             },
             { 
-              "id": "objects_thrown", 
+              "id": "objectsThrown", 
               "name": "Objects Thrown", 
               "type": "typeA", 
               "description": "Physical objects being moved or thrown" 
             },
             { 
-              "id": "cold_temperatures", 
+              "id": "coldTemperatures", 
               "name": "Freezing Temperatures", 
               "type": "typeA", 
               "description": "Room temperature drops below freezing" 
             },
             { 
-              "id": "hunts_alone_players", 
+              "id": "huntsAlonePlayers", 
               "name": "Hunts Alone Players", 
               "type": "typeB", 
               "description": "Preferentially targets isolated players" 
@@ -1724,15 +1724,15 @@ Key responsibilities:
         
         ```json
         {
-          "room_id": "kitchen_01",
+          "roomId": "kitchen_01",
           "name": "Kitchen",
           "connections": ["hallway_01"],
           "objects": [
-            {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
-            {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+            {"name": "Fridge", "isGhosted": true, "trigger": "any"},
+            {"name": "Sink", "isGhosted": false, "trigger": "uvLamp"}
           ],
-          "hiding_places": [
-            {"name": "Pantry", "is_ghost_accessible": false}
+          "hidingPlaces": [
+            {"name": "Pantry", "isGhostAccessible": false}
           ]
         }
         ```
@@ -1752,7 +1752,7 @@ Key responsibilities:
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
+          "lobbyId": "lobby_xyz_789",
           "users": ["user_1", "user_2", "user_3"]
         }
         ```
@@ -1772,8 +1772,8 @@ Key responsibilities:
         
         ```json
         {
-          "death_status": false,
-          "sanity_level": 85
+          "deathStatus": false,
+          "sanityLevel": 85
         }
         ```
         
@@ -1793,8 +1793,8 @@ Key responsibilities:
         ```json
         {
           "items": [
-            {"item_id": "emf"},
-            {"item_id": "crucifix"}
+            {"itemId": "emf"},
+            {"itemId": "crucifix"}
           ]
         }
         ```
@@ -1833,11 +1833,11 @@ Key responsibilities:
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789",
-          "host_id": "player_host_123",
-          "map_id": "map_id_farmhouse_123",
+          "lobbyId": "lobby_xyz_789",
+          "hostId": "player_host_123",
+          "mapId": "map_id_farmhouse_123",
           "difficulty": "medium",
-          "ghost_type": "demon",
+          "ghostType": "demon",
           "session": "active",
           "players": ["player_1", "player_2"]
         }
@@ -1848,8 +1848,8 @@ Key responsibilities:
         ```json
         {
           "status": "started",
-          "lobby_id": "lobby_xyz_789",
-          "tracking_active": true
+          "lobbyId": "lobby_xyz_789",
+          "trackingActive": true
         }
         ```
         
@@ -1862,7 +1862,7 @@ Key responsibilities:
         
         ```json
         {
-          "lobby_id": "lobby_xyz_789"
+          "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -1871,7 +1871,7 @@ Key responsibilities:
         ```json
         {
           "status": "terminated",
-          "lobby_id": "lobby_xyz_789"
+          "lobbyId": "lobby_xyz_789"
         }
         ```
         
@@ -1914,7 +1914,7 @@ Key responsibilities:
         ```json
         {
           "itemId": "inv_790",
-          "itemType": "uv_lamp"
+          "itemType": "uvLamp"
         }
         ```
         
@@ -1923,7 +1923,7 @@ Key responsibilities:
         ```json
         {
           "success": true,
-          "activeItem": { "id": "inv_790", "type": "uv_lamp", "durability": 2 },
+          "activeItem": { "id": "inv_790", "type": "uvLamp", "durability": 2 },
           "timestamp": "2025-09-10T14:30:00Z"
         }
         ```
@@ -1948,7 +1948,7 @@ Key responsibilities:
         {
           "success": true,
           "ghostSignDetected": true,
-          "evidence": "cold_temperature",
+          "evidence": "coldTemperature",
           "itemUsed": true,
           "itemDurability": 3,
           "timestamp": "2025-09-10T14:30:00Z"
@@ -1964,8 +1964,8 @@ Key responsibilities:
         
         ```json
         {
-          "reason": "player_death",
-          "deathCause": "ghost_attack"
+          "reason": "playerDeath",
+          "deathCause": "ghostAttack"
         }
         ```
         
@@ -2097,7 +2097,7 @@ Key responsibilities:
         
         ```json
         {
-          "type": "player_update",
+          "type": "playerUpdate",
           "lobbyId": "lobby_456",
           "userId": "user123",
           "roomId": "kitchen_01",
