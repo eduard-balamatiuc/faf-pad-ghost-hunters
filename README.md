@@ -132,12 +132,7 @@ It integrates with the Location Service to determine who can talk to whom, with 
 
 ## Architecture Diagram
 
-**TODO: Add detailed architecture diagram showing:**
-- Service interactions
-- Data flow
-- Communication protocols
-- Load balancers (if any)
-- Message queues (if any)
+![Architecture Diagram](docs/architecture.svg)
 
 ## Tech Stack
 
