@@ -1551,6 +1551,152 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         200 OK
         ```
 
+### Ghost Service
+
+#### Consumed API Endpoints
+
+`None` - Ghost Service is primarily a data provider and reference service.
+
+#### Exposed API Endpoints
+
+- `GET /ghost/types` - Consumed by Journal Service, Gateway, Ghost AI Service
+    - Description
+        
+        Retrieves all available ghost types with their associated symptoms for AI behavior initialization and journal validation.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "ghosts": [
+            {
+              "id": "poltergeist",
+              "name": "Poltergeist",
+              "typeASymptoms": ["emf_5", "objects_thrown", "cold_temperatures"],
+              "typeBSymptoms": ["hunts_alone_players", "aggressive_when_provoked"],
+              "description": "Aggressive ghost that manipulates objects"
+            },
+            {
+              "id": "demon",
+              "name": "Demon",
+              "typeASymptoms": ["emf_5", "fingerprints", "ghost_writing"],
+              "typeBSymptoms": ["objects_thrown", "hunts_high_sanity"],
+              "description": "Extremely aggressive entity with high hunting frequency"
+            }
+          ]
+        }
+        ```
+        
+- `GET /ghost/{ghostId}/behavior` - Consumed by Ghost AI Service
+    - Description
+        
+        Gets behavioral rules and templates for AI decision-making based on the specific ghost type.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "ghostId": "poltergeist",
+          "huntingTriggers": ["sanity_below_50", "player_alone", "provoked_by_objects"],
+          "abilities": ["throw_objects", "manipulate_electronics", "temperature_drop"],
+          "huntingCooldown": 30000,
+          "aggressionLevel": "high"
+        }
+        ```
+        
+- `GET /ghost/symptoms` - Consumed by Journal Service, Location Service
+    - Description
+        
+        Get all available symptoms categorized by type for game mechanics and validation.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "symptoms": [
+            { 
+              "id": "emf_5", 
+              "name": "EMF Level 5", 
+              "type": "typeA", 
+              "description": "Electromagnetic field readings at maximum level" 
+            },
+            { 
+              "id": "objects_thrown", 
+              "name": "Objects Thrown", 
+              "type": "typeA", 
+              "description": "Physical objects being moved or thrown" 
+            },
+            { 
+              "id": "cold_temperatures", 
+              "name": "Freezing Temperatures", 
+              "type": "typeA", 
+              "description": "Room temperature drops below freezing" 
+            },
+            { 
+              "id": "hunts_alone_players", 
+              "name": "Hunts Alone Players", 
+              "type": "typeB", 
+              "description": "Preferentially targets isolated players" 
+            }
+          ]
+        }
+        ```
+        
+- `GET /ghost/list` - Consumed by Journal Service, Gateway
+    - Description
+        
+        Get all available ghost types in simplified format for UI display and selection.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "ghosts": [
+            { 
+              "id": "poltergeist", 
+              "name": "Poltergeist" 
+            },
+            { 
+              "id": "demon", 
+              "name": "Demon" 
+            },
+            { 
+              "id": "spirit", 
+              "name": "Spirit" 
+            },
+            { 
+              "id": "wraith", 
+              "name": "Wraith" 
+            }
+          ]
+        }
+        ```
+
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy
