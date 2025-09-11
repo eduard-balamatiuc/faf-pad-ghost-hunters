@@ -87,7 +87,11 @@ And all other game session related services like Location Service and Ghost AI S
 
 ### Map Service
 
-- **TODO: Add specific service description**
+Keeps track of the entire game map state throughout each game session. It will track the rooms and all objects inside them with a validation if the ghost interacted with the object or not and by which tool this validation can be triggered by the player, also the available hiding spots and their accessibility by their ghosts. Nevertheless the connections between each available rooms.
+
+The Map service will automatically generate map configurations with different room placements, and objects.
+
+Core functionality will come as help for Ghost AI Service  and Location Service to enable them to interact with the map, and objects and inform them about the ghosted status of each object.
 
 ### Ghost Service
 
