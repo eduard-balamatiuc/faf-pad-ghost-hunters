@@ -670,8 +670,6 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 
 ### Lobby Service
 
-> ℹ️ Microservice responsible for creating, managing, and tracking game sessions. It serves as the source of truth for lobby state, including players, selected items, map, difficulty, and active game status. It communicates state changes to all relevant services and the game client.
-
 #### Consumed API Endpoints
 
 - `GET /map` - Available in Map Service.
@@ -976,9 +974,6 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 
 
 ### Map Service
-
-> ℹ️ Keeps track of the entire game map state throughout each game session. It provides the base layout of maps and manages the dynamic state of objects (e.g., `is_ghosted`) and hiding spots for each active lobby.
-
 
 #### Consumed API Endpoints
 
