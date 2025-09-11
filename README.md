@@ -117,7 +117,9 @@ Key responsibilities:
 
 ### Inventory Service
 
-- **TODO: Add specific service description**
+Manages all equipment and items owned by player within the game: time of purchase, price, remaining durability. When players use equipment during ghost hunting sessions, the service decreases durability and removes items when they break.
+
+It connects with the Shop Service where players buy new items and with the Lobby Service to handle item usage during active games. It also provides equipment status information to other services, such as radio availability for Chat.
 
 ### Chat Service
 
