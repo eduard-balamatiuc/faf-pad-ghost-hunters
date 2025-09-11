@@ -131,17 +131,312 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 
 ## Communication Contracts
 
-### Template Service
-**Base URL**: `http://localhost:8080/api/v1`
+### Lobby Service
 
-#### Template Management
-| Method | Endpoint | Description | Input | Output | Response Format |
-|--------|----------|-------------|-------|--------|-----------------|
-| POST | `/templates` | Create new template | `{name: string, description: string}` | `{template_id: string}` | JSON |
-| GET | `/templates/{id}` | Get template details | Path: `id` | `{template_id: string, name: string, description: string}` | JSON |
-| PUT | `/templates/{id}` | Update template | Path: `id`, Body: `{name: string, description: string}` | `{template_id: string}` | JSON |
-| DELETE | `/templates/{id}` | Delete template | Path: `id` | `{success: boolean}` | JSON |
-| **TODO** | **Add more endpoints** | | | | |
+> ℹ️ Microservice responsible for creating, managing, and tracking game sessions. It serves as the source of truth for lobby state, including players, selected items, map, difficulty, and active game status. It communicates state changes to all relevant services and the game client.
+
+#### Consumed API Endpoints
+
+- `GET /map` - Available in Map Service.
+    
+    **Description**: Retrieves a newly generated map for the player to interact with.
+    
+- `POST /ai/start`  - Available in Ai Service.
+    - Payload
+        
+        ```json
+        {
+        "lobby_id": "lobby_xyz_789",
+        "host_id": "player_host_123",
+        "map_id": "map_id_farmhouse_123",
+        "difficulty": "medium",
+        "ghost_type": "demon",
+        "session": "active",
+        "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    
+    **Description:** Starts a ghost thread in AI Service
+    
+- `POST /ai/end`  - Available in Ai Service.
+    - Payload
+        
+        ```json
+        {
+        "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+    
+    **Description: End** a ghost thread in AI Service
+    
+- `POST /location/start`  - Available in Location Service.
+    - Payload
+        
+        ```json
+        {
+        "lobby_id": "lobby_xyz_789",
+        "host_id": "player_host_123",
+        "map_id": "map_id_farmhouse_123",
+        "difficulty": "medium",
+        "ghost_type": "demon",
+        "session": "active",
+        "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    
+    **Description:** Starts a location session in Location Service.
+    
+- `POST /location/end`  - Available in Location Service.
+    - Payload
+        
+        ```json
+        {
+        "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+    
+    **Description: End** a location session in Location Service.
+    
+
+#### Exposed API Endpoints
+
+- `POST /lobbies` - Consumed by Game Client/Gateway.
+    - Description
+        
+        Creates a new game lobby.
+        
+    - Payload
+        
+        ```json
+        {
+          "host_id": "user_1",
+          "difficulty": "medium",
+          "ghost_type": "type-1",
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "host_id": "player_host_123",
+          "map_id": "map_farmhouse_123",
+          "difficulty": "medium",
+          "ghost_type": "type-1",
+          "session": "inactive",
+        }
+        ```
+        
+- `GET /lobbies/{lobbyId}` - Consumed by Game Client/Gateway, Ghost AI Service, Location Service.
+    - Description
+        
+        Retrieves the current state and settings of a specific lobby.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+        "lobby_id": "lobby_xyz_789",
+        "host_id": "player_host_123",
+        "map_id": "map_id_farmhouse_123",
+        "difficulty": "medium",
+        "ghost_type": "demon",
+        "session": "active",
+        "players": ["player_1", "player_2"]
+        }
+        ```
+        
+- `POST /lobbies/{lobbyId}/start`  - Consumed by Game Client/Gateway.
+    - Description
+        
+        Starts the game with the current lobby configuration.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+        
+- `POST /lobbies/{lobbyId}/user` - Consumed by Game Client/Gateway.
+    - **Description**
+        
+        Adds a player to the specific lobby.
+        
+    - Payload
+        
+        ```json
+        {
+        "user_id": "user_2"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+        
+- `DELETE /lobbies/{lobbyId}/users/{userId}` - Consumed by Game Client/Gateway
+    - Description
+        
+        Removes a player from a lobby.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+        
+- `PUT /lobbies/{lobbyId}/users/{userId}` - Consumed by Game Client/Gateway
+    - Description
+        
+        Updates a player’s loadout (items brought into the session).
+        
+    - Payload
+        
+        ```json
+        {
+        	"items": [
+        		{"item_id": "temp_reader"},
+        		{"item_id": "camera"}
+        	]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+        
+- `GET /lobbies/{lobbyId}/users` - Consumed by Location Service, Game Client
+    - Description
+        
+        Gets a list of all players currently in the lobby.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "users": ["user_1", "user_2", "user_3"]
+        }
+        ```
+        
+- `GET /lobbies/{lobbyId}/users/{userId}/status` - Consumed by Location Service
+    - Description
+        
+        Gets a specific player’s status, including sanity and death state.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+            "death_status": false,
+            "sanity_level": 85
+        }
+        ```
+        
+- `PUT /lobbies/{lobbyId}/users/{userId}/status` - Consumed by Ghost AI Service, Location Service
+    - Description
+        
+        Update a player’s status (e.g., sanity drop, death).
+        
+    - Payload
+        
+        ```json
+        {
+          "death_status": true, // optional
+          "sanity_level": 0 // optional
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+        
+- `GET /lobbies/{lobbyId}/ghost` - Consumed by Journal Service
+    - Description
+        
+        Retrieves the true ghost type for a given session for validation.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "true_ghost_id": "demon"
+        }
+        ```
+        
+- `GET  /lobbies/{lobbyId}/users/{userId}/items`  - Consumed by Location Service, Chat Service
+    
+    `/lobby/{lobbyId}/users/{userId}/items`
+    
+    - Description
+        
+        Retrieves all the items available to the player provided.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+        	"items": [
+        		{"item_id": "emf"},
+            {"item_id": "crucifix"}
+        	]
+        }
+        ```
+
 
 ## Development Guidelines
 
