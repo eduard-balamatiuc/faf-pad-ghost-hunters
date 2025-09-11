@@ -2301,6 +2301,234 @@ Key responsibilities:
         }
         ```
 
+### Chat Service
+
+#### Consumed API Endpoints
+
+- `GET /lobbies/{lobbyId}/users/{userId}/items?category=COMMUNICATION` - Consumed by Lobby Service
+    - Description
+        
+        Retrieves communication items (radios) from user's selected items for the current game session to enable radio-based messaging.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "userId": "user123",
+          "items": [
+            {
+              "id": "inv_radio_123",
+              "itemId": "radio",
+              "itemName": "Radio",
+              "category": "COMMUNICATION",
+              "durability": 8,
+              "maxDurability": 10
+            }
+          ]
+        }
+        ```
+        
+- `GET /inventory/users/{userId}/items/{itemId}` - Consumed by Inventory Service
+    - Description
+        
+        Checks radio item durability before allowing radio communication to ensure the device is functional.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "inv_radio_123",
+          "itemId": "radio",
+          "itemName": "Radio",
+          "category": "COMMUNICATION",
+          "durability": 8,
+          "maxDurability": 10,
+          "createdAt": "2025-09-10T14:30:00Z",
+          "updatedAt": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `POST /inventory/users/{userId}/items/{radioItemId}/use` - Consumed by Inventory Service
+    - Description
+        
+        Decreases radio durability after a message is sent via radio communication, tracking item usage.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "durability": 7,
+          "itemDeleted": false
+        }
+        ```
+        
+- `GET /location/{lobbyId}/users/{userId}/room` - Consumed by Location Service
+    - Description
+        
+        Retrieves user's current room location and roommates for determining message delivery scope in room-based communication.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "userId": "user123",
+          "roomId": "kitchen_01",
+          "roommates": ["user456", "user789"],
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `GET /location/{lobbyId}/users/communication` - Consumed by Location Service
+    - Description
+        
+        Retrieves all user locations with radio status and haunting interference information for managing cross-room communication.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "users": [
+            {
+              "userId": "user123",
+              "roomId": "kitchen_01",
+              "hasRadio": true,
+              "radioItemId": "inv_radio_123",
+              "isHaunted": false
+            },
+            {
+              "userId": "user456",
+              "roomId": "basement_02",
+              "hasRadio": true,
+              "radioItemId": "inv_radio_456",
+              "isHaunted": true
+            }
+          ]
+        }
+        ```
+
+#### Exposed API Endpoints
+
+- `WS /chat/connect` - Consumed by Game Client via API Gateway
+    - Description
+        
+        Establishes WebSocket connection for real-time messaging, initializing user's chat session with room and radio information.
+        
+    - Payload
+        
+        ```json
+        {
+          "userId": "user123",
+          "lobbyId": "lobby_456"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "connected": true,
+          "id": "ws_conn_789",
+          "roomId": "kitchen_01",
+          "radioItemId": "inv_radio_123"
+        }
+        ```
+        
+- `POST /chat/send` - Consumed by Game Client
+    - Description
+        
+        Sends a message through either room-based or radio communication, handling message delivery based on communication type and user locations.
+        
+    - Payload
+        
+        ```json
+        {
+          "userId": "user123",
+          "lobbyId": "lobby_456",
+          "message": "Ghost detected in basement!",
+          "communicationType": "text",
+          "radioItemId": "inv_radio_123"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "msg_uuid",
+          "deliveredTo": ["user456", "user789"],
+          "deliveryCount": 2,
+          "timestamp": "2025-09-10T14:30:00Z",
+          "success": true
+        }
+        ```
+        
+- `GET /chat/lobbies/{lobbyId}/messages` - Consumed by Game Client
+    - Description
+        
+        Retrieves message history for a specific lobby with optional filtering by room, limit, and timestamp for chat replay functionality.
+        
+    - Query Parameters
+        
+        - `limit` (optional): Maximum number of messages to retrieve (integer)
+        - `roomId` (optional): Filter messages by specific room (string)
+        - `since` (optional): Retrieve messages since specific timestamp (ISO date)
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "messages": [
+            {
+              "id": "msg_456",
+              "userId": "user123",
+              "username": "PlayerName",
+              "message": "Found evidence!",
+              "communicationType": "room",
+              "roomId": "kitchen_01",
+              "timestamp": "2025-09-10T14:30:00Z"
+            }
+          ],
+          "hasMore": false
+        }
+        ```
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy
