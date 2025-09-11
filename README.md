@@ -106,7 +106,14 @@ Key responsibilities:
 
 ### Location Service
 
-- **TODO: Add specific service description**
+Maintains real-time spatial awareness for all players, tracking positions, interactions, and contextual states (hiding, speaking, grouping). Processes high-frequency location updates and provides proximity-based queries with microsecond precision.
+
+Serves Chat Service with room occupancy data, streams real-time positions to Ghost AI Service for hunting algorithms, and tracks object interactions for Inventory Service. Validates spatial relationships through Map Service integration.
+
+Key responsibilities:
+
+- Real-time position tracking and state management
+- Object interaction logging and room occupancy
 
 ### Inventory Service
 
