@@ -809,6 +809,334 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
+### Journal Service
+
+#### Consumed API Endpoints
+
+- `GET /ghost/list` - Available in Ghost Service
+    - Description
+        
+        Get all available ghost types in simplified format.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "ghosts": [
+            { 
+              "id": "poltergeist", 
+              "name": "Poltergeist" 
+            },
+            { 
+              "id": "demon", 
+              "name": "Demon" 
+            },
+            { 
+              "id": "spirit", 
+              "name": "Spirit" 
+            },
+            ...
+            { 
+              "id": "wraith", 
+              "name": "Wraith" 
+            }
+          ]
+        }
+        ```
+        
+- `GET /ghost/symptoms` - Available in Ghost Service
+    - Description
+        
+        Get all available symptoms.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "symptoms": [
+            { 
+              "id": "emf_5", 
+              "name": "EMF Level 5", 
+              "type": "typeA", 
+              "description": "Electromagnetic field readings at maximum level" 
+            },
+            { 
+              "id": "objects_thrown", 
+              "name": "Objects Thrown", 
+              "type": "typeA", 
+              "description": "Physical objects being moved or thrown" 
+            },
+            { 
+              "id": "cold_temperatures", 
+              "name": "Freezing Temperatures", 
+              "type": "typeA", 
+              "description": "Room temperature drops below freezing" 
+            },
+            ...
+            { 
+              "id": "hunts_alone_players", 
+              "name": "Hunts Alone Players", 
+              "type": "typeB", 
+              "description": "Preferentially targets isolated players" 
+            }
+          ]
+        }
+        ```
+        
+- `GET /ghost/types` - Available in Ghost Service
+    - Description
+        
+        Get all available ghost types with symptoms.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "ghosts": [
+            {
+              "id": "poltergeist",
+              "name": "Poltergeist",
+              "typeASymptoms": ["emf_5", "cold_temperatures", "ghost_writing"],
+              "typeBSymptoms": ["objects_thrown", "hunts_low_sanity"],
+              "description": "Aggressive ghost that manipulates objects"
+            },
+            ...
+            {
+              "id": "demon",
+              "name": "Demon",
+              "typeASymptoms": ["emf_5", "fingerprints", "ghost_writing"],
+              "typeBSymptoms": ["objects_thrown", "hunts_high_sanity"],
+              "description": "Aggressive ghost that manipulates objects"
+            }
+          ]
+        }
+        ```
+        
+- `GET /lobbies/{lobby_id}/ghost` - Available in Lobby Service
+    - Description
+        
+        Retrieve the true Ghost Type from Lobby Service.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "true_ghost_id": "demon"
+        }
+        ```
+        
+- `PUT /users/{user_id}/currency/transactions` - Available in User Management Service
+    - Description
+        
+        Update Balance and Level of the Player according to the correctness of the predictions.
+        
+    - Payload
+        
+        ```json
+        {
+          "type": "reward",
+          "amount": 70,
+          "exp_gained": 50
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "transaction_status": "success"
+        }
+        ```
+
+#### Exposed API Endpoints
+
+- `POST /journal/users/{user_id}/entry/symptoms` - Consumed by Gateway
+    - Description
+        
+        User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters incompatible ghosts and symptoms, Medium - filters incompatible symptoms, Hard - no filtering is applied.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezing_temperature"],
+          "typeBSymptoms": []
+        }
+        ```
+        
+    - Response (Easy Difficulty - filters incompatible ghosts and symptoms and return compatible)
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
+          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "ghostType": [
+            {
+              "id": "demon",
+              "name": "Demon"
+            },
+            {
+              "id": "obake",
+              "name": "Obake"
+            }
+          ]
+        }
+        ```
+        
+    - Response (Medium Difficulty - filters incompatible symptoms and return compatible, no filter for Ghost Types)
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
+          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "ghostType": [
+            {
+              "id": "demon",
+              "name": "Demon"
+            },
+            ...
+            {
+              "id": "obake",
+              "name": "Obake"
+            }
+          ]
+        }
+        ```
+        
+    - Response (Hard Difficulty - returns all symptoms and ghosts)
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", ..., "ghost_writing"],
+          "typeBSymptoms": ["hunts_alone_players", ..., "hunts_low_sanity"],
+          "ghostType": [
+            {
+              "id": "demon",
+              "name": "Demon"
+            },
+            ...
+            {
+              "id": "obake",
+              "name": "Obake"
+            }
+          ]
+        }
+        ```
+        
+- `POST /journal/users/{user_id}/entry/ghost` - Consumed by Gateway
+    - Description
+        
+        User selects the ghost type from the list of available types and receives output based on the choice and according to Ghost Service Encyclopedia.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "ghostType": [
+            {
+              "id": "demon",
+              "name": "Demon"
+            },
+            {
+              "id": "obake",
+              "name": "Obake"
+            }
+          ]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezing_temperature", "fingerprints", "uses_radio", "ghost_writing"],
+          "typeBSymptoms": ["hunts_alone_players", "hunts_low_sanity"],
+          "ghostType": [
+            {
+              "id": "demon",
+              "name": "Demon"
+            },
+            {
+              "id": "obake",
+              "name": "Obake"
+            }
+          ]
+        }
+        ```
+        
+- `POST /journal/users/{user_id}/submit` - Consumed by Gateway
+    - Description
+        
+        User submits the selected Ghost Type and Symptoms and receives output based on the choice and according to Ghost Service Encyclopedia, as well as the reward in money and experience.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "ghostType": {
+            "id": "demon",
+            "name": "Demon"
+          },
+          "typeASymptoms": ["emf_5", "objects_thrown", "cold_temperatures"],
+          "typeBSymptoms": ["hunts_alone_players", "aggressive_when_provoked"]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "isCorrectType": true,
+          "trueType": {
+            "id": "demon",
+            "name": "Demon"
+          },
+          "submitted_type": {
+            "id": "demon",
+            "name": "Demon"
+          },
+          "accuracyScore": 60,
+          "rewardMoney": 70,
+          "rewardExp": 50,
+          "explanation": "Correctly identified with 3/5 symptoms observed",
+          "correctSymptoms": ["emf_5", "objects_thrown", "aggressive_when_provoked"],
+          "incorrectSymptoms": ["hunts_alone_players", "freezing_temperatures"]
+        }
+        ```
+
 ### Lobby Service
 
 #### Consumed API Endpoints
