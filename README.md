@@ -438,6 +438,118 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```
 
 
+### Map Service
+
+> ℹ️ Keeps track of the entire game map state throughout each game session. It provides the base layout of maps and manages the dynamic state of objects (e.g., `is_ghosted`) and hiding spots for each active lobby.
+
+
+#### Consumed API Endpoints
+
+`None` - Map Service is a data provider.
+
+#### Exposed API Endpoints
+
+- `GET /map` - Consumed by Lobby Service
+    - Description
+        
+        Retrieves a newly generated map for the player to interact with.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "map_id": "map_farmhouse_123",
+          "name": "User's Custom Farmhouse"
+        }
+        ```
+        
+- `GET /map/{mapId}` - Consumed by Game Client, Ghost AI Service
+    - Description
+        
+        Retrieves the full, current map state for a specific, active lobby session.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "map_id": "map_farmhouse_123",
+          "name": "User's Custom Farmhouse",
+          "rooms": [
+            {
+              "room_id": "kitchen_01",
+              "name": "Kitchen",
+              "connections": ["hallway_01", "dining_room_01"],
+              "objects": [
+                {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
+                {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+              ],
+              "hiding_places": [
+        	      {"name": "Pantry", "is_ghost_accessible": false}
+        	    ]
+            }
+          ]
+        }
+        ```
+        
+- `GET /map/{mapId}/rooms/{roomId}` - Consumed by Location Service
+    - Location
+        
+        Gets specific room data for the current map.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+            "room_id": "kitchen_01",
+            "name": "Kitchen",
+            "connections": ["hallway_01"],
+            "objects": [
+                {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
+                {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+            ],
+            "hiding_places": [
+                {"name": "Pantry", "is_ghost_accessible": false}
+            ]
+        }
+        ```
+        
+- `PUT /map/{mapId}/rooms/{roomId}/objects/{objectName}` - Consumed by Ghost AI Service
+    - Description
+        
+        Updates the state of an object within a room for a the specific map.
+        
+    - Payload
+        
+        ```json
+        {
+        "is_ghosted": true
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        200 OK
+        ```
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy
