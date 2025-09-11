@@ -95,7 +95,14 @@ Core functionality will come as help for Ghost AI Service  and Location Service 
 
 ### Ghost Service
 
-- **TODO: Add specific service description**
+Acts as the authoritative encyclopedia for all supernatural entities, managing ghost type definitions. Stores Type A symptoms (directly observable: EMF readings, temperature drops) and Type B symptoms (behavioral patterns: hunting triggers, group dynamics).
+
+Core functions include providing behavioral templates to the Ghost AI Service  and Journal Service. 
+
+Key responsibilities:
+
+- Static ghost type encyclopedia and symptom database
+- Behavioral rule templates for AI decision-making
 
 ### Location Service
 
