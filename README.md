@@ -541,6 +541,133 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
+### Ghost AI Service
+
+#### Consumed API Endpoints
+
+- `PUT /lobbies/{lobbyId}/users/{userId}/status` - Available in Lobby Service
+    - Description
+        
+        Updates a player's status (e.g., sanity drop, death) based on ghost interactions.
+        
+- `GET /map/{mapId}` - Available in Map Service
+    - Description
+        
+        Retrieves the full, current map state for a specific, active lobby session to inform ghost movement and interaction decisions.
+        
+- `PUT /map/{mapId}/rooms/{roomId}/objects/{objectName}` - Available in Map Service
+    - Description
+        
+        Updates the state of an object within a room (e.g., marking it as ghosted) during ghost interactions.
+        
+- `GET /ghost/types` - Available in Ghost Service
+    - Description
+        
+        Retrieves all available ghost types with their associated symptoms for AI behavior initialization.
+        
+- `GET /ghost/{ghostId}/behavior` - Available in Ghost Service
+    - Description
+        
+        Gets behavioral rules and templates for AI decision-making based on the specific ghost type.
+        
+- `GET /location/{lobbyId}/users/{userId}/current` - Available in Location Service
+    - Description
+        
+        Gets detailed user status and position information (only for alive players) to inform ghost hunting behavior.
+        
+- `DELETE /location/{lobbyId}/users/{userId}` - Available in Location Service
+    - Description
+        
+        Removes dead players from location tracking when the ghost kills them.
+
+#### Exposed API Endpoints
+
+- `POST /ai/start` - Consumed by Lobby Service
+    - Description
+        
+        Starts a new ghost AI thread for a specific lobby session with the provided configuration.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "host_id": "player_host_123",
+          "map_id": "map_id_farmhouse_123",
+          "difficulty": "medium",
+          "ghost_type": "demon",
+          "session": "active",
+          "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "status": "started",
+          "ghost_thread_id": "ghost_thread_123",
+          "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+- `POST /ai/end` - Consumed by Lobby Service
+    - Description
+        
+        Terminates the ghost AI thread for a specific lobby session when the game ends.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "status": "terminated",
+          "lobby_id": "lobby_xyz_789"
+        }
+        ```
+
+#### Message Queue Events
+
+- `PUBLISH ghost_updates` - Published to RabbitMQ, Consumed by Location Service, Chat Service
+    - Description
+        
+        Publishes real-time ghost status updates across all services for coordinated game state management.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "event_type": "hunt_started",
+          "ghost_location": "kitchen_01",
+          "timestamp": "2025-09-09T10:00:00Z"
+        }
+        ```
+        
+- `SUBSCRIBE user_updates_{lobbyId}` - Published by Location Service
+    - Description
+        
+        Receives player status and movement updates to inform ghost AI decision-making and hunting behavior.
+        
+    - Payload
+        
+        ```json
+        {
+          "user_id": "player_1",
+          "location": "hallway_01",
+          "action": "speaking",
+          "sanity_level": 65,
+          "timestamp": "2025-09-09T10:00:00Z"
+        }
+        ```
+
 ### Lobby Service
 
 > ℹ️ Microservice responsible for creating, managing, and tracking game sessions. It serves as the source of truth for lobby state, including players, selected items, map, difficulty, and active game status. It communicates state changes to all relevant services and the game client.
