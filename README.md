@@ -131,15 +131,6 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 
 ## Communication Contracts
 
-### Service-to-Service Communication
-
-- **TODO: Add specific communication contracts**
-
-
-## API Endpoints
-
-- **TODO: Add all endpoints for each api based on the template below**
-
 ### Template Service
 **Base URL**: `http://localhost:8080/api/v1`
 
