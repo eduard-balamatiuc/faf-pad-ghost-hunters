@@ -123,7 +123,11 @@ It connects with the Shop Service where players buy new items and with the Lobby
 
 ### Chat Service
 
-- **TODO: Add specific service description**
+Offers communication between based on their location. Players in the same room can talk to each other through text messages, while players with radio equipment can communicate across different rooms (unless a ghost is actively haunting the area). 
+
+As such, the service filters messages based on player locations, manages radio connectivity and ensures that supernatural events can interrupt communications.
+
+It integrates with the Location Service to determine who can talk to whom, with the User Management Service to authenticate players and with the Inventory Service to verify radio equipment status.
 
 
 ## Architecture Diagram
