@@ -1696,6 +1696,421 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
+### Location Service
+
+Maintains real-time spatial awareness for all players, tracking positions, interactions, and contextual states (hiding, speaking, grouping). Processes high-frequency location updates and provides proximity-based queries with microsecond precision.
+
+Serves Chat Service with room occupancy data, streams real-time positions to Ghost AI Service for hunting algorithms, and tracks object interactions for Inventory Service. Validates spatial relationships through Map Service integration.
+
+Key responsibilities:
+
+- Real-time position tracking and state management
+- Object interaction logging and room occupancy
+
+#### Consumed API Endpoints
+
+- `GET /map/{mapId}/rooms/{roomId}` - Available in Map Service
+    - Description
+        
+        Gets specific room data for the current map to validate player movements and object interactions.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "room_id": "kitchen_01",
+          "name": "Kitchen",
+          "connections": ["hallway_01"],
+          "objects": [
+            {"name": "Fridge", "is_ghosted": true, "trigger": "any"},
+            {"name": "Sink", "is_ghosted": false, "trigger": "uv_lamp"}
+          ],
+          "hiding_places": [
+            {"name": "Pantry", "is_ghost_accessible": false}
+          ]
+        }
+        ```
+        
+- `GET /lobbies/{lobbyId}/users` - Available in Lobby Service
+    - Description
+        
+        Gets a list of all players currently in the lobby for session initialization.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "users": ["user_1", "user_2", "user_3"]
+        }
+        ```
+        
+- `GET /lobbies/{lobbyId}/users/{userId}/status` - Available in Lobby Service
+    - Description
+        
+        Gets a specific player's status, including sanity and death state for location tracking validation.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "death_status": false,
+          "sanity_level": 85
+        }
+        ```
+        
+- `GET /lobbies/{lobbyId}/users/{userId}/items` - Available in Lobby Service
+    - Description
+        
+        Retrieves all the items available to the player in the current session for interaction validation.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "items": [
+            {"item_id": "emf"},
+            {"item_id": "crucifix"}
+          ]
+        }
+        ```
+        
+- `PUT /inventory/users/{userId}/items/{itemId}/use` - Available in Inventory Service
+    - Description
+        
+        Decreases item durability when used during object interactions.
+        
+    - Payload
+        
+        ```json
+        {
+          "usageType": "interaction",
+          "durabilityDecrease": 1
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "remainingDurability": 4
+        }
+        ```
+
+#### Exposed API Endpoints
+
+- `POST /location/start` - Consumed by Lobby Service
+    - Description
+        
+        Initializes location tracking for a new game session with all players and map data.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789",
+          "host_id": "player_host_123",
+          "map_id": "map_id_farmhouse_123",
+          "difficulty": "medium",
+          "ghost_type": "demon",
+          "session": "active",
+          "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "status": "started",
+          "lobby_id": "lobby_xyz_789",
+          "tracking_active": true
+        }
+        ```
+        
+- `POST /location/end` - Consumed by Lobby Service
+    - Description
+        
+        Terminates location tracking for a game session and cleans up player data.
+        
+    - Payload
+        
+        ```json
+        {
+          "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "status": "terminated",
+          "lobby_id": "lobby_xyz_789"
+        }
+        ```
+        
+- `PUT /location/{lobbyId}/users/{userId}/room` - Consumed by Gateway
+    - Description
+        
+        Updates player's room location and returns available interactions (only for alive players).
+        
+    - Payload
+        
+        ```json
+        {
+          "roomId": "kitchen_01",
+          "state": "moving",
+          "speaking": false
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "roomId": "kitchen_01",
+          "availableObjects": ["Fridge", "Sink"],
+          "hidingPlaces": ["Pantry"],
+          "connectedRooms": ["hallway_01"],
+          "groupStatus": "alone",
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `PUT /location/{lobbyId}/users/{userId}/equip` - Consumed by Gateway
+    - Description
+        
+        Changes the player's active item in hand for interactions.
+        
+    - Payload
+        
+        ```json
+        {
+          "itemId": "inv_790",
+          "itemType": "uv_lamp"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "activeItem": { "id": "inv_790", "type": "uv_lamp", "durability": 2 },
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `POST /location/{lobbyId}/users/{userId}/interact` - Consumed by Gateway
+    - Description
+        
+        Processes player interaction with room objects and detects ghost signs based on equipped items.
+        
+    - Payload
+        
+        ```json
+        {
+          "objectName": "Fridge",
+          "activeItem": "flashlight"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "ghostSignDetected": true,
+          "evidence": "cold_temperature",
+          "itemUsed": true,
+          "itemDurability": 3,
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `DELETE /location/{lobbyId}/users/{userId}` - Consumed by Lobby Service, Ghost AI Service
+    - Description
+        
+        Removes dead players from location tracking to prevent further interactions.
+        
+    - Payload
+        
+        ```json
+        {
+          "reason": "player_death",
+          "deathCause": "ghost_attack"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        { 
+          "success": true, 
+          "playerRemoved": true, 
+          "timestamp": "2025-09-10T14:30:00Z" 
+        }
+        ```
+        
+- `GET /location/{lobbyId}/users/{userId}/current` - Consumed by Ghost AI Service
+    - Description
+        
+        Gets detailed user status and position information (only for alive players) to inform ghost hunting behavior.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "userId": "user123",
+          "lobbyId": "lobby_456",
+          "roomId": "kitchen_01",
+          "state": "hiding",
+          "speaking": false,
+          "groupStatus": "alone",
+          "sanity": 65,
+          "alive": true,
+          "activeItem": { "id": "inv_789", "type": "flashlight", "durability": 3 },
+          "hidingPlace": "Pantry",
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `GET /location/{lobbyId}/users/{userId}/room` - Consumed by Chat Service
+    - Description
+        
+        Gets user's current room with optional room occupancy data for message broadcasting.
+        
+    - Query Parameters
+        
+        - `includeOthers`: boolean (default: false) - Include other users in the same room
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response (When `includeOthers=false`)
+        
+        ```json
+        { 
+          "userId": "user123",
+          "lobbyId": "lobby_456", 
+          "roomId": "kitchen_01",
+          "alive": true,
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+    - Response (When `includeOthers=true`)
+        
+        ```json
+        { 
+          "userId": "user123",
+          "lobbyId": "lobby_456", 
+          "roomId": "kitchen_01",
+          "alive": true,
+          "otherUsers": ["user456", "user789"],
+          "deadPlayers": ["user101"],
+          "totalOccupants": 4,
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `GET /location/{lobbyId}/users/communication` - Consumed by Chat Service
+    - Description
+        
+        Gets user locations with radio status and haunting interference for communication filtering.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        { 
+          "lobbyId": "lobby_456",
+          "isHaunting": true,
+          "hauntedRooms": ["kitchen_01"],
+          "users": [
+            { 
+              "userId": "user123", 
+              "roomId": "kitchen_01", 
+              "alive": true,
+              "radioBlocked": true
+            },
+            { 
+              "userId": "user456", 
+              "roomId": "hallway_01", 
+              "alive": true,
+              "radioBlocked": false
+            }
+          ],
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
+
+#### Message Queue Events
+
+- `PUBLISH user_updates_{lobbyId}` - Published to RabbitMQ, Consumed by Ghost AI Service
+    - Description
+        
+        Publishes real-time player status and movement updates to inform ghost AI decision-making and hunting behavior.
+        
+    - Payload
+        
+        ```json
+        {
+          "type": "player_update",
+          "lobbyId": "lobby_456",
+          "userId": "user123",
+          "roomId": "kitchen_01",
+          "state": "moving",
+          "groupStatus": "alone",
+          "speaking": false,
+          "sanity": 65,
+          "alive": true,
+          "activeItem": "flashlight",
+          "hidingPlace": null,
+          "timestamp": "2025-09-10T14:30:00Z"
+        }
+        ```
 
 ## Development Guidelines
 
