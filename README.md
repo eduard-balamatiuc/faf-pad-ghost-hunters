@@ -50,7 +50,19 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 
 ### Lobby Service
 
-- **TODO: Add specific service description**
+Microservice responsible for gathering all the information about the game session and keep track of it till the end of the game session, making it the source of truth, with data like:
+
+- Players participating in the session
+    - Items brought
+    - Sanity level
+    - Death status
+- The difficulty level
+- Ghost type
+- Chosen map
+
+This service will be interacting with the Gateway through any change.
+
+And all other game session related services like Location Service and Ghost AI Service  will be using the game status information as the truth source.
 
 ### Map Service
 
