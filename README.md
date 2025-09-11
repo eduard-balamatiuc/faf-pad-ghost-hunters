@@ -38,7 +38,7 @@ Microservice responsible for every user and it’s data (email, password, curren
 
 ### Ghost AI Service
 
-- **TODO: Add specific service description**
+The brains of the game aka the AI Service is responsible for dictating the ghosts actions based on the map, player behavior and their sanity level, difficulty and ghost types. It heavily relies on multi-threading since each ghost needs to work in a separate thread, that’s why it has Rust as his language. Consumes data from practically all services and mostly communicates with the Location Service using queues, because of their reactivity and functionality.
 
 ### Shop Service 
 
