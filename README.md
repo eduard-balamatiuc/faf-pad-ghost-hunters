@@ -188,6 +188,359 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 
 ## Communication Contracts
 
+### User Management Service
+
+#### Consumed API Endpoints
+
+`None` - User Management Service is primarily a data provider and authentication service.
+
+#### Exposed API Endpoints
+
+- `POST /users/register` - Consumed by Gateway
+    - Description
+        
+        Creates a new user account with initial currency allocation. A user starts with some currency (`100`).
+        
+    - Payload
+        
+        ```json
+        {
+          "email": "player@example.com",
+          "username": "PlayerOne",
+          "password": "SecurePassword123"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "user": {
+            "id": "uuid-here",
+            "email": "player@example.com",
+            "username": "PlayerOne",
+            "currency": 100,
+            "createdAt": "2025-09-09T10:00:00Z"
+          },
+          "access_token": "jwt-token-here"
+        }
+        ```
+        
+- `POST /users/login` - Consumed by Gateway
+    - Description
+        
+        Authenticates existing users and returns access tokens.
+        
+    - Payload
+        
+        ```json
+        {
+          "email": "player@example.com",
+          "password": "SecurePassword123"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "user": {
+            "id": "uuid-here",
+            "email": "player@example.com",
+            "username": "PlayerOne",
+            "level": 5,
+            "currency": 2500,
+            "lastLogin": "2025-09-09T10:00:00Z"
+          },
+          "access_token": "jwt-token-here",
+          "refresh_token": "refresh-token-here"
+        }
+        ```
+        
+- `POST /users/refresh` - Consumed by Gateway
+    - Description
+        
+        Generates new access tokens without requiring re-authentication.
+        
+    - Payload
+        
+        ```json
+        {
+          "refresh_token": "refresh-token-here"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "access_token": "new-jwt-token-here",
+          "expiresIn": 3600,
+          "refresh_token": "refresh-token-here",
+          "refreshExpiresIn": 1800000
+        }
+        ```
+        
+- `PUT /users/{userId}/profile` - Consumed by Gateway
+    - Description
+        
+        Updates profile info (username/email). Changes should be limited.
+        
+    - Payload
+        
+        ```json
+        {
+          "username": "NewPlayerName",
+          "email": "newemail@example.com"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "message": "Profile updated successfully",
+          "user": {
+            "id": "uuid-here",
+            "email": "newemail@example.com",
+            "username": "NewPlayerName",
+            "level": 5,
+            "currency": 2500
+          }
+        }
+        ```
+        
+- `DELETE /users/{userId}/account` - Consumed by Gateway
+    - Description
+        
+        Deletes a user account, with a grace period for recovery.
+        
+    - Payload
+        
+        ```json
+        {
+          "password": "SecurePassword123",
+          "confirmation": "DELETE"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "message": "Account successfully deleted"
+        }
+        ```
+        
+- `GET /users/{userId}/currency` - Consumed by Gateway, Inventory Service
+    - Description
+        
+        Returns the current balance and transaction history.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "balance": 2500
+        }
+        ```
+        
+- `POST /users/{userId}/currency/transactions` - Consumed by Inventory Service
+    - Description
+        
+        Processes purchases, rewards, or transfers.
+        
+    - Payload (Purchase)
+        
+        ```json
+        {
+          "type": "purchase",
+          "amount": 150
+        }
+        ```
+        
+    - Payload (Transfer)
+        
+        ```json
+        {
+          "type": "transfer",
+          "amount": 100
+        }
+        ```
+        
+    - Payload (Reward)
+        
+        ```json
+        {
+          "type": "reward",
+          "amount": 100,
+          "exp_gained": 1030
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "transaction_status": "success"
+        }
+        ```
+        
+- `POST /users/{userId}/friends/request` - Consumed by Gateway
+    - Description
+        
+        Sends a friend request.
+        
+    - Payload
+        
+        ```json
+        {
+          "recipientUsername": "FriendUsername"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "request": {
+            "id": "request-uuid",
+            "recipientId": "friend-uuid",
+            "recipientUsername": "FriendUsername",
+            "status": "pending",
+            "sentAt": "2025-09-09T10:00:00Z"
+          }
+        }
+        ```
+        
+- `GET /users/{userId}/friends/requests` - Consumed by Gateway
+    - Description
+        
+        Gets incoming and outgoing friend requests.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "incoming": [
+            {
+              "id": "request-uuid",
+              "senderId": "sender-uuid",
+              "senderUsername": "SenderName",
+              "sentAt": "2025-09-09T09:00:00Z"
+            }
+          ],
+          "outgoing": [
+            {
+              "id": "request-uuid-2",
+              "recipientId": "recipient-uuid",
+              "recipientUsername": "RecipientName",
+              "sentAt": "2025-09-09T08:00:00Z"
+            }
+          ]
+        }
+        ```
+        
+- `POST /users/{userId}/friends/respond` - Consumed by Gateway
+    - Description
+        
+        Accepts or rejects a friend request.
+        
+    - Payload
+        
+        ```json
+        {
+          "requestId": "request-uuid",
+          "action": "accept"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "message": "Friend request accepted",
+          "friend": {
+            "id": "friend-uuid",
+            "username": "NewFriend",
+            "level": 3,
+            "isOnline": true,
+            "friendshipDate": "2025-09-09T10:00:00Z"
+          }
+        }
+        ```
+        
+- `GET /users/{userId}/friends/list` - Consumed by Gateway
+    - Description
+        
+        Returns all confirmed friends with online status.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "friends": [
+            {
+              "id": "friend-uuid",
+              "username": "BestFriend",
+              "level": 8,
+              "isOnline": true,
+              "lastSeen": "2025-09-09T10:00:00Z",
+              "friendshipDate": "2025-08-15T14:30:00Z"
+            },
+            {
+              "id": "friend-uuid-2",
+              "username": "OldFriend",
+              "level": 12,
+              "isOnline": false,
+              "lastSeen": "2025-09-08T20:15:00Z",
+              "friendshipDate": "2025-07-22T11:45:00Z"
+            }
+          ],
+          "total": 12,
+          "onlineCount": 4
+        }
+        ```
+        
+- `DELETE /users/{userId}/friends/remove` - Consumed by Gateway
+    - Description
+        
+        Removes a friend.
+        
+    - Payload
+        
+        ```json
+        {
+          "friendId": "friend-uuid"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "message": "Friendship ended successfully"
+        }
+        ```
+
 ### Lobby Service
 
 > ℹ️ Microservice responsible for creating, managing, and tracking game sessions. It serves as the source of truth for lobby state, including players, selected items, map, difficulty, and active game status. It communicates state changes to all relevant services and the game client.
