@@ -42,7 +42,18 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 
 ### Shop Service 
 
-- **TODO: Add specific service description**
+Microservice responsible for handling available shop items, presenting to players:
+
+1. Item Title - title of the item (e.g. “*Candle*”), 
+2. Description - description of the corresponding item (e.g. “*Candle is a ghost-provocative tool that is used to gather evidences and track possible presence of the Ghost on the Map*.”), 
+3. Durability - the number of sessions in which the item can be used or the number of usages during the session (e.g. Candle have a durability of “*1 Usage*”, respectively one usage per session, or Radio has durability “*10 seconds*”), 
+4. Price - the amount of in-game currency that is required to spend to procure the corresponding item (e.g. “*Candle Price: 100$*”).
+
+This components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously, as well as every registered price across time.
+
+Besides above-mentioned scope, this service is designed handle applying price changes based on special events (Discount/Inflation).
+
+This Service communicates with **Inventory Service**, responsible for each individual player available items to be used. **Shop Service** will send information about the available shop item(s) by the player in JSON Serialization Format upon requests from **Inventory Service**. Besides that, filtering based on the category tag is done on this service’s side.
 
 ### Journal Service
 
