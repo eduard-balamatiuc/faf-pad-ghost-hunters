@@ -46,7 +46,17 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 
 ### Journal Service
 
-- **TODO: Add specific service description**
+Microservice responsible to provide to players a way to record symptoms manifested by the Ghost during the game by selecting from the list of all possible symptoms 3 specific symptoms that are considered to be manifested by the Ghost during the on-going game.
+
+Besides this, Journal Service will display the available symptoms from the Ghost Service, that holds information about every Ghost behavior and identification methods, that are displayed to players during the game to make notes and choose the Ghost Type when they decide to fininsh the investigation.
+
+Also, Journal Service is responsible for the evaluation of the correctness of players guesses, rewarding them based on coincidences between chosen by the players set of symptoms and on-going Ghost Type true symptoms.
+
+This service employs several other services:
+
+1. **User Management Service** - to award in-game players accordingly based on the correctness of their guesses.
+2. **Ghost Service** - to retrieve all possible symptoms of each ghost and validate against true Ghost type symptoms.
+3. **Lobby Service** - to get the current in-game actual Ghost type.
 
 ### Lobby Service
 
