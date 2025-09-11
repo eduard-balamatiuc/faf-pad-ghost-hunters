@@ -2112,6 +2112,195 @@ Key responsibilities:
         }
         ```
 
+### Inventory Service
+
+#### Consumed API Endpoints
+
+- `GET /shop/items/{itemId}` - Consumed by Shop Service
+    - Description
+        
+        Retrieves item details and original price for tracking when adding purchased items to user inventory.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "flashlight",
+          "title": "Flashlight",
+          "description": "Illuminates dark areas and reveals ghost interactions.",
+          "category": "INVESTIGATIVE",
+          "durability": 5,
+          "price": 50
+        }
+        ```
+        
+- `GET /users/{userId}/currency` - Consumed by User Management Service
+    - Description
+        
+        Retrieves user's current currency balance to validate purchase transactions.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "userId": "user123",
+          "currency": 250
+        }
+        ```
+        
+- `POST /users/{userId}/currency/transactions` - Consumed by User Management Service
+    - Description
+        
+        Updates user currency when adding purchased item to inventory, deducting the purchase price.
+        
+    - Payload
+        
+        ```json
+        {
+          "amount": -50,
+          "type": "PURCHASE",
+          "description": "Purchased Flashlight from shop"
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "transactionId": "txn_123456",
+          "newBalance": 200,
+          "success": true
+        }
+        ```
+
+#### Exposed API Endpoints
+
+- `GET /inventory/users/{userId}/items` - Consumed by API Gateway, Lobby Service
+    - Description
+        
+        Retrieves all items owned by a specific user, with optional category filtering for inventory management.
+        
+    - Query Parameters
+        
+        - `category` (optional): Category type used for filtering items (e.g., "INVESTIGATIVE", "PROTECTIVE", "COMMUNICATION")
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "userId": "user123",
+          "items": [
+            {
+              "id": "inv_311212sa",
+              "itemId": "flashlight", 
+              "itemName": "Flashlight",
+              "category": "INVESTIGATIVE",
+              "purchasePrice": 50,
+              "durability": 5,
+              "maxDurability": 5,
+              "createdAt": "2025-09-10T14:30:00Z",
+              "updatedAt": "2025-09-10T14:30:00Z"
+            }
+          ]
+        }
+        ```
+        
+- `POST /inventory/users/{userId}/items` - Consumed by API Gateway
+    - Description
+        
+        Adds a purchased item to user's inventory after successful shop transaction, initializing durability and tracking purchase details.
+        
+    - Payload
+        
+        ```json
+        {
+          "itemId": "flashlight",
+          "purchasePrice": 50
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "inv_311212sa",
+          "itemId": "flashlight",
+          "itemName": "Flashlight",
+          "category": "INVESTIGATIVE",
+          "purchasePrice": 50,
+          "durability": 5,
+          "maxDurability": 5,
+          "createdAt": "2025-09-10T14:30:00Z",
+          "updatedAt": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `GET /inventory/users/{userId}/items/{itemId}` - Consumed by API Gateway
+    - Description
+        
+        Retrieves detailed information about a specific item in user's inventory, including current durability status.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "id": "inv_311212sa",
+          "itemId": "flashlight",
+          "itemName": "Flashlight",
+          "category": "INVESTIGATIVE",
+          "purchasePrice": 50,
+          "durability": 5,
+          "maxDurability": 5,
+          "createdAt": "2025-09-10T14:30:00Z",
+          "updatedAt": "2025-09-10T14:30:00Z"
+        }
+        ```
+        
+- `PUT /inventory/users/{userId}/items/{itemId}/use` - Consumed by Location Service
+    - Description
+        
+        Uses an item during gameplay, decreasing its durability by 1. If durability reaches 0, the item is automatically deleted from inventory.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "success": true,
+          "durability": 4,
+          "itemDeleted": false
+        }
+        ```
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy
