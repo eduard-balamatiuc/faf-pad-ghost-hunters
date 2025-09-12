@@ -1133,6 +1133,46 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
+- **`POST /journal/start`** - Consumed by **Lobby Service**
+    - Description
+        
+        Starts a Journal thread in Journal Service.
+        
+    - Payload
+        
+        ```json
+        {
+            "lobbyId": "lobby_xyz_789",
+            "hostId": "player_host_123",
+            "mapId": "map_id_farmhouse_123",
+            "difficulty": "medium",
+            "ghostType": "demon",
+            "session": "active",
+            "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        None
+        ```
+        
+- **`POST /journal/end`** - Consumed by **Lobby Service**
+    - Description
+        
+        End a Journal thread in Journal Service.
+        
+    - Payload
+        
+        ```json
+        {
+            "lobbyId": "lobby_xyz_789"
+        }
+        ```
+        
+    - Response
+
 ### Lobby Service
 
 #### Consumed API Endpoints
@@ -1201,6 +1241,37 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     
     **Description: End** a location session in Location Service.
     
+- `POST /journal/start` - Available in Journal Service.
+    - Payload
+        
+        ```json
+        {
+        "lobbyId": "lobby_xyz_789",
+        "hostId": "player_host_123",
+        "mapId": "map_id_farmhouse_123",
+        "difficulty": "medium",
+        "ghostType": "demon",
+        "session": "active",
+        "players": ["player_1", "player_2"]
+        }
+        
+        ```
+        
+    
+    **Description:** Starts a Journal session in Journal Service.
+    
+- `POST /journal/end` - Available in Journal Service.
+    - Payload
+        
+        ```json
+        {
+        "lobbyId": "lobby_xyz_789"
+        }
+        
+        ```
+        
+    
+    **Description: End** a Journal session in Journal Service.
 
 #### Exposed API Endpoints
 
