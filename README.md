@@ -169,8 +169,8 @@ Used for Chat Service, Inventory Service and Shop Service. It is a great choice 
 
 - Location Service `locations_db`: for high-frequency operations - storing current player positions, room occupancy, and real-time state data with sub-millisecond access times. Essential for handling simultaneous location updates from hundreds of players without bottlenecks.
 - Ghost AI Service `ai_db` : since the ghost are recorded only session-wise, and some info can be optimized via caching, Redis would be the best option.
-- Lobby Service: for transient session management - storing player lists, game settings, and real-time readiness status with extremely low-latency read/write access. Essential for managing thousands of concurrent pre-game lobbies and broadcasting instant updates to all players.
-- Map Service: for real-time game state tracking - storing dynamic object states (e.g., `is_ghosted`) and live data  with millisecond-level update propagation. Essential for synchronizing the game world state for all players and the Ghost AI Service during an active session.
+- Lobby Service `lobby_db`: for transient session management - storing player lists, game settings, and real-time readiness status with extremely low-latency read/write access. Essential for managing thousands of concurrent pre-game lobbies and broadcasting instant updates to all players.
+- Map Service `map_db`: for real-time game state tracking - storing dynamic object states (e.g., `is_ghosted`) and live data  with millisecond-level update propagation. Essential for synchronizing the game world state for all players and the Ghost AI Service during an active session.
 
 ### Communication Patterns
 
