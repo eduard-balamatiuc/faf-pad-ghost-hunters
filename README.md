@@ -926,6 +926,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```
         
 - `GET /lobbies/{lobby_id}/ghost` - Available in Lobby Service
+    - Path Parameters
+        
+        `lobby_id`- ID of the Session from which the true type of the Ghost is requested.
+
     - Description
         
         Retrieve the true Ghost Type from Lobby Service.
@@ -946,6 +950,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```
         
 - `PUT /users/{user_id}/currency/transactions` - Available in User Management Service
+    - Path Parameters
+        
+        `user_id` - ID of the User that should be rewarded.
+
     - Description
         
         Update Balance and Level of the Player according to the correctness of the predictions.
@@ -971,6 +979,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
 #### Exposed API Endpoints
 
 - `POST /journal/users/{user_id}/entry/symptoms` - Consumed by Gateway
+    - Path Parameters:
+        
+        `user_id` - ID of the User that calls this endpoint in order to select symptoms from the general pool of all possible symptoms.
+
     - Description
         
         User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters incompatible ghosts and symptoms, Medium - filters incompatible symptoms, Hard - no filtering is applied.
@@ -1048,6 +1060,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```
         
 - `POST /journal/users/{user_id}/entry/ghost` - Consumed by Gateway
+    - Path Parameters:
+        
+        `user_id` - ID of the User that calls this endpoint in order to select Ghost Type from the general pool of all possible Ghost Types.
+
     - Description
         
         User selects the ghost type from the list of available types and receives output based on the choice and according to Ghost Service Encyclopedia.
@@ -1091,6 +1107,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         ```
         
 - `POST /journal/users/{user_id}/submit` - Consumed by Gateway
+    - Path Parameters:
+        
+        `user_id` - ID of the User that calls this endpoint in order to submit the selected Ghost Type and Symptoms from the general pool of all possible Ghost Types and Symptoms.
+
     - Description
         
         User submits the selected Ghost Type and Symptoms and receives output based on the choice and according to Ghost Service Encyclopedia, as well as the reward in money and experience.
