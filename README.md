@@ -3,17 +3,16 @@
 A ghost hunting game built with microservices architecture for the PAD (Parallel and Distributed Programming) laboratory work at FAF, Technical University of Moldova.
 
 ## Table of Contents
-
-- [Project Overview](#-project-overview)
-- [Team](#-team)
-- [Service Boundaries](#-service-boundaries)
-- [Architecture Diagram](#-architecture-diagram)
-- [Tech Stack](#-tech-stack)
-- [Communication Contracts](#-communication-contracts)
-- [API Endpoints](#-api-endpoints)
-- [Development Guidelines](#-development-guidelines)
-- [Project Management](#-project-management)
-- [License](#-license)
+- [Project Overview](#project-overview)
+- [Team](#team)
+- [Service Boundaries](#service-boundaries)
+- [Architecture Diagram](#architecture-diagram)
+- [Tech Stack](#tech-stack)
+- [Communication Contracts](#communication-contracts)
+- [API Endpoints](#api-endpoints)
+- [Development Guidelines](#development-guidelines)
+- [Project Management](#project-management)
+- [License](#license)
 
 ## Project Overview
 
