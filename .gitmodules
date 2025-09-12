@@ -1,0 +1,39 @@
+[submodule "map-service"]
+	path = map-service
+	url = git@github.com:eduard-balamatiuc/faf-pad-map-service.git
+
+[submodule "lobby-service"]
+	path = lobby-service
+	url = git@github.com:eduard-balamatiuc/faf-pad-lobby-service.git
+
+[submodule "inventory-service"]
+	path = inventory-service
+	url = git@github.com:danielavornic/ghost-hunters-inventory-service.git
+  
+[submodule "chat-service"]
+	path = chat-service
+	url = git@github.com:danielavornic/ghost-hunters-chat-service.git
+  
+[submodule "shop-service"]
+	path = shop-service
+	url = https://github.com/Ghenntoggy1/PAD-Shop-Service.git
+
+[submodule "journal-service"]
+	path = journal-service
+	url = https://github.com/Ghenntoggy1/PAD-Journal-Service.git
+
+[submodule "user-management-service"]
+	path = user-management-service
+	url = git@grumpy:grumpycatyo-collab/ghost-hunters-user-management-service.git
+
+[submodule "ghost-ai-service"]
+	path = ghost-ai-service
+	url = git@grumpy:grumpycatyo-collab/ghost-hunters-ghost-ai-service.git
+
+[submodule "ghost-service"]
+	path = ghost-service
+	url = https://github.com/MarinBizarreAdventure/ghost-service
+	
+[submodule "location-service"]
+	path = location-service
+	url = https://github.com/MarinBizarreAdventure/location-service
