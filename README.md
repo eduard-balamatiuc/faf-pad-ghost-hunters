@@ -142,7 +142,7 @@ The following diagram illustrates the microservices architecture with API Gatewa
 
 #### Go
 
-Used for Ghost Service, Location Service, Map Service, Lobby Service, User ManagementService. Strong typing ensures data validation accuracy, built-in JSON marshaling handles complex ghost data structures efficiently, and Go's simplicity reduces development overhead for validation-focused operations. Goroutines and channels are essential for handling real-time position tracking with microsecond precision, while built-in concurrency primitives allow efficient processing of high-frequency location updates from multiple players simultaneously.
+Used for Ghost Service, Location Service, Map Service, Lobby Service, User Management Service and Journal Service. Strong typing ensures data validation accuracy, built-in JSON marshaling handles complex ghost data structures efficiently, and Go's simplicity reduces development overhead for validation-focused operations. Goroutines and channels are essential for handling real-time position tracking with microsecond precision, while built-in concurrency primitives allow efficient processing of high-frequency location updates from multiple players simultaneously.
 
 #### Rust
 
