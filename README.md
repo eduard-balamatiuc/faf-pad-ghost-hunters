@@ -1153,7 +1153,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
-  - `GET /journal/lobbies/{lobby_id}/users/{user_id}/ghost/selected` - Consumed by Gateway
+- `GET /journal/lobbies/{lobby_id}/users/{user_id}/ghost/selected` - Consumed by Gateway
     - Path Parameters:
 
         `lobby_id` - ID of the lobby from where the Users select their ghost entry.
@@ -1182,7 +1182,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         }
         ```
 
-  - `GET /journal/lobbies/{lobby_id}/users/{user_id}/symptoms/selected` - Consumed by Gateway
+- `GET /journal/lobbies/{lobby_id}/users/{user_id}/symptoms/selected` - Consumed by Gateway
     - Path Parameters:
 
         `lobby_id` - ID of the lobby from where the Users select their symptoms entries.
