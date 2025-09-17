@@ -2528,9 +2528,9 @@ Key responsibilities:
 - `WS /chat/connect` - Consumed by Game Client via API Gateway
     - Description
         
-        Establishes WebSocket connection for real-time messaging, initializing user's chat session with room and radio information.
+        Establishes WebSocket connection for real-time messaging, initializing user's chat session with room and radio information. Also handles message sending through WebSocket events.
         
-    - Payload
+    - Connection Payload
         
         ```json
         {
@@ -2539,7 +2539,7 @@ Key responsibilities:
         }
         ```
         
-    - Response
+    - Connection Response
         
         ```json
         {
@@ -2550,24 +2550,21 @@ Key responsibilities:
         }
         ```
         
-- `POST /chat/send` - Consumed by Game Client
-    - Description
+    - Send Message Event: `sendMessage`
         
-        Sends a message through either room-based or radio communication, handling message delivery based on communication type and user locations.
+        Sends a message through either room-based or radio communication via WebSocket, handling message delivery based on communication type and user locations.
         
-    - Payload
+    - Message Event Payload
         
         ```json
         {
-          "userId": "user123",
-          "lobbyId": "lobby_456",
           "message": "Ghost detected in basement!",
           "communicationType": "text",
           "radioItemId": "inv_radio_123"
         }
         ```
         
-    - Response
+    - Message Event Response
         
         ```json
         {
