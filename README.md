@@ -2099,6 +2099,24 @@ Key responsibilities:
     }
     ```
 
+#### Message Queue Events
+
+- `SUBSCRIBE ghost_updates` - Published by Ghost AI Service
+  - Description
+    Updates the Chat Service about ghost activity status to manage communication interruptions. When a ghost is actively haunting an area, radio-based communication gets interrupted and players in haunted rooms cannot use radios for cross-room messaging.
+  - Payload
+    ```json
+    {
+      "lobbyId": "lobby_xyz_789",
+      "eventType": "huntStarted",
+      "ghostLocation": "kitchen_01", 
+      "hauntedRooms": ["kitchen_01", "hallway_01"],
+      "timestamp": "2025-09-09T10:00:00Z"
+    }
+    ```
+  - Usage
+    When `eventType` is "huntStarted", the Chat Service blocks radio communication for users in `hauntedRooms`. When `eventType` is "huntEnded", radio communication is restored for all users in the lobby.
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy & Naming Convention
