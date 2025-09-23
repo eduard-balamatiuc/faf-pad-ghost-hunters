@@ -24,11 +24,11 @@
 
 [submodule "user-management-service"]
 	path = user-management-service
-	url = git@grumpy:grumpycatyo-collab/ghost-hunters-user-management-service.git
+	url = https://github.com/grumpycatyo-collab/ghost-hunters-user-management-service.git
 
 [submodule "ghost-ai-service"]
 	path = ghost-ai-service
-	url = git@grumpy:grumpycatyo-collab/ghost-hunters-ghost-ai-service.git
+	url = https://github.com/grumpycatyo-collab/ghost-hunters-ghost-ai-service.git
 
 [submodule "ghost-service"]
 	path = ghost-service
