@@ -210,6 +210,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
         "email": "player@example.com",
         "username": "PlayerOne",
         "currency": 100,
+        "level": 1,
         "createdAt": "2025-09-09T10:00:00Z"
       },
       "accessToken": "jwt-token-here"
@@ -332,7 +333,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     {
       "type": "reward",
       "amount": 100,
-      "expGained": 1030
+      "expGained": 1030 // User levels up every 1000 exp (if 1000 exp is gained, level increases by 1)
     }
     ```
   - Response
