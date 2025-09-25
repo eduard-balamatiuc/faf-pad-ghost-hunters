@@ -169,6 +169,7 @@ Used for Chat Service, Inventory Service and Shop Service. It is a great choice 
 - Ghost AI Service `ai_db` : since the ghost are recorded only session-wise, and some info can be optimized via caching, Redis would be the best option.
 - Lobby Service `lobby_db`: for transient session management - storing player lists, game settings, and real-time readiness status with extremely low-latency read/write access. Essential for managing thousands of concurrent pre-game lobbies and broadcasting instant updates to all players.
 - Map Service `map_db`: for real-time game state tracking - storing dynamic object states (e.g., `is_ghosted`) and live data with millisecond-level update propagation. Essential for synchronizing the game world state for all players and the Ghost AI Service during an active session.
+- Journal Service `journal_db`: for real-time journal entries handling - storing session-wise for each player their entries both for ghost type and symptoms. Useful to maintain the currently noted-down entries by each user.
 
 ### Communication Patterns
 
@@ -985,6 +986,102 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     }
     ```
 
+- `GET /journal/lobbies/{lobby_id}/users/{user_id}/ghost/selected` - Consumed by Gateway
+    - Path Parameters:
+
+        `lobby_id` - ID of the lobby from where the Users select their ghost entry.
+        
+        `user_id` - ID of the User that calls this endpoint in order to get their ghost selection.
+
+    - Description
+        
+        Gets currently selected ghost entry by User.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "ghostType": {
+            "id": "demon",
+            "name": "Demon"
+          }
+        }
+        ```
+
+- `GET /journal/lobbies/{lobby_id}/users/{user_id}/symptoms/selected` - Consumed by Gateway
+    - Path Parameters:
+
+        `lobby_id` - ID of the lobby from where the Users select their symptoms entries.
+        
+        `user_id` - ID of the User that calls this endpoint in order to get their symptoms selection.
+
+    - Description
+        
+        Gets currently selected symptoms entry by User.
+        
+    - Payload
+        
+        ```json
+        None
+        ```
+        
+    - Response
+        
+        ```json
+        {
+          "lobbyId": "lobby123",
+          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
+          "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
+        }
+        ```
+
+- `POST /journal/start` - Consumed by **Lobby Service**
+    - Description
+        
+        Starts a Journal thread in Journal Service.
+        
+    - Payload
+        
+        ```json
+        {
+            "lobbyId": "lobby_xyz_789",
+            "hostId": "player_host_123",
+            "mapId": "map_id_farmhouse_123",
+            "difficulty": "medium",
+            "ghostType": "demon",
+            "session": "active",
+            "players": ["player_1", "player_2"]
+        }
+        ```
+        
+    - Response
+        
+        ```json
+        None
+        ```
+        
+- `POST /journal/end` - Consumed by **Lobby Service**
+    - Description
+        
+        End a Journal thread in Journal Service.
+        
+    - Payload
+        
+        ```json
+        {
+            "lobbyId": "lobby_xyz_789"
+        }
+        ```
+        
+    - Response
+
 - **`POST /journal/start`** - Consumed by **Lobby Service**
   - Description
     Starts a Journal thread in Journal Service.
@@ -1004,6 +1101,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```json
     None
     ```
+
 - **`POST /journal/end`** - Consumed by **Lobby Service**
   - Description
     End a Journal thread in Journal Service.
@@ -1014,6 +1112,10 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     }
     ```
   - Response
+
+        ```json
+        None
+        ```
 
 ### Lobby Service
 
