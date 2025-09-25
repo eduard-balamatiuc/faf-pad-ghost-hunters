@@ -988,100 +988,85 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```
 
 - `GET /journal/lobbies/{lobby_id}/users/{user_id}/ghost/selected` - Consumed by Gateway
-    - Path Parameters:
+  - Path Parameters:
 
-        `lobby_id` - ID of the lobby from where the Users select their ghost entry.
-        
-        `user_id` - ID of the User that calls this endpoint in order to get their ghost selection.
+    `lobby_id` - ID of the lobby from where the Users select their ghost entry.
 
-    - Description
-        
-        Gets currently selected ghost entry by User.
-        
-    - Payload
-        
-        ```json
-        None
-        ```
-        
-    - Response
-        
-        ```json
-        {
-          "lobbyId": "lobby123",
-          "ghostType": {
-            "id": "demon",
-            "name": "Demon"
-          }
-        }
-        ```
+    `user_id` - ID of the User that calls this endpoint in order to get their ghost selection.
+
+  - Description
+    Gets currently selected ghost entry by User.
+  - Payload
+    ```json
+    None
+    ```
+  - Response
+    ```json
+    {
+      "lobbyId": "lobby123",
+      "ghostType": {
+        "id": "demon",
+        "name": "Demon"
+      }
+    }
+    ```
 
 - `GET /journal/lobbies/{lobby_id}/users/{user_id}/symptoms/selected` - Consumed by Gateway
-    - Path Parameters:
+  - Path Parameters:
 
-        `lobby_id` - ID of the lobby from where the Users select their symptoms entries.
-        
-        `user_id` - ID of the User that calls this endpoint in order to get their symptoms selection.
+    `lobby_id` - ID of the lobby from where the Users select their symptoms entries.
 
-    - Description
-        
-        Gets currently selected symptoms entry by User.
-        
-    - Payload
-        
-        ```json
-        None
-        ```
-        
-    - Response
-        
-        ```json
-        {
-          "lobbyId": "lobby123",
-          "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
-          "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
-        }
-        ```
+    `user_id` - ID of the User that calls this endpoint in order to get their symptoms selection.
+
+  - Description
+    Gets currently selected symptoms entry by User.
+  - Payload
+    ```json
+    None
+    ```
+  - Response
+    ```json
+    {
+      "lobbyId": "lobby123",
+      "typeASymptoms": [
+        "freezingTemperature",
+        "fingerprints",
+        "usesRadio",
+        "ghostWriting"
+      ],
+      "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"]
+    }
+    ```
 
 - `POST /journal/start` - Consumed by **Lobby Service**
-    - Description
-        
-        Starts a Journal thread in Journal Service.
-        
-    - Payload
-        
-        ```json
-        {
-            "lobbyId": "lobby_xyz_789",
-            "hostId": "player_host_123",
-            "mapId": "map_id_farmhouse_123",
-            "difficulty": "medium",
-            "ghostType": "demon",
-            "session": "active",
-            "players": ["player_1", "player_2"]
-        }
-        ```
-        
-    - Response
-        
-        ```json
-        None
-        ```
-        
+  - Description
+    Starts a Journal thread in Journal Service.
+  - Payload
+    ```json
+    {
+      "lobbyId": "lobby_xyz_789",
+      "hostId": "player_host_123",
+      "mapId": "map_id_farmhouse_123",
+      "difficulty": "medium",
+      "ghostType": "demon",
+      "session": "active",
+      "players": ["player_1", "player_2"]
+    }
+    ```
+  - Response
+    ```json
+    None
+    ```
 - `POST /journal/end` - Consumed by **Lobby Service**
-    - Description
-        
-        End a Journal thread in Journal Service.
-        
-    - Payload
-        
-        ```json
-        {
-            "lobbyId": "lobby_xyz_789"
-        }
-        ```
-        
-    - Response
+  - Description
+    End a Journal thread in Journal Service.
+  - Payload
+    ```json
+    {
+      "lobbyId": "lobby_xyz_789"
+    }
+    ```
+  - Response
 
 - **`POST /journal/start`** - Consumed by **Lobby Service**
   - Description
@@ -1137,7 +1122,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "players": ["player_1", "player_2"]
     }
     ```
-  **Description:** Starts a ghost thread in AI Service
+    **Description:** Starts a ghost thread in AI Service
 - `POST /ai/end` - Available in Ai Service.
   - Payload
     ```json
@@ -1145,7 +1130,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "lobbyId": "lobby_xyz_789"
     }
     ```
-  **Description: End** a ghost thread in AI Service
+    **Description: End** a ghost thread in AI Service
 - `POST /location/start` - Available in Location Service.
   - Payload
     ```json
@@ -1159,7 +1144,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "players": ["player_1", "player_2"]
     }
     ```
-  **Description:** Starts a location session in Location Service.
+    **Description:** Starts a location session in Location Service.
 - `POST /location/end` - Available in Location Service.
   - Payload
     ```json
@@ -1167,7 +1152,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "lobbyId": "lobby_xyz_789"
     }
     ```
-  **Description: End** a location session in Location Service.
+    **Description: End** a location session in Location Service.
 - `POST /journal/start` - Available in Journal Service.
   - Payload
     ```json
@@ -1181,7 +1166,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "players": ["player_1", "player_2"]
     }
     ```
-  **Description:** Starts a Journal session in Journal Service.
+    **Description:** Starts a Journal session in Journal Service.
 - `POST /journal/end` - Available in Journal Service.
   - Payload
     ```json
@@ -1189,7 +1174,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "lobbyId": "lobby_xyz_789"
     }
     ```
-  **Description: End** a Journal session in Journal Service.
+    **Description: End** a Journal session in Journal Service.
 
 #### Exposed API Endpoints
 
@@ -2212,7 +2197,7 @@ Key responsibilities:
     {
       "lobbyId": "lobby_xyz_789",
       "eventType": "huntStarted",
-      "ghostLocation": "kitchen_01", 
+      "ghostLocation": "kitchen_01",
       "hauntedRooms": ["kitchen_01", "hallway_01"],
       "timestamp": "2025-09-09T10:00:00Z"
     }
@@ -2224,55 +2209,64 @@ Key responsibilities:
 
 ### Git Workflow & Branch Strategy & Naming Convention
 
-#### GitFlow Model
+#### Trunk-Based Development Model
 
-We follow the **GitFlow** model:
+We follow the **Trunk-Based Development** model:
 
 ```
-main (official release history)
-├── develop (integration branch)
-    ├── feature/feature-name (new features)
-    ├── release/vX.Y.Z (preparation branches for new releases)
-    └── hotfix/critical-fix (production hotfixes)
+main (trunk - all development and releases)
+├── feat/feature-name (short-lived feature branches)
+├── fix/issue-description (short-lived fix branches)
+├── docs/update-description (short-lived documentation branches)
+├── chore/task-description (short-lived maintenance branches)
+└── release/lab-X (lab completion branches)
 ```
 
-#### Branch Naming Convention
+## Branch Naming Convention
 
-- **Feature branches**: `feature/lab-X-service-name` or `feature/lab-X-functionality`
-  - Example: `feature/lab-2-ghost-ai`, `feature/lab-3-inventory-crud`
-- **Release branches**: `release/vX.Y.Z`
-  - Example: `release/v2.0.0`, `release/v3.1.0`
-- **Hotfix branches**: `hotfix/vX.Y.Z`
-  - Example: `hotfix/v2.0.1`, `hotfix/v1.0.3`
-- **Bugfix branches**: `bugfix/issue-description`
-  - Example: `bugfix/ghost-ai-memory-leak`
+- **Feature branches**: `feat/lab-X-service-name` or `feat/lab-X-functionality`
+  - Example: `feat/lab-2-ghost-ai`, `feat/lab-3-inventory-crud`
+- **Fix branches**: `fix/issue-description`
+  - Example: `tfix/ghost-ai-crash`, `fix/inventory-bug`
 - **Documentation branches**: `docs/update-description`
   - Example: `docs/api-contract-updates`
+- **Chore brances**: `chore/task-description`
+  - Example: `chore/update-dependencies`, `chore/setup-docker-compose`
+- **Lab release branches**: `release/lab-X`
+  - Example: `release/lab-1`, `release/lab-2`
 
-### Release Strategy
+## Versioning
 
-- **Lab-based versioning:**
-  - `v{lab}.{iteration}.{patch}`
-  - Lab completion: `v1.0.0`, `v2.0.0`, etc.
-  - Feature iterations: `v2.1.0`, `v2.2.0`
-  - Bug fixes: `v2.0.1`, `v2.0.2`
+**Lab-based versioning:**
 
-- **Release workflow:**
-  1. Create `release/vX.0.0` from `develop`
-  2. Team integration testing in release branch
-  3. Merge to `main` and tag `vX.0.0`
-  4. Demo/submit from tagged version
+- `v{lab}.{iteration}.{patch}`
+- Lab completion: `v1.0.0`, `v2.0.0`, etc.
+- Feature iterations: `v2.1.0`, `v2.2.0`
+- Bug fixes: `v2.0.1`, `v2.0.2`
 
-- **Hotfix workflow:**
-  1. Create `hotfix/vX.Y.Z` from `main`
-  2. Fix critical issues
-  3. Merge to both `main` and `develop`
-  4. Tag new patch version
+## Workflow Rules
 
-#### Merging Strategy
+**Lab completion process**
 
-- **Feature → Develop**: Squash and merge
-- **Develop → Main**: Squash and merge
+- Create `release/lab-X` from main when requirements complete
+- Final testing and submission preparation
+- Tag completion: `git tag vX.0.0`
+- Submit and apply fixes during evaluation
+- Merge back to `main` when accepted
+
+## Workflow Rules
+
+### Lab Completion Process
+
+1. Create `release/lab-X` from `main` when requirements complete
+2. Final testing and submission preparation
+3. Tag completion: `git tag vX.0.0`
+4. Submit and apply fixes during evaluation
+5. Merge back to `main` when accepted
+
+### Merging Strategy
+
+- **All branches → Main**: Squash and merge
 
 ### Conventional Commits
 
