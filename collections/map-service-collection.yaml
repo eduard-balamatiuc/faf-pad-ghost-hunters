@@ -1,0 +1,156 @@
+type: collection.insomnia.rest/5.0
+name: map-service-collection
+meta:
+  id: wrk_db7e9cd0f400414c9839146471d9d0c7
+  created: 1758805662710
+  modified: 1758805688387
+  description: ""
+collection:
+  - name: Map Service
+    meta:
+      id: fld_1ad2f696985c40f99b7ae629f933af71
+      created: 1695653999000
+      modified: 1695653999000
+      sortKey: -1695653999000
+      description: Ghost Hunters Platform - Map Service API endpoints
+    children:
+      - url: "{{ _.base_url }}/health"
+        name: Health Check
+        meta:
+          id: req_4ea33ab358b347ab8577132cf0d28513
+          created: 1695654000000
+          modified: 1695654000000
+          isPrivate: false
+          description: Check if the Map Service is running and healthy
+          sortKey: -1695654000000
+        method: GET
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+            description: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/map"
+        name: Generate Map
+        meta:
+          id: req_9c2fc19b2dd14fbbabba3e3a7cbe3aa8
+          created: 1695654001000
+          modified: 1695654001000
+          isPrivate: false
+          description: Generate a new map for a game session
+          sortKey: -1695654001000
+        method: GET
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+            description: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/map/{{ _.map_id }}"
+        name: Get Map Details
+        meta:
+          id: req_e8ec5db7e3a24a4b89d3449adaa9e0ae
+          created: 1695654002000
+          modified: 1695654002000
+          isPrivate: false
+          description: Retrieve the full map state for a specific map ID
+          sortKey: -1695654002000
+        method: GET
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+            description: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/map/{{ _.map_id }}/rooms/{{ _.room_id }}"
+        name: Get Room Details
+        meta:
+          id: req_fa9e95daa7264d348b4c8b819cdc480d
+          created: 1695654003000
+          modified: 1695654003000
+          isPrivate: false
+          description: Get specific room data for the current map
+          sortKey: -1695654003000
+        method: GET
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+            description: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/map/{{ _.map_id }}/rooms/{{ _.room_id }}/objects/{{
+          _.object_name }}"
+        name: Update Object State
+        meta:
+          id: req_dd0cd1fb3bf04d33a70940287fec8001
+          created: 1695654004000
+          modified: 1695654004000
+          isPrivate: false
+          description: Update the ghosted state of an object within a room
+          sortKey: -1695654004000
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "isGhosted": true
+            }
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+            description: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_2c329a04e4134e6dacc3105f8f27aa9c
+    created: 1695653996000
+    modified: 1695653996000
+environments:
+  name: Base Environment
+  meta:
+    id: env_114ff592e605453c90dd03dfe0b9092f
+    created: 1695653997000
+    modified: 1758912401264
+    isPrivate: false
+  data:
+    base_url: http://localhost:8085
+    map_id: map_0e5c72de
+    room_id: kitchen_01
+    object_name: Fridge
