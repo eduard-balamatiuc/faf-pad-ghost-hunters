@@ -305,7 +305,123 @@ services:
     networks:
       - ghost_hunters_network
 
+  # Ghost Service Database
+  ghost-db:
+    image: postgres:13-alpine
+    platform: linux/amd64
+    container_name: ghost-postgres
+    environment:
+      POSTGRES_DB: ${GHOST_SVC_DB_NAME:-ghost_db}
+      POSTGRES_USER: ${GHOST_SVC_DB_USER:-ghost_user}
+      POSTGRES_PASSWORD: ${GHOST_SVC_DB_PASSWORD:-ghost_pass}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "${GHOST_SVC_DB_PORT:-5436}:5432"
+    volumes:
+      - ghost_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ghost_hunters_network
+    restart: unless-stopped
 
+  # Ghost Service Application
+  ghost-service:
+    image: marinbizzareadventrue/ghost-service:v1.1.0
+    platform: linux/amd64
+    container_name: ghost-service-app
+    environment:
+      - PORT=${GHOST_SVC_PORT:-8086}
+      - HOST=${GHOST_SVC_HOST:-0.0.0.0}
+      - DB_URL=postgres://${GHOST_SVC_DB_USER:-ghost_user}:${GHOST_SVC_DB_PASSWORD:-ghost_pass}@ghost-db:5432/${GHOST_SVC_DB_NAME:-ghost_db}?sslmode=disable
+      - ENVIRONMENT=${GHOST_SVC_ENVIRONMENT:-development}
+      - DEBUG=${GHOST_SVC_DEBUG:-false}
+      - GIN_MODE=${GHOST_SVC_GIN_MODE:-release}
+      - LOG_LEVEL=${GHOST_SVC_LOG_LEVEL:-info}
+      - MAX_GHOSTS_PER_LOBBY=${GHOST_SVC_MAX_GHOSTS_PER_LOBBY:-1}
+      - GHOST_TTL=${GHOST_SVC_GHOST_TTL:-7200}
+      - SYMPTOM_TTL=${GHOST_SVC_SYMPTOM_TTL:-3600}
+      - DEFAULT_GHOST_AGGRESSION=${GHOST_SVC_DEFAULT_GHOST_AGGRESSION:-0.3}
+      - EVIDENCE_GENERATION_RATE=${GHOST_SVC_EVIDENCE_GENERATION_RATE:-0.5}
+      - HUNT_COOLDOWN_SECONDS=${GHOST_SVC_HUNT_COOLDOWN_SECONDS:-30}
+      - AUTO_POPULATE_DATA=${GHOST_SVC_AUTO_POPULATE_DATA:-true}
+      - LOG_FORMAT=${GHOST_SVC_LOG_FORMAT:-json}
+    env_file:
+      - .env
+    ports:
+      - "${GHOST_SVC_PORT:-8086}:${GHOST_SVC_PORT:-8086}"
+    depends_on:
+      ghost-db:
+        condition: service_healthy
+    networks:
+      - ghost_hunters_network
+    restart: unless-stopped
+
+  # Location Service Redis Database
+  location-service-redis:
+    image: redis:6-alpine
+    platform: linux/amd64
+    container_name: location-redis
+    ports:
+      - "${LOCATION_SVC_REDIS_PORT:-6378}:6379"
+    volumes:
+      - location_service_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - ghost_hunters_network
+    restart: unless-stopped
+
+  # Location Service
+  location-service:
+    image: marinbizzareadventrue/location-service:v1.2.0
+    platform: linux/amd64
+    container_name: location-service
+    ports:
+      - "${LOCATION_SVC_PORT:-8087}:${LOCATION_SVC_PORT:-8087}"
+    environment:
+      - PORT=${LOCATION_SVC_PORT:-8087}
+      - HOST=${LOCATION_SVC_HOST:-0.0.0.0}
+      - REDIS_URL=redis://location-service-redis:6379/0
+      - MAP_SERVICE_URL=http://map-service:${MAP_SERVICE_SERVER_PORT:-8085}
+      - LOBBY_SERVICE_URL=http://lobby-service-prod:${LOBBY_SERVICE_SERVER_PORT:-8084}
+      - INVENTORY_SERVICE_URL=http://inventory-service:${INVENTORY_SVC_PORT:-8088}
+      - ENVIRONMENT=${LOCATION_SVC_ENVIRONMENT:-development}
+      - DEBUG=${LOCATION_SVC_DEBUG:-false}
+      - LOG_LEVEL=${LOCATION_SVC_LOG_LEVEL:-info}
+      - MAX_PLAYERS_PER_LOBBY=${LOCATION_SVC_MAX_PLAYERS_PER_LOBBY:-8}
+      - LOCATION_TTL=${LOCATION_SVC_LOCATION_TTL:-3600}
+      - LOBBY_TTL=${LOCATION_SVC_LOBBY_TTL:-7200}
+      - HAUNTING_TTL=${LOCATION_SVC_HAUNTING_TTL:-3600}
+      - DEFAULT_PLAYER_SANITY=${LOCATION_SVC_DEFAULT_PLAYER_SANITY:-100}
+      - GHOST_DETECTION_RATE=${LOCATION_SVC_GHOST_DETECTION_RATE:-0.3}
+      - MOCK_EXTERNAL_SERVICES=${LOCATION_SVC_MOCK_EXTERNAL_SERVICES:-true}
+      - AUTO_POPULATE_DATA=${LOCATION_SVC_AUTO_POPULATE_DATA:-true}
+      - LOG_FORMAT=${LOCATION_SVC_LOG_FORMAT:-json}
+      - HEALTH_ENDPOINT=${LOCATION_SVC_HEALTH_ENDPOINT:-/health}
+      - HEALTH_TIMEOUT=${LOCATION_SVC_HEALTH_TIMEOUT:-10}
+    env_file:
+      - .env
+    depends_on:
+      location-service-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${LOCATION_SVC_PORT:-8087}${LOCATION_SVC_HEALTH_ENDPOINT:-/health}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - ghost_hunters_network
 
 volumes:
   lobby_service_redis_data_prod:
@@ -317,6 +433,8 @@ volumes:
   mongodb_config:
   postgres_data:
   pgadmin_data:
+  ghost_db_data:
+  location_service_redis_data:
 
 networks:
   ghost-hunters-network:
