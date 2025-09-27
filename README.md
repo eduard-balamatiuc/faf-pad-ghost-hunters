@@ -862,7 +862,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     `user_id` - ID of the User that calls this endpoint in order to select symptoms from the general pool of all possible symptoms.
 
   - Description
-    User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters incompatible ghosts and symptoms, Medium - filters incompatible symptoms, Hard - no filtering is applied.
+    User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters ghosts that match at least two of the selected symptoms, Medium - filters ghosts that match at least one of the selected symptoms, Hard - no filtering is applied.
   - Payload
     ```json
     {
@@ -871,17 +871,12 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "typeBSymptoms": []
     }
     ```
-  - Response (Easy Difficulty - filters incompatible ghosts and symptoms and return compatible)
+  - Response (Easy Difficulty - filters ghosts that match at least two of the selected symptoms)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": [
-        "freezingTemperature",
-        "fingerprints",
-        "usesRadio",
-        "ghostWriting"
-      ],
-      "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
@@ -894,18 +889,21 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       ]
     }
     ```
-  - Response (Medium Difficulty - filters incompatible symptoms and return compatible, no filter for Ghost Types)
+  - Response (Medium Difficulty - filters ghosts that match at least one of the selected symptoms)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
-      "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
           "name": "Demon"
         },
-        ...
+        {
+          "id": "spirit",
+          "name": "Spirit"
+        },
         {
           "id": "obake",
           "name": "Obake"
@@ -913,12 +911,12 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       ]
     }
     ```
-  - Response (Hard Difficulty - returns all symptoms and ghosts)
+  - Response (Hard Difficulty - returns all selected symptoms and ghosts)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", ..., "ghostWriting"],
-      "typeBSymptoms": ["huntsAlonePlayers", ..., "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
@@ -944,39 +942,22 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```json
     {
       "lobbyId": "lobby123",
-      "ghostType": [
-        {
+      "ghostType": {
           "id": "demon",
           "name": "Demon"
-        },
-        {
-          "id": "obake",
-          "name": "Obake"
         }
-      ]
     }
     ```
   - Response
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": [
-        "freezingTemperature",
-        "fingerprints",
-        "usesRadio",
-        "ghostWriting"
-      ],
+      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
       "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
-      "ghostType": [
-        {
+      "ghostType": {
           "id": "demon",
           "name": "Demon"
-        },
-        {
-          "id": "obake",
-          "name": "Obake"
         }
-      ]
     }
     ```
 
@@ -1017,7 +998,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "rewardExp": 50,
       "explanation": "Correctly identified with 3/5 symptoms observed",
       "correctSymptoms": ["emfFive", "objectsThrown", "aggressiveWhenProvoked"],
-      "incorrectSymptoms": ["huntsAlonePlayers", "freezingTemperatures"]
+      "incorrectSymptoms": ["huntsAlonePlayers", "freezingTemperatures"],
+      "missedSymptoms": ["huntsHighSanity", "usesRadio"]
     }
     ```
 
@@ -1093,7 +1075,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```
 - `POST /journal/end` - Consumed by **Lobby Service**
   - Description
-    End a Journal thread in Journal Service.
+    Ends a Journal thread in Journal Service.
   - Payload
     ```json
     {
@@ -1101,41 +1083,6 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     }
     ```
   - Response
-
-- **`POST /journal/start`** - Consumed by **Lobby Service**
-  - Description
-    Starts a Journal thread in Journal Service.
-  - Payload
-    ```json
-    {
-      "lobbyId": "lobby_xyz_789",
-      "hostId": "player_host_123",
-      "mapId": "map_id_farmhouse_123",
-      "difficulty": "medium",
-      "ghostType": "demon",
-      "session": "active",
-      "players": ["player_1", "player_2"]
-    }
-    ```
-  - Response
-    ```json
-    None
-    ```
-
-- **`POST /journal/end`** - Consumed by **Lobby Service**
-  - Description
-    End a Journal thread in Journal Service.
-  - Payload
-    ```json
-    {
-      "lobbyId": "lobby_xyz_789"
-    }
-    ```
-  - Response
-
-        ```json
-        None
-        ```
 
 ### Lobby Service
 
@@ -1164,7 +1111,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "lobbyId": "lobby_xyz_789"
     }
     ```
-    **Description: End** a ghost thread in AI Service
+    **Description:** Ends a ghost thread in AI Service
 - `POST /location/start` - Available in Location Service.
   - Payload
     ```json
