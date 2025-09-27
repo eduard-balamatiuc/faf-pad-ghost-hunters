@@ -51,6 +51,11 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    networks:
+      - ghost-hunters-network
+    depends_on:
+      redis-ghost-ai-service:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -63,8 +68,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  redis-ghost-ai-service:
+    image: redis:7-alpine
+    command: redis-server --port ${GHOST_AI_SVC_REDIS_PORT}
+    ports:
+      - "${GHOST_AI_SVC_REDIS_PORT}:${GHOST_AI_SVC_REDIS_PORT}"
+    env_file:
+      - .env
+    restart: unless-stopped
     networks:
       - ghost-hunters-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-p", "${GHOST_AI_SVC_REDIS_PORT}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   redis_journal_service:
     image: redis:latest
@@ -481,6 +500,7 @@ volumes:
   pgadmin_data:
   ghost_db_data:
   location_service_redis_data:
+  redis-ghost-ai-service_data:
 
 networks:
   ghost-hunters-network:

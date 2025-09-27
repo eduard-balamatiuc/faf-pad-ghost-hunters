@@ -108,7 +108,7 @@ If Postman is used
   4.3. Choose files from `_collections` folder
   4.4. Click `Start Migration`
 
-5. If Default Ports were used, no additional changes should be done and you can test the endpoints.
+5. You'll have to modify the ports from the `.env.template` since some of them might intersect.
 
 6. If other Ports were specified in `.env`, you may require to manually change the base URLs in Postman/Insomnia endpoints.
 
