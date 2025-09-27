@@ -1,0 +1,782 @@
+type: collection.insomnia.rest/5.0
+name: ghost-service-collection
+meta:
+  id: wrk_50f27d3049504b99a57aee4b09fc1a2b
+  created: 1758904702279
+  modified: 1758924188623
+  description: ""
+collection:
+  - name: Ghost Service API
+    meta:
+      id: fld_301e3b63e7274cda8658ee3e061adb63
+      created: 1758904702281
+      modified: 1758924162746
+      sortKey: -1758904701089
+      description: >-
+        Complete API collection for Ghost Service - Ghost Hunters Game
+
+
+        This collection covers all endpoints for managing ghost types,
+        behaviors, and symptoms in the Ghost Hunters microservices architecture.
+
+
+        **Base URL:** {{base_url}} (default: http://localhost:8086)
+
+
+        **Authors:** Ghost Hunters Team - PAD Lab
+
+        **Version:** 1.0.0
+    children:
+      - name: Ghost CRUD Operations
+        meta:
+          id: fld_72506332af1e4f509508243dd548681f
+          created: 1758904702281
+          modified: 1758924162746
+          sortKey: -1758904701088
+          description: Full CRUD operations for managing ghost entities in the database.
+        children:
+          - url: "{{base_url}}/ghost"
+            name: Create Ghost
+            meta:
+              id: req_2fbdb5b4d8604b55ab13dc3c705eaac6
+              created: 1758904702282
+              modified: 1758904702282
+              isPrivate: false
+              description: |-
+                Creates a new ghost type in the database. 
+
+                **Required fields:**
+                - id: Unique identifier (lowercase, alphanumeric, hyphens)
+                - name: Display name for the ghost
+                - typeASymptoms: Array of observable symptoms
+                - typeBSymptoms: Array of behavioral symptoms
+                - description: Detailed description
+
+                **Validation:**
+                - Ghost ID must be unique
+                - At least one Type A symptom required
+                - ID format: lowercase letters, numbers, hyphens only
+              sortKey: -1758904701087
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "id": "banshee",
+                    "name": "Banshee",
+                    "typeASymptoms": ["emfFive", "fingerprints", "coldTemperatures"],
+                    "typeBSymptoms": ["huntsAlonePlayers", "fearOfCrucifixes"],
+                    "description": "A vengeful spirit that wails to herald death. Known for its piercing screams and preference for hunting isolated players."
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 201", function () {
+                    insomnia.response.to.have.status(201);
+                });
+
+
+                insomnia.test("Response has success message", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.message).to.eql("Ghost created successfully");
+                });
+
+
+                insomnia.test("Response contains ghost ID", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.id).to.be.a('string');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/banshee"
+            name: Update Ghost
+            meta:
+              id: req_0e77eb914b99404598bf7e306e4900dc
+              created: 1758904702283
+              modified: 1758904702283
+              isPrivate: false
+              description: |-
+                Updates an existing ghost's properties.
+
+                **Path Parameters:**
+                - ghostId: The ID of the ghost to update
+
+                **Body:**
+                - All ghost properties (except ID which comes from URL)
+                - Validation rules apply same as create
+
+                **Notes:**
+                - UpdatedAt timestamp is automatically set
+                - Ghost ID in URL takes precedence over any ID in body
+              sortKey: -1758904701085
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "name": "Banshee - Updated",
+                    "typeASymptoms": ["emfFive", "fingerprints", "coldTemperatures", "ghostWriting"],
+                    "typeBSymptoms": ["huntsAlonePlayers", "fearOfCrucifixes", "increasedActivityAtNight"],
+                    "description": "UPDATED: A vengeful spirit that wails to herald death. Known for its piercing screams and preference for hunting isolated players. Now with increased nighttime activity."
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                insomnia.test("Response has success message", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.message).to.eql("Ghost updated successfully");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/poltergeist"
+            name: Get Ghost by ID
+            meta:
+              id: req_29cdbd23a6fc40af836e470da9c0aa1d
+              created: 1758904702283
+              modified: 1758904702283
+              isPrivate: false
+              description: |-
+                Retrieves a specific ghost by its unique ID.
+
+                **Path Parameters:**
+                - ghostId: The unique identifier of the ghost
+
+                **Returns:**
+                - Full ghost object with all properties
+                - 404 if ghost not found
+              sortKey: -1758904701086
+            method: GET
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response contains ghost data", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.have.property('id');
+                    insomnia.expect(jsonData).to.have.property('name');
+                    insomnia.expect(jsonData).to.have.property('typeASymptoms');
+                    insomnia.expect(jsonData).to.have.property('typeBSymptoms');
+                    insomnia.expect(jsonData).to.have.property('description');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/banshee"
+            name: Delete Ghost
+            meta:
+              id: req_70a6db9c68e846a58500f493b69587b4
+              created: 1758904702283
+              modified: 1758904702283
+              isPrivate: false
+              description: |-
+                Deletes a ghost from the database.
+
+                **Path Parameters:**
+                - ghostId: The ID of the ghost to delete
+
+                **Returns:**
+                - Success message with deleted ghost ID
+                - 404 if ghost not found
+
+                **Cascade Effects:**
+                - Related behavioral rules are also deleted
+                - Operation is permanent
+              sortKey: -1758904701084
+            method: DELETE
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                insomnia.test("Response has success message", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.message).to.eql("Ghost deleted successfully");
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Contract Endpoints
+        meta:
+          id: fld_5e2569b88f7a41978233ece22858a097
+          created: 1758904702284
+          modified: 1758904702284
+          sortKey: -1758904701083
+          description: API endpoints defined in the team communication contract. These are
+            consumed by other microservices in the Ghost Hunters system.
+        children:
+          - url: "{{base_url}}/ghost/types"
+            name: Get All Ghost Types
+            meta:
+              id: req_1a941f5257104c15b211b6356a03f89a
+              created: 1758904702284
+              modified: 1758904702284
+              isPrivate: false
+              description: >-
+                **Team Contract Endpoint**
+
+
+                Retrieves all available ghost types with complete information
+                including symptoms and behavioral patterns.
+
+
+                **Consumed by:**
+
+                - Journal Service (for validation)
+
+                - Gateway (for client requests)
+
+                - Ghost AI Service (for behavior initialization)
+
+
+                **Returns:**
+
+                - Array of complete ghost objects
+
+                - Full symptoms arrays
+
+                - Behavioral information
+              sortKey: -1758904701082
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                insomnia.test("Response has ghosts array", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.have.property('ghosts');
+                    insomnia.expect(jsonData.ghosts).to.be.an('array');
+                });
+
+
+                insomnia.test("Each ghost has required properties", function ()
+                {
+                    const jsonData = insomnia.response.json();
+                    if (jsonData.ghosts.length > 0) {
+                        const ghost = jsonData.ghosts[0];
+                        insomnia.expect(ghost).to.have.property('id');
+                        insomnia.expect(ghost).to.have.property('name');
+                        insomnia.expect(ghost).to.have.property('typeASymptoms');
+                        insomnia.expect(ghost).to.have.property('typeBSymptoms');
+                        insomnia.expect(ghost).to.have.property('description');
+                    }
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/poltergeist/behavior"
+            name: Get Ghost Behavior
+            meta:
+              id: req_74733639e99740578efc7a2c07d535c1
+              created: 1758904702284
+              modified: 1758904702284
+              isPrivate: false
+              description: |-
+                **Team Contract Endpoint**
+
+                Retrieves behavioral rules and templates for AI decision-making.
+
+                **Consumed by:**
+                - Ghost AI Service (for behavior patterns)
+
+                **Path Parameters:**
+                - ghostId: The ghost type to get behavior for
+
+                **Returns:**
+                - Hunting triggers array
+                - Special abilities
+                - Cooldown timings
+                - Aggression level settings
+              sortKey: -1758904701080
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                insomnia.test("Response has behavioral properties", function ()
+                {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.have.property('ghostId');
+                    insomnia.expect(jsonData).to.have.property('huntingTriggers');
+                    insomnia.expect(jsonData).to.have.property('abilities');
+                    insomnia.expect(jsonData).to.have.property('huntingCooldown');
+                    insomnia.expect(jsonData).to.have.property('aggressionLevel');
+                });
+
+
+                insomnia.test("Hunting cooldown is a number", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.huntingCooldown).to.be.a('number');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/symptoms"
+            name: Get All Symptoms
+            meta:
+              id: req_7529365ba68e49db8a44f5fcb7fa5706
+              created: 1758904702284
+              modified: 1758904702284
+              isPrivate: false
+              description: >-
+                **Team Contract Endpoint**
+
+
+                Retrieves all available symptoms categorized by type for game
+                mechanics and validation.
+
+
+                **Consumed by:**
+
+                - Journal Service (for validation)
+
+                - Location Service (for interaction tracking)
+
+
+                **Returns:**
+
+                - Complete symptoms database
+
+                - Type categorization (typeA/typeB)
+
+                - Detailed descriptions for each symptom
+              sortKey: -1758904701079
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+
+                insomnia.test("Response has symptoms array", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.have.property('symptoms');
+                    insomnia.expect(jsonData.symptoms).to.be.an('array');
+                });
+
+
+                insomnia.test("Each symptom has required properties", function
+                () {
+                    const jsonData = insomnia.response.json();
+                    if (jsonData.symptoms.length > 0) {
+                        const symptom = jsonData.symptoms[0];
+                        insomnia.expect(symptom).to.have.property('id');
+                        insomnia.expect(symptom).to.have.property('name');
+                        insomnia.expect(symptom).to.have.property('type');
+                        insomnia.expect(symptom).to.have.property('description');
+                    }
+                });
+
+
+                insomnia.test("Symptom types are valid", function () {
+                    const jsonData = insomnia.response.json();
+                    jsonData.symptoms.forEach(symptom => {
+                        insomnia.expect(['typeA', 'typeB']).to.include(symptom.type);
+                    });
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost/list"
+            name: Get Simple Ghost List
+            meta:
+              id: req_ea066ba894a249c787ca400754b87d29
+              created: 1758904702284
+              modified: 1758904702284
+              isPrivate: false
+              description: >-
+                **Team Contract Endpoint**
+
+
+                Retrieves simplified ghost list for UI display and selection
+                purposes.
+
+
+                **Consumed by:**
+
+                - Journal Service (for dropdown lists)
+
+                - Gateway (for client UI)
+
+
+                **Returns:**
+
+                - Lightweight array with only ID and name
+
+                - Optimized for UI components
+
+                - Faster response for simple listings
+              sortKey: -1758904701081
+            method: GET
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+
+                insomnia.test("Response has ghosts array", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData).to.have.property('ghosts');
+                    insomnia.expect(jsonData.ghosts).to.be.an('array');
+                });
+
+                insomnia.test("Each ghost has only id and name", function () {
+                    const jsonData = insomnia.response.json();
+                    if (jsonData.ghosts.length > 0) {
+                        const ghost = jsonData.ghosts[0];
+                        insomnia.expect(ghost).to.have.property('id');
+                        insomnia.expect(ghost).to.have.property('name');
+                        insomnia.expect(Object.keys(ghost)).to.have.lengthOf(2);
+                    }
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Test Data Setup
+        meta:
+          id: fld_6578b8538c6c415cb143e8017aeb8fa8
+          created: 1758904702285
+          modified: 1758904702285
+          sortKey: -1758904701078
+          description: Requests to set up test data for development and testing purposes.
+            Run these to populate the database with sample ghosts.
+        children:
+          - url: "{{base_url}}/ghost"
+            name: Create Test Ghost - Poltergeist
+            meta:
+              id: req_ee8122f75d7c44019f4785fc8b9ad386
+              created: 1758904702285
+              modified: 1758904702285
+              isPrivate: false
+              description: Creates the classic Poltergeist ghost for testing purposes.
+              sortKey: -1758904701077
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "id": "poltergeist",
+                    "name": "Poltergeist",
+                    "typeASymptoms": ["emfFive", "objectsThrown", "coldTemperatures"],
+                    "typeBSymptoms": ["huntsAlonePlayers", "aggressiveWhenProvoked"],
+                    "description": "Aggressive ghost that manipulates objects and becomes more dangerous when provoked."
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Ghost created or already exists", function () {
+                    insomnia.expect([201, 409]).to.include(insomnia.response.code);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost"
+            name: Create Test Ghost - Demon
+            meta:
+              id: req_4bb634b812864640bac7602b32f1177c
+              created: 1758904702286
+              modified: 1758904702286
+              isPrivate: false
+              description: Creates the Demon ghost for testing aggressive behavior patterns.
+              sortKey: -1758904701076
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "id": "demon",
+                    "name": "Demon",
+                    "typeASymptoms": ["emfFive", "fingerprints", "ghostWriting"],
+                    "typeBSymptoms": ["huntsHighSanity", "extremelyAggressive"],
+                    "description": "Extremely aggressive entity with high hunting frequency and the ability to hunt at higher sanity levels."
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Ghost created or already exists", function () {
+                    insomnia.expect([201, 409]).to.include(insomnia.response.code);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost"
+            name: Create Test Ghost - Spirit
+            meta:
+              id: req_9945ace4f2bf4eb8b38c8aa7ec5a0b31
+              created: 1758904702286
+              modified: 1758904702286
+              isPrivate: false
+              description: Creates a basic Spirit ghost for testing standard behaviors.
+              sortKey: -1758904701075
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "id": "spirit",
+                    "name": "Spirit",
+                    "typeASymptoms": ["emfFive", "ghostWriting", "spiritBox"],
+                    "typeBSymptoms": ["huntsOnlyInGroups", "weakToSmudgeSticks"],
+                    "description": "A basic vengeful spirit that seeks to harm the living but is deterred by smudge sticks."
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Ghost created or already exists", function () {
+                    insomnia.expect([201, 409]).to.include(insomnia.response.code);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Error Testing
+        meta:
+          id: fld_b0fa91abac704318b8f5fb1ce630c0ab
+          created: 1758904702286
+          modified: 1758904702286
+          sortKey: -1758904701074
+          description: Test requests for error handling and validation. These should
+            return appropriate error codes and messages.
+        children:
+          - url: "{{base_url}}/ghost"
+            name: Create Ghost - Invalid ID Format
+            meta:
+              id: req_cb6da449834a4160908ed07bd4cb7314
+              created: 1758904702286
+              modified: 1758904702286
+              isPrivate: false
+              description: Tests validation for invalid ghost ID format. Should return 400
+                error.
+              sortKey: -1758904701073
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                    "id": "INVALID_ID!",
+                    "name": "Invalid Ghost",
+                    "typeASymptoms": ["emfFive"],
+                    "typeBSymptoms": ["huntsBadly"],
+                    "description": "This should fail validation"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 400", function () {
+                    insomnia.response.to.have.status(400);
+                });
+
+
+                insomnia.test("Response contains error message about ID format",
+                function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.error).to.include('lowercase letters, numbers, and hyphens');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/ghost"
+            name: Create Ghost - Missing Type A Symptoms
+            meta:
+              id: req_03d6b4a7f588487d802db2eae63513df
+              created: 1758904702287
+              modified: 1758904702287
+              isPrivate: false
+              description: Tests validation for missing Type A symptoms. Should return 400
+                error.
+              sortKey: -1758904701072
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                    "id": "invalid-ghost",
+                    "name": "Invalid Ghost",
+                    "typeASymptoms": [],
+                    "typeBSymptoms": ["huntsBadly"],
+                    "description": "This should fail validation for missing Type A symptoms"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 400", function () {
+                    insomnia.response.to.have.status(400);
+                });
+
+
+                insomnia.test("Response contains error about Type A symptoms",
+                function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.error).to.include('Type A symptom');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{_['base_url']}}/ghost/non-existent-ghost"
+            name: Get Non-existent Ghost
+            meta:
+              id: req_a34534677eca425d801b0105d5306bfa
+              created: 1758904702287
+              modified: 1758904702287
+              isPrivate: false
+              description: Tests 404 handling for non-existent ghost IDs.
+              sortKey: -1758904701071
+            method: GET
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 404", function () {
+                    insomnia.response.to.have.status(404);
+                });
+
+                insomnia.test("Response contains not found error", function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.error).to.include('not found');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{_['base_url']}}/ghost/non-existent-ghost/behavior"
+            name: Get Behavior for Non-existent Ghost
+            meta:
+              id: req_a3dacb86842a4c1ca7963ea6baaa37a5
+              created: 1758904702287
+              modified: 1758904702287
+              isPrivate: false
+              description: Tests 404 handling for behavioral rules of non-existent ghosts.
+              sortKey: -1758904701070
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test("Status code is 404", function () {
+                    insomnia.response.to.have.status(404);
+                });
+
+
+                insomnia.test("Response contains behavior not found error",
+                function () {
+                    const jsonData = insomnia.response.json();
+                    insomnia.expect(jsonData.error).to.include('behavior not found');
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+    environment:
+      base_url: http://localhost:8086
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_1b28a7b3539682e4d8b1f3110d79e055012b7126
+    created: 1758913166782
+    modified: 1758924162745
+environments:
+  name: Base Environment
+  meta:
+    id: env_1b28a7b3539682e4d8b1f3110d79e055012b7126
+    created: 1758904702288
+    modified: 1758924162746
+    isPrivate: false

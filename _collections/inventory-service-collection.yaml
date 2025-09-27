@@ -1,0 +1,171 @@
+type: collection.insomnia.rest/5.0
+name: inventory-service-collection
+meta:
+  id: wrk_12cb178a19884a6aa8bc5f736e8d8fb0
+  created: 1758916722572
+  modified: 1758921773682
+  description: ""
+collection:
+  - url: "{{ _.API_URL }}/inventory/users/:userId/items"
+    name: Get all user items
+    meta:
+      id: req_1093fd7a9f4a47aab00d54344ccf5b23
+      created: 1758468405632
+      modified: 1758876228790
+      isPrivate: false
+      description: ""
+      sortKey: -1757365239322
+    method: GET
+    parameters:
+      - name: category
+        value: ""
+        disabled: true
+        id: pair_91754f1df78543f5a543d28af210fa51
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_9cc8c68b594844638222a05eda6afaf9
+      - name: offset
+        value: "0"
+        disabled: false
+        id: pair_2c33b678661f408fa358573947d35520
+    headers:
+      - name: User-Agent
+        value: insomnia/10.3.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: userId
+        value: sample-user-1
+  - url: "{{ _.API_URL }}/inventory/users/:userId/items"
+    name: Create user item
+    meta:
+      id: req_9888b335edb043fcba4dfc5b33cbae3e
+      created: 1758468936295
+      modified: 1758906862865
+      isPrivate: false
+      description: ""
+      sortKey: -1757365239272
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"itemId": "flashlight",
+        	"purchasePrice": 120
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/10.3.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: userId
+        value: sample-user-1
+  - url: "{{ _.API_URL }}/inventory/users/:userId/items/:itemId"
+    name: Get single user item
+    meta:
+      id: req_3153b9643cda4dc3a195f8e54680a80c
+      created: 1758469439853
+      modified: 1758906856816
+      isPrivate: false
+      description: ""
+      sortKey: -1757365239247
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/10.3.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: userId
+        value: sample-user-1
+      - name: itemId
+        value: 961a9b02-503b-4dbe-904b-7a1afe3f171a
+  - url: "{{ _.API_URL }}/inventory/users/:userId/items/:itemId"
+    name: Delete item by ID
+    meta:
+      id: req_f937eed4d7124493b12788c9c12dd68d
+      created: 1758469461249
+      modified: 1758906882065
+      isPrivate: false
+      description: ""
+      sortKey: -1757365239228.25
+    method: DELETE
+    headers:
+      - name: User-Agent
+        value: insomnia/10.3.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: userId
+        value: sample-user-1
+      - name: itemId
+        value: 961a9b02-503b-4dbe-904b-7a1afe3f171a
+  - url: "{{ _.API_URL }}/inventory/users/:userId/items/:itemId/use"
+    name: Use item
+    meta:
+      id: req_1660305da8c54e6f9ef0800bf5cda18a
+      created: 1758469486477
+      modified: 1758906872893
+      isPrivate: false
+      description: ""
+      sortKey: -1757365239234.5
+    method: PUT
+    headers:
+      - name: User-Agent
+        value: insomnia/10.3.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: userId
+        value: sample-user-1
+      - name: itemId
+        value: 961a9b02-503b-4dbe-904b-7a1afe3f171a
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_adbb4929d6324395af110fc10951f287
+    created: 1758560014040
+    modified: 1758560014040
+environments:
+  name: Base Environment
+  meta:
+    id: env_5ec4cfbc0d33425c9e7280a47fcb817c
+    created: 1757363621371
+    modified: 1758906369785
+    isPrivate: false
+  data:
+    API_URL: http://localhost:8088
