@@ -1952,9 +1952,11 @@ Key responsibilities:
 
 - `GET /inventory/users/{userId}/items` - Consumed by API Gateway, Lobby Service
   - Description
-    Retrieves all items owned by a specific user, with optional category filtering for inventory management.
+    Retrieves paginated list of items owned by a specific user, with optional category filtering and pagination for inventory management.
   - Query Parameters
     - `category` (optional): Category type used for filtering items (e.g., "INVESTIGATIVE", "PROTECTIVE", "COMMUNICATION")
+    - `limit` (optional): Number of items per page (default: 20, max: 100)
+    - `offset` (optional): Number of items to skip (default: 0)
   - Payload
     ```json
     None
@@ -1962,10 +1964,9 @@ Key responsibilities:
   - Response
     ```json
     {
-      "userId": "user123",
-      "items": [
+      "data": [
         {
-          "id": "inv_311212sa",
+          "id": "123e4567-e89b-12d3-a456-426614174000",
           "itemId": "flashlight",
           "itemName": "Flashlight",
           "category": "INVESTIGATIVE",
@@ -1975,7 +1976,13 @@ Key responsibilities:
           "createdAt": "2025-09-10T14:30:00Z",
           "updatedAt": "2025-09-10T14:30:00Z"
         }
-      ]
+      ],
+      "pagination": {
+        "hasMore": true,
+        "totalCount": 150,
+        "limit": 20,
+        "offset": 0
+      }
     }
     ```
 - `POST /inventory/users/{userId}/items` - Consumed by API Gateway
@@ -2188,10 +2195,11 @@ Key responsibilities:
     ```
 - `GET /chat/lobbies/{lobbyId}/messages` - Consumed by Game Client
   - Description
-    Retrieves message history for a specific lobby with optional filtering by room, limit, and timestamp for chat replay functionality.
+    Retrieves message history for a specific lobby with optional filtering by room, limit, offset, and timestamp for chat replay functionality.
   - Query Parameters
-    - `limit` (optional): Maximum number of messages to retrieve (integer)
     - `roomId` (optional): Filter messages by specific room (string)
+    - `limit` (optional): Maximum number of messages to retrieve (default: 50)
+    - `offset` (optional): Number of messages to skip (default: 0)
     - `since` (optional): Retrieve messages since specific timestamp (ISO date)
   - Payload
     ```json
@@ -2200,7 +2208,7 @@ Key responsibilities:
   - Response
     ```json
     {
-      "messages": [
+      "data": [
         {
           "id": "msg_456",
           "userId": "user123",
@@ -2211,7 +2219,12 @@ Key responsibilities:
           "timestamp": "2025-09-10T14:30:00Z"
         }
       ],
-      "hasMore": false
+      "pagination": {
+        "hasMore": false,
+        "totalCount": 1,
+        "limit": 50,
+        "offset": 0
+      }
     }
     ```
 
