@@ -1,0 +1,297 @@
+type: collection.insomnia.rest/5.0
+name: journal-service-collection
+meta:
+  id: wrk_6c952f0fb6f7403ea377aa1601f2db06
+  created: 1758878781434
+  modified: 1758921739476
+  description: ""
+collection:
+  - name: Journal Entry and Exit
+    meta:
+      id: fld_89fc1bf22bb0471fa03bd2e25aec0de5
+      created: 1758847321176
+      modified: 1758847321176
+      sortKey: -1758847321176
+      description: ""
+    children:
+      - url: http://localhost:8083/journal/start
+        name: Journal Start - Add new Lobby
+        meta:
+          id: req_db43374689854b9c865113d733b5ea96
+          created: 1758844543977
+          modified: 1758881625895
+          isPrivate: false
+          description: ""
+          sortKey: -1758847324792
+        method: POST
+        body:
+          mimeType: application/json
+          text: |
+            {
+              "lobbyId": "lobby123",
+              "hostId": "550e8400-e29b-41d4-a716-446655440000",
+              "mapId": "map_id_farmhouse_123",
+              "difficulty": "medium",
+              "ghostType": "demon",
+              "session": "active",
+              "players": [
+                "550e8400-e29b-41d4-a716-446655440001",
+            		"550e8400-e29b-41d4-a716-446655440002"
+              ]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8083/journal/lobbies/:lobbyId/details
+        name: Get Lobby Details by Lobby ID
+        meta:
+          id: req_e71419ae26094f1a98df73257f841185
+          created: 1758844655488
+          modified: 1758881636486
+          isPrivate: false
+          description: ""
+          sortKey: -1758847324892
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: lobbyId
+            value: lobby123
+      - url: http://localhost:8081/journal/users/:userId/submit
+        name: Submit Journal Entries to Rewarding
+        meta:
+          id: req_cffe310df7eb4784a6d6b78436f43d4f
+          created: 1758845230097
+          modified: 1758875554352
+          isPrivate: false
+          description: ""
+          sortKey: -1758847324992
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "lobbyId": "lobby123",
+              "userId": "550e8400-e29b-41d4-a716-446655440001",
+              "ghostType": {
+                "id": "demon",
+                "name": "Demon"
+              },
+              "typeASymptoms": ["emfFive", "fingerprints", "ghostWriting"],
+              "typeBSymptoms": ["objectsThrown", "huntsHighSanity"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: userId
+            value: 550e8400-e29b-41d4-a716-446655440001
+      - url: http://localhost:8081/journal/end
+        name: Journal End - Clear Redis
+        meta:
+          id: req_777cfe83c2f1480fb36df2aa883efafd
+          created: 1758846425344
+          modified: 1758875558845
+          isPrivate: false
+          description: ""
+          sortKey: -1758847324692
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"lobbyId": "lobby123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Symptoms
+    meta:
+      id: fld_1381b6edfcec4b72ba4249383cf93b75
+      created: 1758847332458
+      modified: 1758847332458
+      sortKey: -1758847332458
+      description: ""
+    children:
+      - url: http://localhost:8081/journal/users/:userId/entry/symptoms
+        name: Select Symptoms Types by Lobby ID and User ID
+        meta:
+          id: req_2d4fb2be360144298954546c6761eff2
+          created: 1758830032920
+          modified: 1758875564328
+          isPrivate: false
+          description: ""
+          sortKey: -1758847337331
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "lobbyId": "lobby123",
+              "typeASymptoms": ["emfFive", "coldTemperatures"],
+              "typeBSymptoms": []
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: userId
+            value: 550e8400-e29b-41d4-a716-446655440000
+      - url: http://localhost:8081/journal/lobbies/:lobbyId/users/:userId/symptoms/selected
+        name: Get Selected Symptoms Type by Lobby ID and User ID
+        meta:
+          id: req_edd5f37770524fb38d95abd689416ab5
+          created: 1758841151769
+          modified: 1758875606036
+          isPrivate: false
+          description: ""
+          sortKey: -1758847337231
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: lobbyId
+            value: lobby123
+          - name: userId
+            value: ff4b02a4-49b6-49c4-a5d3-d5edfed07546
+  - name: Ghosts
+    meta:
+      id: fld_e19f76bc985d42f18e82aade043b934a
+      created: 1758847346588
+      modified: 1758847360509
+      sortKey: -1758847346588
+      description: ""
+    children:
+      - url: http://localhost:8081/journal/users/:userId/entry/ghost
+        name: Select Ghost Type by Lobby ID and User ID
+        meta:
+          id: req_01d8f2406380421597c090a7ef9605fe
+          created: 1758837893131
+          modified: 1758875635522
+          isPrivate: false
+          description: ""
+          sortKey: -1758875580896
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"lobbyId": "lobby123",
+            	"ghostType": {
+            		"id": "spirit",
+            		"name": "Spirit"
+            	}
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: userId
+            value: ff4b02a4-49b6-49c4-a5d3-d5edfed07546
+      - url: http://localhost:8081/journal/lobbies/:lobbyId/users/:userId/ghost/selected
+        name: Get Selected Ghost Type by Lobby ID and User ID
+        meta:
+          id: req_bd20e8d8f8f841f59baf5e6589ecab2b
+          created: 1758837967902
+          modified: 1758875589262
+          isPrivate: false
+          description: ""
+          sortKey: -1758875580996
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: lobbyId
+            value: lobby123
+          - name: userId
+            value: 550e8400-e29b-41d4-a716-446655440000
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_4b5392a674254dee937e82eb007b79db
+    created: 1758712369755
+    modified: 1758712369755
+environments:
+  name: Base Environment
+  meta:
+    id: env_ba28631f0c2b482ca4bd017f0efa3279
+    created: 1758712369754
+    modified: 1758712369754
+    isPrivate: false

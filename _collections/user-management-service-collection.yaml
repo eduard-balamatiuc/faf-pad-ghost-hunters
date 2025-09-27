@@ -1,0 +1,460 @@
+type: collection.insomnia.rest/5.0
+name: user-management-collection
+meta:
+  id: wrk_8d93fe89e78b44b799c87d9ed6290f14
+  created: 1758910388099
+  modified: 1758921668513
+  description: ""
+collection:
+  - name: User Management API
+    meta:
+      id: fld_ce1ba43a21c744648707cee517a8aa2b
+      created: 1758910388100
+      modified: 1758921653528
+      sortKey: -1758910387165
+      description: Ghost Hunters User Management Service API Collection
+    children:
+      - name: Authentication
+        meta:
+          id: fld_052626661678465c94772725724d84a7
+          created: 1758910388100
+          modified: 1758921653528
+          sortKey: -1758910387164
+          description: ""
+        children:
+          - url: "{{baseUrl}}/v1/users/register"
+            name: Register User
+            meta:
+              id: req_004021461a2e413e8a0162a1a433ea1a
+              created: 1758910388101
+              modified: 1758910388101
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387163
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "email": "max@gmail.com",
+                  "username": "maxik",
+                  "password": "password1234"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                if (insomnia.response.code === 201) {
+                    const response = insomnia.response.json();
+                    insomnia.collectionVariables.set('userId', response.user.id);
+                    insomnia.collectionVariables.set('accessToken', response.access_token);
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/login"
+            name: Login User
+            meta:
+              id: req_e555e72c41544497956aea4a823fb5ee
+              created: 1758910388101
+              modified: 1758910388101
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387162
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "email": "max@gmail.com",
+                  "password": "password1234"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                if (insomnia.response.code === 200) {
+                    const response = insomnia.response.json();
+                    insomnia.collectionVariables.set('userId', response.user.id);
+                    insomnia.collectionVariables.set('accessToken', response.access_token);
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/refresh"
+            name: Refresh Token
+            meta:
+              id: req_5d530ae9c48d426c90b5f07bf3cb3ab4
+              created: 1758910388102
+              modified: 1758910388102
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387161
+            method: POST
+            body:
+              mimeType: text/plain
+              text: >-
+                {
+                  "refresh_token": "REDACTED_TOKEN"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: User Profile
+        meta:
+          id: fld_c569b592e45140ecb51722a6603d5e00
+          created: 1758910388102
+          modified: 1758910388102
+          sortKey: -1758910387160
+          description: ""
+        children:
+          - url: "{{baseUrl}}/v1/users/{{userId}}/profile"
+            name: Update Profile
+            meta:
+              id: req_77bcad23f1d64c0c8b2fcfb0b6824e35
+              created: 1758910388102
+              modified: 1758910388102
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387158
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "username": "maxik123"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/profile"
+            name: Get Profile
+            meta:
+              id: req_fef7da917c774455808011da0258f6e3
+              created: 1758910388102
+              modified: 1758910388102
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387159
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/account"
+            name: Delete Account
+            meta:
+              id: req_a06aa58dddd3425b9ce9e6f6070e1689
+              created: 1758910388103
+              modified: 1758910388103
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387157
+            method: DELETE
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "password": "password123",
+                  "confirmation": "DELETE"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Currency
+        meta:
+          id: fld_62d431f7321d4d2dae606824f372b304
+          created: 1758910388103
+          modified: 1758910388103
+          sortKey: -1758910387156
+          description: ""
+        children:
+          - url: "{{baseUrl}}/v1/users/{{userId}}/currency/transactions"
+            name: Purchase Transaction
+            meta:
+              id: req_3a5d12607f6b4ae0ba16ef0e68783d36
+              created: 1758910388103
+              modified: 1758910388103
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387154
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "type": "purchase",
+                  "amount": 150
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/currency/transactions"
+            name: Reward Transaction
+            meta:
+              id: req_995ed669960a43a6a120a01dc68eddb7
+              created: 1758910388103
+              modified: 1758910388103
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387153
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "type": "reward",
+                  "amount": 100,
+                  "exp_gained": 1030
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/currency"
+            name: Get Balance
+            meta:
+              id: req_f9f33c8b5b3d4f198621763d8e6180b7
+              created: 1758910388103
+              modified: 1758910388103
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387155
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/currency/transactions"
+            name: Transfer Transaction
+            meta:
+              id: req_df76d94d80bb474dbbc4ef633a9072c1
+              created: 1758910388104
+              modified: 1758910388104
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387152
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "type": "transfer",
+                  "amount": 100
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Friends
+        meta:
+          id: fld_af779df1ca644a668cd6d36c30b7de6c
+          created: 1758910388104
+          modified: 1758910388104
+          sortKey: -1758910387151
+          description: ""
+        children:
+          - url: "{{baseUrl}}/v1/users/{{userId}}/friends/requests"
+            name: Get Friend Requests
+            meta:
+              id: req_62eb564235514a13a45143f6363d66ff
+              created: 1758910388104
+              modified: 1758910388104
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387149
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/friends/request"
+            name: Send Friend Request
+            meta:
+              id: req_ca1f17009e1f48509a405e78a37e046c
+              created: 1758910388104
+              modified: 1758910388104
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387150
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "recipientUsername": "bob_gamer"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/friends/list"
+            name: Get Friends List
+            meta:
+              id: req_d1bd236d6e2a40b39badf48406e9b2de
+              created: 1758910388104
+              modified: 1758910388104
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387148
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/friends/remove"
+            name: Remove Friend
+            meta:
+              id: req_86e445ee2e934bdd8b5f0518086779bb
+              created: 1758910388105
+              modified: 1758910388105
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387147
+            method: DELETE
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "friendId": "FRIEND_ID_HERE"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{baseUrl}}/v1/users/{{userId}}/friends/respond"
+            name: Respond Friend Request
+            meta:
+              id: req_e5744e8365df43ee8b685b7466216c87
+              created: 1758910388105
+              modified: 1758910388105
+              isPrivate: false
+              description: ""
+              sortKey: -1758910387146
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                "requestId": "185a64f3-793d-4b3e-890a-555383405a32", 
+                "action": "accept"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+    environment:
+      baseUrl: http://localhost:8080
+      userId: ""
+      accessToken: ""
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_d91b4a194f5ac90dd7bf47a1684c6f5342de36e5
+    created: 1758910389312
+    modified: 1758921653523
+environments:
+  name: Base Environment
+  meta:
+    id: env_d91b4a194f5ac90dd7bf47a1684c6f5342de36e5
+    created: 1758910388105
+    modified: 1758921653526
+    isPrivate: false
+  data:
+    userId: a290830e-7d68-4d2b-aa2b-bd8fdf975f6b
+    accessToken: REDACTED_TOKEN

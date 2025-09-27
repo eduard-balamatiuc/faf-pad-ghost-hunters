@@ -213,7 +213,7 @@ It integrates with the Location Service to determine who can talk to whom, with 
 
 The following diagram illustrates the microservices architecture with API Gateway, load balancer, and service communication patterns:
 
-![Architecture Diagram](assets/architecture.svg)
+![Architecture Diagram](_assets/architecture.svg)
 
 ## Tech Stack
 

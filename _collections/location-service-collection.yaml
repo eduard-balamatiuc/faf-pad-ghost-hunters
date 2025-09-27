@@ -1,0 +1,506 @@
+type: collection.insomnia.rest/5.0
+name: location-service-collection
+meta:
+  id: wrk_2abbff4b106340c5910c155d051a7746
+  created: 1758904737886
+  modified: 1758924198103
+  description: ""
+collection:
+  - name: Location Service API
+    meta:
+      id: fld_fb30b1e3eadf408dbbf9e1100b86478b
+      created: 1758904737888
+      modified: 1758904737888
+      sortKey: -1758904736937
+      description: Complete API collection for Location Service - Real-time spatial
+        tracking for Ghost Hunters game
+    children:
+      - url: "{{base_url}}/health"
+        name: Health Check
+        meta:
+          id: req_c3ffdf549c24457da3719ecaede8fdfa
+          created: 1758904737888
+          modified: 1758904737888
+          isPrivate: false
+          description: Check if the Location Service is running and healthy
+          sortKey: -1758904736936
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - name: Session Management
+        meta:
+          id: fld_6c543288e8f945c7a8b9b41eea4025e7
+          created: 1758904737889
+          modified: 1758904737889
+          sortKey: -1758904736935
+          description: ""
+        children:
+          - url: "{{base_url}}/location/start"
+            name: Start Location Tracking
+            meta:
+              id: req_85829303dad84748ac2b5669cd01b6c5
+              created: 1758904737889
+              modified: 1758904737889
+              isPrivate: false
+              description: Initialize location tracking for a new game session
+              sortKey: -1758904736934
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "lobbyId": "lobby_xyz_789",
+                  "hostId": "player_host_123",
+                  "mapId": "map_id_farmhouse_123",
+                  "difficulty": "medium",
+                  "ghostType": "demon",
+                  "session": "active",
+                  "players": ["player_1", "player_2", "player_3"]
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/end"
+            name: End Location Tracking
+            meta:
+              id: req_942e0181aa4443d19d2ef5924c010489
+              created: 1758904737889
+              modified: 1758904737889
+              isPrivate: false
+              description: Terminate location tracking for a game session
+              sortKey: -1758904736933
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "lobbyId": "lobby_xyz_789"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Player Location Management
+        meta:
+          id: fld_f298ecd60a6a44eebf5156ddd9e07b5e
+          created: 1758904737890
+          modified: 1758904737890
+          sortKey: -1758904736932
+          description: ""
+        children:
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/equip"
+            name: Equip Item
+            meta:
+              id: req_39c3d810335046f0b72aaedd7dc65c8a
+              created: 1758904737890
+              modified: 1758904737890
+              isPrivate: false
+              description: Change player's active item for interactions
+              sortKey: -1758904736930
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "itemId": "inv_790",
+                  "itemType": "uvLamp"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/interact"
+            name: Interact with Object
+            meta:
+              id: req_dcb0c1f2190e4b1db8bc602c7fc32ac5
+              created: 1758904737890
+              modified: 1758904737890
+              isPrivate: false
+              description: Process player interaction with room objects
+              sortKey: -1758904736929
+            method: POST
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "objectName": "Fridge",
+                  "activeItem": "flashlight"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/room"
+            name: Update Player Room
+            meta:
+              id: req_fd70c5d98629407e867b4bb275b30522
+              created: 1758904737890
+              modified: 1758904737890
+              isPrivate: false
+              description: Update player's room location and state
+              sortKey: -1758904736931
+            method: PUT
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "roomId": "kitchen_01",
+                  "state": "moving",
+                  "speaking": false
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}"
+            name: Remove Player
+            meta:
+              id: req_a1c6156d1f924c849f27db0ca1a0da62
+              created: 1758904737891
+              modified: 1758904737891
+              isPrivate: false
+              description: Remove dead players from location tracking
+              sortKey: -1758904736928
+            method: DELETE
+            body:
+              mimeType: text/plain
+              text: |-
+                {
+                  "reason": "playerDeath",
+                  "deathCause": "ghostAttack"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Data Retrieval
+        meta:
+          id: fld_503e915c81d04d658f08c06fb71cb47a
+          created: 1758904737891
+          modified: 1758904737891
+          sortKey: -1758904736927
+          description: ""
+        children:
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/room"
+            name: Get Player Room (Basic)
+            meta:
+              id: req_4e5165e5c2f54b5c8d2519b9c4eed5c9
+              created: 1758904737891
+              modified: 1758904737891
+              isPrivate: false
+              description: Get user's current room without occupancy data
+              sortKey: -1758904736925
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/current"
+            name: Get Current Player Location
+            meta:
+              id: req_a2157f4cb1d944128df4801e49de0a12
+              created: 1758904737891
+              modified: 1758904737891
+              isPrivate: false
+              description: Get detailed user status and position information for Ghost AI
+                Service
+              sortKey: -1758904736926
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/{{user_id}}/room"
+            name: Get Player Room (With Others)
+            meta:
+              id: req_abe2fb18fab2449f994c498c28a892bf
+              created: 1758904737892
+              modified: 1758904737892
+              isPrivate: false
+              description: Get user's current room with occupancy data for Chat Service
+              sortKey: -1758904736924
+            method: GET
+            parameters:
+              - name: includeOthers
+                value: "true"
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{base_url}}/location/{{lobby_id}}/users/communication"
+            name: Get Communication Data
+            meta:
+              id: req_f419fe502b704199a349a97a9806db15
+              created: 1758904737892
+              modified: 1758904737892
+              isPrivate: false
+              description: Get user locations with radio status for Chat Service communication
+                filtering
+              sortKey: -1758904736923
+            method: GET
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Test Scenarios
+        meta:
+          id: fld_6abcbe6600d54e9b819a6938b65d2eae
+          created: 1758904737892
+          modified: 1758904737892
+          sortKey: -1758904736922
+          description: ""
+        children:
+          - name: Complete Game Flow
+            meta:
+              id: fld_b034cf29a81e4a0da6f8a10e1d681729
+              created: 1758904737892
+              modified: 1758904737892
+              sortKey: -1758904736921
+              description: ""
+            children:
+              - url: "{{base_url}}/location/start"
+                name: 1. Start Game Session
+                meta:
+                  id: req_3873eec3e8fc41b3b3bb134431aa24cd
+                  created: 1758904737892
+                  modified: 1758904737892
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736920
+                method: POST
+                body:
+                  mimeType: text/plain
+                  text: |-
+                    {
+                      "lobbyId": "test_lobby_001",
+                      "hostId": "test_player_host",
+                      "mapId": "farmhouse_map_01",
+                      "difficulty": "medium",
+                      "ghostType": "poltergeist",
+                      "session": "active",
+                      "players": ["test_player_1", "test_player_2"]
+                    }
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: "{{base_url}}/location/test_lobby_001/users/test_player_1/room"
+                name: 2. Player 1 Enters Kitchen
+                meta:
+                  id: req_e6d6a6e2d63344c8843ba3917d33f5cb
+                  created: 1758904737893
+                  modified: 1758904737893
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736919
+                method: PUT
+                body:
+                  mimeType: text/plain
+                  text: |-
+                    {
+                      "roomId": "kitchen_01",
+                      "state": "moving",
+                      "speaking": false
+                    }
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: "{{base_url}}/location/test_lobby_001/users/test_player_1/interact"
+                name: 4. Player 1 Interacts with Fridge
+                meta:
+                  id: req_38b2ea41f07e40e3ae647bfc29338e53
+                  created: 1758904737894
+                  modified: 1758904737894
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736917
+                method: POST
+                body:
+                  mimeType: text/plain
+                  text: |-
+                    {
+                      "objectName": "Fridge",
+                      "activeItem": "flashlight"
+                    }
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: "{{base_url}}/location/test_lobby_001/users/test_player_1/equip"
+                name: 3. Player 1 Equips Flashlight
+                meta:
+                  id: req_91a9c19c548d4affa3a169b64c157b7c
+                  created: 1758904737894
+                  modified: 1758904737894
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736918
+                method: PUT
+                body:
+                  mimeType: text/plain
+                  text: |-
+                    {
+                      "itemId": "flashlight_001",
+                      "itemType": "flashlight"
+                    }
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: "{{base_url}}/location/test_lobby_001/users/test_player_1/current"
+                name: 5. Check Player Location
+                meta:
+                  id: req_d2b15196ac6f4706a4f2dda41aeab53e
+                  created: 1758904737894
+                  modified: 1758904737894
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736916
+                method: GET
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: "{{base_url}}/location/end"
+                name: 6. End Game Session
+                meta:
+                  id: req_dbf899f8975644c9ae4d5a35f7e5d6d7
+                  created: 1758904737894
+                  modified: 1758904737894
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1758904736915
+                method: POST
+                body:
+                  mimeType: text/plain
+                  text: |-
+                    {
+                      "lobbyId": "test_lobby_001"
+                    }
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+    environment:
+      base_url: http://localhost:8087
+      lobby_id: lobby_xyz_789
+      user_id: player_1
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_299e40720f40bd87a7b53c3fb462573ee7b2420b
+    created: 1758924167182
+    modified: 1758924167182
+environments:
+  name: Base Environment
+  meta:
+    id: env_299e40720f40bd87a7b53c3fb462573ee7b2420b
+    created: 1758904737895
+    modified: 1758904737895
+    isPrivate: false
