@@ -110,7 +110,22 @@ If Postman is used
 
 5. If Default Ports were used, no additional changes should be done and you can test the endpoints.
 
-6. If other Ports were specified in `.env`, you may require to manually change the base URLs in Postman/Insomnia endpoints. 
+6. If other Ports were specified in `.env`, you may require to manually change the base URLs in Postman/Insomnia endpoints.
+
+## Database Seeding
+
+Database seeding is handled differently across services:
+
+- **Automated Seeding**: For all services except Inventory and Chat, the database is automatically seeded with initial data when the database is empty. This happens during the first startup of the service containers.
+
+- **Manual Seeding**: For Inventory and Chat services, seeding must be done manually after the containers are running. Use the following commands:
+
+  ```bash
+  docker compose exec inventory-service pnpm run db:seed
+  docker compose exec chat-service pnpm run db:seed
+  ```
+
+  Run these commands after starting the services with `docker-compose up` to populate the databases with necessary initial data.
 
 ## Service Boundaries
 
