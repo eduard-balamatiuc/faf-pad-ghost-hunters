@@ -29,6 +29,89 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 | [Plămădeală Maxim](https://github.com/grumpycatyo-collab) | User Service      | Ghost AI Service |
 | [Vornic Daniela](https://github.com/danielavornic)        | Inventory Service | Chat Service     |
 
+## Getting Started
+
+### Docker Images
+Below are displayed each service API image that are referenced in `docker-compose.yaml`, alongside with link reference to DockerHub tags page, where all images are hosted.
+#### User Management Service
+* [grumpycatyocollab/user-management-api:latest](https://hub.docker.com/r/grumpycatyocollab/user-management-api/tags)
+
+#### Ghost AI Service
+* [grumpycatyocollab/ghost-ai-api:latest](https://hub.docker.com/r/grumpycatyocollab/ghost-ai-api/tags)
+
+#### Journal Service
+* [ghenntoggy/journal-service:latest](https://hub.docker.com/r/ghenntoggy/journal-service/tags)
+
+#### Shop Service
+* [ghenntoggy/shop-service:latest](https://hub.docker.com/r/ghenntoggy/shop-service/tags)
+
+#### Lobby Service
+* [eduardbalamatiuc/lobby-service:latest](https://hub.docker.com/r/eduardbalamatiuc/lobby-service/tags)
+
+#### Map Service
+* [eduardbalamatiuc/map-service:latest](https://hub.docker.com/r/eduardbalamatiuc/map-service/tags)
+
+#### Chat Service
+* [danielavornic/ghost-hunters-chat-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-chat-service/tags)
+
+#### Inventory Service
+* [danielavornic/ghost-hunters-inventory-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-inventory-service/tags)
+
+#### Ghost Service
+* [marinbizzareadventrue/ghost-service:v1.1.0](https://hub.docker.com/r/marinbizzareadventrue/ghost-service/tags)
+
+#### Location Service
+* [marinbizzareadventrue/location-service:v1.2.0](https://hub.docker.com/r/marinbizzareadventrue/location-service/tags)
+
+### Requirements
+* `.env` setup according to `.env.template`
+  
+  * Make sure to set up passwords for each password-related field
+  * Default ports are set up in `.env.template`
+
+* Docker Engine or Docker Desktop
+* Command-Line Interpreter (`sh`/`bash`/`cmd`/`powershell`)
+* Insomnia or Postman - for endpoints testing
+* Supported OS:
+  * Linux Distributions
+  * MacOS
+  * Windows with WSL2
+
+### How to Run
+1. Clone the repository
+```sh
+git clone --branch main https://github.com/eduard-balamatiuc/faf-pad-ghost-hunters.git
+```
+2. Change directory to the one where you cloned the repository:
+```sh
+cd <repository_local_location>
+```
+2. Open CLI (sh/bash/cmd/powershell)
+3. Run command:
+```sh
+docker-compose up -d
+```
+or
+```sh
+docker-compose up
+```
+4. Open Insomnia or Postman
+
+If Insomnia is used 
+
+  4.1. Import Collections from `_collections` folder
+
+If Postman is used
+
+  4.1. In Postman, click Import > Migrate to Postman > Other API Clients.
+  4.2. Click `Select data to migrate` option
+  4.3. Choose files from `_collections` folder
+  4.4. Click `Start Migration`
+
+5. If Default Ports were used, no additional changes should be done and you can test the endpoints.
+
+6. If other Ports were specified in `.env`, you may require to manually change the base URLs in Postman/Insomnia endpoints. 
+
 ## Service Boundaries
 
 ### User Management Service
@@ -48,9 +131,7 @@ Microservice responsible for handling available shop items, presenting to player
 3. Durability - the number of sessions in which the item can be used or the number of usages during the session (e.g. Candle have a durability of “_1 Usage_”, respectively one usage per session, or Radio has durability “_10 seconds_”),
 4. Price - the amount of in-game currency that is required to spend to procure the corresponding item (e.g. “_Candle Price: 100$_”).
 
-This components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously, as well as every registered price across time.
-
-Besides above-mentioned scope, this service is designed handle applying price changes based on special events (Discount/Inflation).
+This components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously.
 
 This Service communicates with **Inventory Service**, responsible for each individual player available items to be used. **Shop Service** will send information about the available shop item(s) by the player in JSON Serialization Format upon requests from **Inventory Service**. Besides that, filtering based on the category tag is done on this service’s side.
 
@@ -828,7 +909,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     `user_id` - ID of the User that calls this endpoint in order to select symptoms from the general pool of all possible symptoms.
 
   - Description
-    User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters incompatible ghosts and symptoms, Medium - filters incompatible symptoms, Hard - no filtering is applied.
+    User selects the symptoms from the list of available symptoms and receives output based on the difficulty: Easy - filters ghosts that match at least two of the selected symptoms, Medium - filters ghosts that match at least one of the selected symptoms, Hard - no filtering is applied.
   - Payload
     ```json
     {
@@ -837,17 +918,12 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "typeBSymptoms": []
     }
     ```
-  - Response (Easy Difficulty - filters incompatible ghosts and symptoms and return compatible)
+  - Response (Easy Difficulty - filters ghosts that match at least two of the selected symptoms)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": [
-        "freezingTemperature",
-        "fingerprints",
-        "usesRadio",
-        "ghostWriting"
-      ],
-      "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
@@ -860,18 +936,21 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       ]
     }
     ```
-  - Response (Medium Difficulty - filters incompatible symptoms and return compatible, no filter for Ghost Types)
+  - Response (Medium Difficulty - filters ghosts that match at least one of the selected symptoms)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
-      "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
           "name": "Demon"
         },
-        ...
+        {
+          "id": "spirit",
+          "name": "Spirit"
+        },
         {
           "id": "obake",
           "name": "Obake"
@@ -879,12 +958,12 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       ]
     }
     ```
-  - Response (Hard Difficulty - returns all symptoms and ghosts)
+  - Response (Hard Difficulty - returns all selected symptoms and ghosts)
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", ..., "ghostWriting"],
-      "typeBSymptoms": ["huntsAlonePlayers", ..., "huntsLowSanity"],
+      "typeASymptoms": ["freezingTemperature", "emfFive"],
+      "typeBSymptoms": [],
       "ghostType": [
         {
           "id": "demon",
@@ -910,39 +989,22 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```json
     {
       "lobbyId": "lobby123",
-      "ghostType": [
-        {
+      "ghostType": {
           "id": "demon",
           "name": "Demon"
-        },
-        {
-          "id": "obake",
-          "name": "Obake"
         }
-      ]
     }
     ```
   - Response
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": [
-        "freezingTemperature",
-        "fingerprints",
-        "usesRadio",
-        "ghostWriting"
-      ],
+      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
       "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
-      "ghostType": [
-        {
+      "ghostType": {
           "id": "demon",
           "name": "Demon"
-        },
-        {
-          "id": "obake",
-          "name": "Obake"
         }
-      ]
     }
     ```
 
@@ -983,7 +1045,8 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "rewardExp": 50,
       "explanation": "Correctly identified with 3/5 symptoms observed",
       "correctSymptoms": ["emfFive", "objectsThrown", "aggressiveWhenProvoked"],
-      "incorrectSymptoms": ["huntsAlonePlayers", "freezingTemperatures"]
+      "incorrectSymptoms": ["huntsAlonePlayers", "freezingTemperatures"],
+      "missedSymptoms": ["huntsHighSanity", "usesRadio"]
     }
     ```
 
@@ -1059,7 +1122,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```
 - `POST /journal/end` - Consumed by **Lobby Service**
   - Description
-    End a Journal thread in Journal Service.
+    Ends a Journal thread in Journal Service.
   - Payload
     ```json
     {
@@ -1067,41 +1130,6 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     }
     ```
   - Response
-
-- **`POST /journal/start`** - Consumed by **Lobby Service**
-  - Description
-    Starts a Journal thread in Journal Service.
-  - Payload
-    ```json
-    {
-      "lobbyId": "lobby_xyz_789",
-      "hostId": "player_host_123",
-      "mapId": "map_id_farmhouse_123",
-      "difficulty": "medium",
-      "ghostType": "demon",
-      "session": "active",
-      "players": ["player_1", "player_2"]
-    }
-    ```
-  - Response
-    ```json
-    None
-    ```
-
-- **`POST /journal/end`** - Consumed by **Lobby Service**
-  - Description
-    End a Journal thread in Journal Service.
-  - Payload
-    ```json
-    {
-      "lobbyId": "lobby_xyz_789"
-    }
-    ```
-  - Response
-
-        ```json
-        None
-        ```
 
 ### Lobby Service
 
@@ -1130,7 +1158,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
       "lobbyId": "lobby_xyz_789"
     }
     ```
-    **Description: End** a ghost thread in AI Service
+    **Description:** Ends a ghost thread in AI Service
 - `POST /location/start` - Available in Location Service.
   - Payload
     ```json
