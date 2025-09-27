@@ -2175,12 +2175,11 @@ Key responsibilities:
     }
     ```
   - Send Message Event: `sendMessage`
-    Sends a message through either room-based or radio communication via WebSocket, handling message delivery based on communication type and user locations.
+    Sends a message through either room-based or radio communication via WebSocket, handling message delivery based on user locations and radio availability (inferred from connection payload).
   - Message Event Payload
     ```json
     {
-      "message": "Ghost detected in basement!",
-      "communicationType": "text"
+      "message": "Ghost detected in basement!"
     }
     ```
   - Message Event Response
