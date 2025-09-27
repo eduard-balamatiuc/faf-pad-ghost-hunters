@@ -2294,16 +2294,6 @@ main (trunk - all development and releases)
 - Submit and apply fixes during evaluation
 - Merge back to `main` when accepted
 
-## Workflow Rules
-
-### Lab Completion Process
-
-1. Create `release/lab-X` from `main` when requirements complete
-2. Final testing and submission preparation
-3. Tag completion: `git tag vX.0.0`
-4. Submit and apply fixes during evaluation
-5. Merge back to `main` when accepted
-
 ### Merging Strategy
 
 - **All branches → Main**: Squash and merge
