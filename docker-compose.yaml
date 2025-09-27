@@ -51,6 +51,11 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    networks:
+      - ghost-hunters-network
+    depends_on:
+      redis-ghost-ai-service:
+        condition: service_healthy
     healthcheck:
       test:
         [
