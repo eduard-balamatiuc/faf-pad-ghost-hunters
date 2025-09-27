@@ -29,6 +29,42 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 | [Plămădeală Maxim](https://github.com/grumpycatyo-collab) | User Service      | Ghost AI Service |
 | [Vornic Daniela](https://github.com/danielavornic)        | Inventory Service | Chat Service     |
 
+## Getting Started
+
+### Docker Images
+Below are displayed each service API image that are referenced in `docker-compose.yaml`, alongside with link reference to DockerHub tags page, where all images are hosted.
+#### User Management Service
+* [grumpycatyocollab/user-management-api:latest](https://hub.docker.com/r/grumpycatyocollab/user-management-api/tags)
+
+#### Ghost AI Service
+* [grumpycatyocollab/ghost-ai-api:latest](https://hub.docker.com/r/grumpycatyocollab/ghost-ai-api/tags)
+
+#### Journal Service
+* [ghenntoggy/journal-service:latest](https://hub.docker.com/r/ghenntoggy/journal-service/tags)
+
+#### Shop Service
+* [ghenntoggy/shop-service:latest](https://hub.docker.com/r/ghenntoggy/shop-service/tags)
+
+#### Lobby Service
+* [eduardbalamatiuc/lobby-service:latest](https://hub.docker.com/r/eduardbalamatiuc/lobby-service/tags)
+
+#### Map Service
+* [eduardbalamatiuc/map-service:latest](https://hub.docker.com/r/eduardbalamatiuc/map-service/tags)
+
+#### Chat Service
+* [danielavornic/ghost-hunters-chat-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-chat-service/tags)
+
+#### Inventory Service
+* [danielavornic/ghost-hunters-inventory-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-inventory-service/tags)
+
+#### Ghost Service
+* [marinbizzareadventrue/ghost-service:v1.1.0](https://hub.docker.com/r/marinbizzareadventrue/ghost-service/tags)
+
+#### Location Service
+* [marinbizzareadventrue/location-service:v1.2.0](https://hub.docker.com/r/marinbizzareadventrue/location-service/tags)
+
+
+
 ## Service Boundaries
 
 ### User Management Service
@@ -48,9 +84,7 @@ Microservice responsible for handling available shop items, presenting to player
 3. Durability - the number of sessions in which the item can be used or the number of usages during the session (e.g. Candle have a durability of “_1 Usage_”, respectively one usage per session, or Radio has durability “_10 seconds_”),
 4. Price - the amount of in-game currency that is required to spend to procure the corresponding item (e.g. “_Candle Price: 100$_”).
 
-This components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously, as well as every registered price across time.
-
-Besides above-mentioned scope, this service is designed handle applying price changes based on special events (Discount/Inflation).
+This components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously.
 
 This Service communicates with **Inventory Service**, responsible for each individual player available items to be used. **Shop Service** will send information about the available shop item(s) by the player in JSON Serialization Format upon requests from **Inventory Service**. Besides that, filtering based on the category tag is done on this service’s side.
 
