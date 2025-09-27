@@ -63,7 +63,54 @@ Below are displayed each service API image that are referenced in `docker-compos
 #### Location Service
 * [marinbizzareadventrue/location-service:v1.2.0](https://hub.docker.com/r/marinbizzareadventrue/location-service/tags)
 
+### Requirements
+* `.env` setup according to `.env.template`
+  
+  * Make sure to set up passwords for each password-related field
+  * Default ports are set up in `.env.template`
 
+* Docker Engine or Docker Desktop
+* Command-Line Interpreter (`sh`/`bash`/`cmd`/`powershell`)
+* Insomnia or Postman - for endpoints testing
+* Supported OS:
+  * Linux Distributions
+  * MacOS
+  * Windows with WSL2
+
+### How to Run
+1. Clone the repository
+```sh
+git clone --branch main https://github.com/eduard-balamatiuc/faf-pad-ghost-hunters.git
+```
+2. Change directory to the one where you cloned the repository:
+```sh
+cd <repository_local_location>
+```
+2. Open CLI (sh/bash/cmd/powershell)
+3. Run command:
+```sh
+docker-compose up -d
+```
+or
+```sh
+docker-compose up
+```
+4. Open Insomnia or Postman
+
+If Insomnia is used 
+
+  4.1. Import Collections from `_collections` folder
+
+If Postman is used
+
+  4.1. In Postman, click Import > Migrate to Postman > Other API Clients.
+  4.2. Click `Select data to migrate` option
+  4.3. Choose files from `_collections` folder
+  4.4. Click `Start Migration`
+
+5. If Default Ports were used, no additional changes should be done and you can test the endpoints.
+
+6. If other Ports were specified in `.env`, you may require to manually change the base URLs in Postman/Insomnia endpoints. 
 
 ## Service Boundaries
 
