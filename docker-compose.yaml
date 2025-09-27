@@ -87,7 +87,7 @@ services:
       retries: 5
 
   journal_service_app:
-    image: ghenntoggy/journal-service:dev-latest
+    image: ghenntoggy/journal-service:latest
     platform: linux/amd64
     container_name: journal_service_go_container
     depends_on:
