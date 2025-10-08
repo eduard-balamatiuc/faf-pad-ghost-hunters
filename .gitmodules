@@ -37,3 +37,7 @@
 [submodule "location-service"]
 	path = location-service
 	url = https://github.com/MarinBizarreAdventure/location-service
+
+[submodule "faf-pad-gateway"]
+	path = faf-pad-gateway
+	url = https://github.com/grumpycatyo-collab/faf-pad-gateway.git
