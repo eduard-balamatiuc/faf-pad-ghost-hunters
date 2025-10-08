@@ -2282,7 +2282,7 @@ main (trunk - all development and releases)
 - **Feature branches**: `feat/lab-X-service-name` or `feat/lab-X-functionality`
   - Example: `feat/lab-2-ghost-ai`, `feat/lab-3-inventory-crud`
 - **Fix branches**: `fix/issue-description`
-  - Example: `tfix/ghost-ai-crash`, `fix/inventory-bug`
+  - Example: `fix/ghost-ai-crash`, `fix/inventory-bug`
 - **Documentation branches**: `docs/update-description`
   - Example: `docs/api-contract-updates`
 - **Chore brances**: `chore/task-description`
