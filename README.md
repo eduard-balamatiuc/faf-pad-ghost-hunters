@@ -32,81 +32,102 @@ Ghost Hunters is a multiplayer game, inspired by Phasmaphobia, that uses a micro
 ## Getting Started
 
 ### Docker Images
+
 Below are displayed each service API image that are referenced in `docker-compose.yaml`, alongside with link reference to DockerHub tags page, where all images are hosted.
+
 #### User Management Service
-* [grumpycatyocollab/user-management-api:latest](https://hub.docker.com/r/grumpycatyocollab/user-management-api/tags)
+
+- [grumpycatyocollab/user-management-api:latest](https://hub.docker.com/r/grumpycatyocollab/user-management-api/tags)
 
 #### Ghost AI Service
-* [grumpycatyocollab/ghost-ai-api:latest](https://hub.docker.com/r/grumpycatyocollab/ghost-ai-api/tags)
+
+- [grumpycatyocollab/ghost-ai-api:latest](https://hub.docker.com/r/grumpycatyocollab/ghost-ai-api/tags)
 
 #### Journal Service
-* [ghenntoggy/journal-service:latest](https://hub.docker.com/r/ghenntoggy/journal-service/tags)
+
+- [ghenntoggy/journal-service:latest](https://hub.docker.com/r/ghenntoggy/journal-service/tags)
 
 #### Shop Service
-* [ghenntoggy/shop-service:latest](https://hub.docker.com/r/ghenntoggy/shop-service/tags)
+
+- [ghenntoggy/shop-service:latest](https://hub.docker.com/r/ghenntoggy/shop-service/tags)
 
 #### Lobby Service
-* [eduardbalamatiuc/lobby-service:latest](https://hub.docker.com/r/eduardbalamatiuc/lobby-service/tags)
+
+- [eduardbalamatiuc/lobby-service:latest](https://hub.docker.com/r/eduardbalamatiuc/lobby-service/tags)
 
 #### Map Service
-* [eduardbalamatiuc/map-service:latest](https://hub.docker.com/r/eduardbalamatiuc/map-service/tags)
+
+- [eduardbalamatiuc/map-service:latest](https://hub.docker.com/r/eduardbalamatiuc/map-service/tags)
 
 #### Chat Service
-* [danielavornic/ghost-hunters-chat-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-chat-service/tags)
+
+- [danielavornic/ghost-hunters-chat-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-chat-service/tags)
 
 #### Inventory Service
-* [danielavornic/ghost-hunters-inventory-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-inventory-service/tags)
+
+- [danielavornic/ghost-hunters-inventory-service:latest](https://hub.docker.com/r/danielavornic/ghost-hunters-inventory-service/tags)
 
 #### Ghost Service
-* [marinbizzareadventrue/ghost-service:v1.1.0](https://hub.docker.com/r/marinbizzareadventrue/ghost-service/tags)
+
+- [marinbizzareadventrue/ghost-service:v1.1.0](https://hub.docker.com/r/marinbizzareadventrue/ghost-service/tags)
 
 #### Location Service
-* [marinbizzareadventrue/location-service:v1.2.0](https://hub.docker.com/r/marinbizzareadventrue/location-service/tags)
+
+- [marinbizzareadventrue/location-service:v1.2.0](https://hub.docker.com/r/marinbizzareadventrue/location-service/tags)
 
 ### Requirements
-* `.env` setup according to `.env.template`
-  
-  * Make sure to set up passwords for each password-related field
-  * Default ports are set up in `.env.template`
 
-* Docker Engine or Docker Desktop
-* Command-Line Interpreter (`sh`/`bash`/`cmd`/`powershell`)
-* Insomnia or Postman - for endpoints testing
-* Supported OS:
-  * Linux Distributions
-  * MacOS
-  * Windows with WSL2
+- `.env` setup according to `.env.template`
+  - Make sure to set up passwords for each password-related field
+  - Default ports are set up in `.env.template`
+
+- Docker Engine or Docker Desktop
+- Command-Line Interpreter (`sh`/`bash`/`cmd`/`powershell`)
+- Insomnia or Postman - for endpoints testing
+- Supported OS:
+  - Linux Distributions
+  - MacOS
+  - Windows with WSL2
 
 ### How to Run
+
 1. Clone the repository
+
 ```sh
 git clone --branch main https://github.com/eduard-balamatiuc/faf-pad-ghost-hunters.git
 ```
+
 2. Change directory to the one where you cloned the repository:
+
 ```sh
 cd <repository_local_location>
 ```
+
 2. Open CLI (sh/bash/cmd/powershell)
 3. Run command:
+
 ```sh
 docker-compose up -d
 ```
+
 or
+
 ```sh
 docker-compose up
 ```
+
 4. Open Insomnia or Postman
 
-If Insomnia is used 
+If Insomnia is used
 
-  4.1. Import Collections from `_collections` folder
+4.1. Import Collections from `_collections` folder
 
 If Postman is used
 
-  4.1. In Postman, click Import > Migrate to Postman > Other API Clients.
-  4.2. Click `Select data to migrate` option
-  4.3. Choose files from `_collections` folder
-  4.4. Click `Start Migration`
+4.1. In Postman, click Import > Migrate to Postman > Other API Clients.
+4.2. Click `Select data to migrate` option
+4.3. Choose files from `_collections` folder
+4.4. Click `Start Migration`
 
 5. You'll have to modify the ports from the `.env.template` since some of them might intersect.
 
@@ -218,11 +239,380 @@ It connects with the Shop Service where players buy new items and with the Lobby
 
 ### Chat Service
 
-Offers communication between based on their location. Players in the same room can talk to each other through text messages, while players with radio equipment can communicate across different rooms (unless a ghost is actively haunting the area).
+Offers communication between players based on their location. Players in the same room can talk to each other through text messages, while players with radio equipment can communicate across different rooms (unless a ghost is actively haunting the area).
 
-As such, the service filters messages based on player locations, manages radio connectivity and ensures that supernatural events can interrupt communications.
+The service includes a radio system where radios have durability that decreases with each use. When a radio breaks (durability reaches 0), it is automatically unequipped and the user must equip a replacement. Radio messages are delivered both locally (same room) and globally (to all radio-equipped users) unless ghost interference blocks cross-room communication.
 
-It integrates with the Location Service to determine who can talk to whom, with the User Management Service to authenticate players and with the Inventory Service to verify radio equipment status.
+As such, the service filters messages based on player locations, manages radio connectivity and durability, and ensures that supernatural events can interrupt communications.
+
+It integrates with the Location Service to determine who can talk to whom, with the Lobby Service to check items brought into the game, and with the Inventory Service to verify radio equipment status.
+
+#### Exposed API Endpoints
+
+##### WS /chat/connect - Consumed by Game Client via API Gateway
+
+**Description:** Establishes WebSocket connection for real-time messaging, initializing user's chat session with room and radio information. Handles all chat operations through WebSocket events.
+
+**WebSocket Events:**
+
+**Join Lobby Event: `join`**
+
+Initializes user's chat session and joins them to lobby/room/radio communication channels.
+
+**Join Event Payload:**
+
+```json
+{
+  "userId": "user123",
+  "lobbyId": "lobby_456",
+  "roomId": "kitchen_01",
+  "radioItemId": "inv_radio_123",
+  "username": "PlayerName"
+}
+```
+
+**Join Event Response (`joined`):**
+
+```json
+{
+  "success": true,
+  "sessionId": "68d6c214f54437ea33fa0dd7",
+  "roomId": "kitchen_01",
+  "radioItemId": "inv_radio_123",
+  "roommates": ["user456", "user789"],
+  "timestamp": "2025-09-10T14:30:00Z"
+}
+```
+
+**Send Message Event: `sendMessage`**
+
+Sends a message through either room-based or radio communication via WebSocket.
+
+**Message Event Payload:**
+
+```json
+{
+  "message": "Ghost detected in basement!",
+  "isRadio": false
+}
+```
+
+**Message Event Response (`messageSent`):**
+
+```json
+{
+  "id": "msg_uuid",
+  "deliveredTo": ["user456", "user789"],
+  "deliveryCount": 2,
+  "timestamp": "2025-09-10T14:30:00Z",
+  "success": true,
+  "radioDeleted": false
+}
+```
+
+**Change Room Event: `changeRoom`**
+
+Moves user to a different room, updating their communication channels.
+
+**Change Room Payload:**
+
+```json
+{
+  "roomId": "basement_02"
+}
+```
+
+**Change Radio Event: `changeRadio`**
+
+Equips or unequips a radio for cross-room communication. Validates radio exists and has durability > 0.
+
+**Change Radio Payload:**
+
+```json
+{
+  "radioItemId": "inv_radio_456"
+}
+```
+
+To unequip radio:
+
+```json
+{
+  "radioItemId": null
+}
+```
+
+**Received Events:**
+
+**Message Received Event: `messageReceived`**
+
+Broadcast to other users when a message is sent.
+
+```json
+{
+  "id": "msg_uuid",
+  "userId": "user123",
+  "username": "PlayerName",
+  "message": "Ghost detected in basement!",
+  "roomId": "kitchen_01",
+  "timestamp": "2025-09-10T14:30:00Z",
+  "isRadio": false,
+  "radioDeleted": false
+}
+```
+
+**User Joined Event: `userJoined`**
+
+Broadcast when a user joins/changes room or equips radio.
+
+```json
+{
+  "userId": "user123",
+  "username": "PlayerName",
+  "roomId": "kitchen_01",
+  "hasRadio": true,
+  "timestamp": "2025-09-10T14:30:00Z"
+}
+```
+
+**User Left Event: `userLeft`**
+
+Broadcast when a user leaves/changes room or unequips radio.
+
+```json
+{
+  "userId": "user123",
+  "username": "PlayerName",
+  "roomId": "kitchen_01",
+  "timestamp": "2025-09-10T14:30:00Z"
+}
+```
+
+**Error Events:**
+
+All WebSocket events can emit error events with the following structure:
+
+```json
+{
+  "message": "Error description",
+  "code": "ERROR_CODE"
+}
+```
+
+**Error Codes:**
+
+- `JOIN_FAILED` - Failed to join lobby
+- `NOT_JOINED` - User not joined to lobby
+- `SESSION_NOT_FOUND` - Chat session not found
+- `SEND_FAILED` - Failed to send message
+- `CHANGE_ROOM_FAILED` - Failed to change room
+- `CHANGE_RADIO_FAILED` - Failed to change radio
+- `RADIO_NOT_FOUND` - Radio item not found in inventory
+- `RADIO_BROKEN` - Cannot equip radio with durability <= 0
+
+##### GET /chat/lobbies/{lobbyId}/messages - Consumed by Game Client
+
+**Description:** Retrieves messages for a lobby with optional filters.
+
+**Query Parameters:**
+
+- `roomId` (optional): Filter messages by specific room (string)
+- `limit` (optional): Maximum number of messages to retrieve (default: 50)
+- `offset` (optional): Number of messages to skip (default: 0)
+- `since` (optional): Retrieve messages since specific timestamp (ISO date)
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "msg_456",
+      "userId": "user123",
+      "username": "PlayerName",
+      "message": "Found evidence!",
+      "roomId": "kitchen_01",
+      "deliveredTo": ["user456", "user789"],
+      "deliveryCount": 2,
+      "timestamp": "2025-09-10T14:30:00Z"
+    }
+  ],
+  "hasMore": false,
+  "totalCount": 1,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+##### Radio System
+
+The Chat Service includes a radio system that allows players to communicate across different rooms. Radios have durability that decreases with each use and can break, requiring replacement.
+
+1. **Equip Radio:** Use `changeRadio` WebSocket event with `radioItemId`
+2. **Send Radio Message:** Use `sendMessage` with `isRadio: true`
+3. **Durability Decrease:** Each radio message decreases durability by 1
+4. **Radio Breaks:** When durability reaches 0, radio is automatically unequipped
+5. **Replace Radio:** Equip a new radio using `changeRadio` event
+
+Radio messages are delivered to:
+
+- All users in the same room (room-based delivery)
+- All users with radios equipped (cross-room delivery, unless ghost interference)
+
+#### Consumed API Endpoints
+
+##### GET /lobbies/{lobbyId}/users/{userId}/items?category=COMMUNICATION - Available in Lobby Service
+
+**Description:** Retrieves communication items (radios) from user's selected items for the current game session to enable radio-based messaging.
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "userId": "user123",
+  "items": [
+    {
+      "id": "inv_radio_123",
+      "itemId": "radio",
+      "itemName": "Radio",
+      "category": "COMMUNICATION",
+      "durability": 8,
+      "maxDurability": 10
+    }
+  ]
+}
+```
+
+##### GET /inventory/users/{userId}/items/{itemId} - Available in Inventory Service
+
+**Description:** Checks radio item durability before allowing radio communication to ensure the device is functional.
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "id": "inv_radio_123",
+  "itemId": "radio",
+  "itemName": "Radio",
+  "category": "COMMUNICATION",
+  "durability": 8,
+  "maxDurability": 10,
+  "createdAt": "2025-09-10T14:30:00Z",
+  "updatedAt": "2025-09-10T14:30:00Z"
+}
+```
+
+##### POST /inventory/users/{userId}/items/{radioItemId}/use - Available in Inventory Service
+
+**Description:** Decreases radio durability after a message is sent via radio communication, tracking item usage.
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "durability": 7,
+  "itemDeleted": false
+}
+```
+
+##### GET /location/{lobbyId}/users/{userId}/room - Available in Location Service
+
+**Description:** Retrieves user's current room location and roommates for determining message delivery scope in room-based communication.
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "userId": "user123",
+  "roomId": "kitchen_01",
+  "roommates": ["user456", "user789"],
+  "timestamp": "2025-09-10T14:30:00Z"
+}
+```
+
+##### GET /location/{lobbyId}/users/communication - Available in Location Service
+
+**Description:** Retrieves all user locations with radio status and haunting interference information for managing cross-room communication.
+
+**Payload:**
+
+```json
+None
+```
+
+**Response:**
+
+```json
+{
+  "users": [
+    {
+      "userId": "user123",
+      "roomId": "kitchen_01",
+      "hasRadio": true,
+      "radioItemId": "inv_radio_123",
+      "isHaunted": false
+    },
+    {
+      "userId": "user456",
+      "roomId": "basement_02",
+      "hasRadio": true,
+      "radioItemId": "inv_radio_456",
+      "isHaunted": true
+    }
+  ]
+}
+```
+
+#### Message Queue Events
+
+##### SUBSCRIBE ghost_updates - Published by Ghost AI Service
+
+**Description:** Updates the Chat Service about ghost activity status to manage communication interruptions. When a ghost is actively haunting an area, radio-based communication gets interrupted and players in haunted rooms cannot use radios for cross-room messaging.
+
+**Payload:**
+
+```json
+{
+  "lobbyId": "lobby_xyz_789",
+  "eventType": "huntStarted",
+  "ghostLocation": "kitchen_01",
+  "hauntedRooms": ["kitchen_01", "hallway_01"],
+  "timestamp": "2025-09-09T10:00:00Z"
+}
+```
+
+**Usage:** When `eventType` is "huntStarted", the Chat Service blocks radio communication for users in `hauntedRooms`. When `eventType` is "huntEnded", radio communication is restored for all users in the lobby.
 
 ## Architecture Diagram
 
@@ -1005,21 +1395,26 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     {
       "lobbyId": "lobby123",
       "ghostType": {
-          "id": "demon",
-          "name": "Demon"
-        }
+        "id": "demon",
+        "name": "Demon"
+      }
     }
     ```
   - Response
     ```json
     {
       "lobbyId": "lobby123",
-      "typeASymptoms": ["freezingTemperature", "fingerprints", "usesRadio", "ghostWriting"],
+      "typeASymptoms": [
+        "freezingTemperature",
+        "fingerprints",
+        "usesRadio",
+        "ghostWriting"
+      ],
       "typeBSymptoms": ["huntsAlonePlayers", "huntsLowSanity"],
       "ghostType": {
-          "id": "demon",
-          "name": "Demon"
-        }
+        "id": "demon",
+        "name": "Demon"
+      }
     }
     ```
 
