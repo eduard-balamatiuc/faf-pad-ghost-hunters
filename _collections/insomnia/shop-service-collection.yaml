@@ -1,0 +1,337 @@
+type: collection.insomnia.rest/5.0
+name: PAD_Shop_Service_Collection
+meta:
+  id: wrk_efdc45289f0747c98e569e1f180c4378
+  created: 1758710467394
+  modified: 1758712099082
+  description: '# Shop Service - Ghost Hunters Platform## Service
+    OverviewMicroservice responsible for handling available shop items,
+    presenting to players:1. Item Title - title of the item (e.g. “*Candle*”),
+    2. Description - description of the corresponding item (e.g. “*Candle is a
+    ghost-provocative tool that is used to gather evidences and track possible
+    presence of the Ghost on the Map*.”), 3. Durability - the number of sessions
+    in which the item can be used or the number of usages during the session
+    (e.g. Candle have a durability of “*1 Usage*”, respectively one usage per
+    session, or Radio has durability “*10 seconds*”), 4. Price - the amount of
+    in-game currency that is required to spend to procure the corresponding item
+    (e.g. “*Candle Price: 100$*”).This components uses services personal
+    Database - `shop_db` , which contains information about each item details,
+    mentioned previously, as well as every registered price across time.##
+    Communication Contract### Exposed API Endpoints#### `GET /shop/items` -
+    Consumed by Inventory Service**Description:** Retrieves all shop items or
+    filtered items by category. Supports optional category query parameter for
+    filtering.**Query Parameters**:`category` (optional): Category type used for
+    filtering shop items (e.g., `INVESTIGATIVE`,
+    `PROTECTIVE`)**Payload:**```jsonNone```**Response:**1. No query parameter
+    supplied - `/shop/items` (All Shop Items are
+    retrieved):```json{  "shopItems": [    {      "id": "emf",      "title":
+    "EMF Reader",      "description": "Measures EMF Level.",      "category":
+    "INVESTIGATIVE",      "durability": 5,      "price":
+    50    },    {      "id": "crucifix",      "title":
+    "Crucifix",      "description": "Prevents Ghost Attacks.",      "category":
+    "PROTECTIVE",      "durability": 3,      "price": 150    },    {      "id":
+    "radio",      "title": "Radio",      "description": "Enables communication
+    across rooms.",      "category": "COMMUNICATION",      "durability":
+    10,      "price": 150    }  ]}```2. Query parameter supplied -
+    `/shop/items?category=investigative` (Filtered by
+    category: `?category=INVESTIGATIVE`):```json{  "shopItems":
+    [    {      "id": "emf",      "title": "EMF Reader",      "description":
+    "Measures EMF Level.",      "category": "INVESTIGATIVE",      "durability":
+    5,      "price": 50    },    {      "id": "salt",      "title":
+    "Salt",      "description": "Salt used to track ghost
+    footprints.",      "category": "INVESTIGATIVE",      "durability":
+    4,      "price": 100    },    {      "id": "uvLight",      "title": "UV
+    Light",      "description": "Ultra-Violet Light that is used to highlight
+    fingerprints and footprints",      "category":
+    "INVESTIGATIVE",      "durability": 10,      "price": 120    }  ]}```####
+    `GET /shop/categories` - Consumed by Inventory Service**Description:**
+    Retrieves all available shop item categories for filtering and organization
+    purposes.**Payload:**```jsonNone```**Response:**```json{  "categories":
+    [    "INVESTIGATIVE",    "PROTECTIVE",    "COMMUNICATION",    "CONSUMABLES"  ]}```####
+    `GET /shop/items/{itemId}` - Consumed by Inventory Service**Description:**
+    Retrieves detailed information about a specific shop item by its ID.**Path
+    Parameters**:`user_id` - Unique identifier of the shop
+    item**Payload:**```jsonNone```**Response:**```json{  "id": "emf",  "title":
+    "EMF Reader",  "description": "Measures EMF Level.",  "category":
+    "INVESTIGATIVE",  "durability": 5,  "price": 50}```### Consumed API
+    Endpoints`None` - Shop Service is primarily a data provider for item catalog
+    information.'
+collection:
+  - url: http://localhost:8082/api/shop/items
+    name: Get all shop items
+    meta:
+      id: req_a3b1fc93781a497cae0f20036d156063
+      created: 1758710467416
+      modified: 1760055322180
+      isPrivate: false
+      description: >-
+        #### `GET /shop/items` - Consumed by Inventory Service
+
+
+        **Description:** 
+
+
+        Retrieves all shop items or filtered items by category. Supports
+        optional category query parameter for filtering.
+
+
+        **Query Parameters**:
+
+
+        `category` (optional): Category type used for filtering shop items
+        (e.g., `INVESTIGATIVE`, `PROTECTIVE`)
+
+
+        **Payload:**
+
+        ```json
+
+        None
+
+        ```
+
+
+        **Response:**
+
+        1. No query parameter supplied - `/shop/items` (All Shop Items are
+        retrieved):
+
+        ```json
+
+        {
+          "shopItems": [
+            {
+              "id": "emf",
+              "title": "EMF Reader",
+              "description": "Measures EMF Level.",
+              "category": "INVESTIGATIVE",
+              "durability": 5,
+              "price": 50
+            },
+            {
+              "id": "crucifix",
+              "title": "Crucifix",
+              "description": "Prevents Ghost Attacks.",
+              "category": "PROTECTIVE",
+              "durability": 3,
+              "price": 150
+            },
+            {
+              "id": "radio",
+              "title": "Radio",
+              "description": "Enables communication across rooms.",
+              "category": "COMMUNICATION",
+              "durability": 10,
+              "price": 150
+            }
+          ]
+        }
+
+        ```
+
+        2. Query parameter supplied - `/shop/items?category=investigative`
+        (Filtered by category: `?category=INVESTIGATIVE`):
+
+        ```json
+
+        {
+          "shopItems": [
+            {
+              "id": "emf",
+              "title": "EMF Reader",
+              "description": "Measures EMF Level.",
+              "category": "INVESTIGATIVE",
+              "durability": 5,
+              "price": 50
+            },
+            {
+              "id": "salt",
+              "title": "Salt",
+              "description": "Salt used to track ghost footprints.",
+              "category": "INVESTIGATIVE",
+              "durability": 4,
+              "price": 100
+            },
+            {
+              "id": "uvLight",
+              "title": "UV Light",
+              "description": "Ultra-Violet Light that is used to highlight fingerprints and footprints",
+              "category": "INVESTIGATIVE",
+              "durability": 10,
+              "price": 120
+            }
+          ]
+        }
+
+        ```
+      sortKey: -1758710467417
+    method: GET
+    parameters:
+      - id: pair_57d1f69891274566bc32dacd72bf11d2
+        name: category
+        value: INVESTIGATIVE
+        description: Item Category ENUM required to filter shop items by their category
+        disabled: false
+        type: text
+        multiline: false
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8082/api/shop/categories
+    name: Get all shop item categories
+    meta:
+      id: req_d033c7b18d20420b838844ba4ef8b855
+      created: 1758710751411
+      modified: 1760055206790
+      isPrivate: false
+      description: >-
+        #### `GET /shop/categories` - Consumed by Inventory Service
+
+
+        **Description:** 
+
+
+        Retrieves all available shop item categories for filtering and
+        organization purposes.
+
+
+        **Payload:**
+
+        ```json
+
+        None
+
+        ```
+
+
+        **Response:**
+
+        ```json
+
+        {
+          "categories": [
+            "INVESTIGATIVE",
+            "PROTECTIVE",
+            "COMMUNICATION",
+            "CONSUMABLES"
+          ]
+        }
+
+        ```
+      sortKey: -1758710751411
+    method: GET
+    parameters:
+      - id: pair_80d21e6ea35146ec9b2b7aa1a95aca7b
+        name: ""
+        value: ""
+        description: ""
+        disabled: true
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8082/api/shop/items/:id
+    name: Get shop item by id
+    meta:
+      id: req_d942d98bc5ba416f9c0222f77854bcb8
+      created: 1758711097360
+      modified: 1760055200256
+      isPrivate: false
+      description: |-
+        #### `GET /shop/items/{itemId}` - Consumed by Inventory Service
+
+        **Description:** 
+
+        Retrieves detailed information about a specific shop item by its ID.
+
+        **Path Parameters**:
+
+        `item_id` - Unique identifier of the shop item
+
+        **Payload:**
+        ```json
+        None
+        ```
+
+        **Response:**
+        ```json
+        {
+          "id": "emf",
+          "title": "EMF Reader",
+          "description": "Measures EMF Level.",
+          "category": "INVESTIGATIVE",
+          "durability": 5,
+          "price": 50
+        }
+        ```
+      sortKey: -1758711097360
+    method: GET
+    parameters:
+      - id: pair_9363a08b5ac94a638bd9a258e4ee7c91
+        name: ""
+        value: ""
+        description: ""
+        disabled: true
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+    pathParameters:
+      - name: id
+        value: emf
+  - url: http://localhost:8082/api/test/timeout
+    name: Test Timeout Limit (Artificial delay in response)
+    meta:
+      id: req_216d2ed4baaa4c09ba74661b7b574318
+      created: 1760041070453
+      modified: 1760055203533
+      isPrivate: false
+      description: ""
+      sortKey: -1760041070453
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.1
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_71d62291315b111005a13eae6b920e47af1137fb
+    created: 1758710467407
+    modified: 1758710467407
+environments:
+  name: Base Environment
+  meta:
+    id: env_71d62291315b111005a13eae6b920e47af1137fb
+    created: 1758710467403
+    modified: 1758710467403
+    isPrivate: false

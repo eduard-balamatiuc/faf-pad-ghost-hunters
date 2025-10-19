@@ -1,0 +1,165 @@
+{
+	"info": {
+		"_postman_id": "f3db6c1d-7c54-43a5-a331-faacfac56fee",
+		"name": "PAD_Shop_Service_Collection",
+		"description": "# Shop Service - Ghost Hunters Platform\n\n## Service Overview\n\nMicroservice responsible for handling available shop items, presenting to players:\n\n1. Item Title - title of the item (e.g. “*Candle*”), \n2. Description - description of the corresponding item (e.g. “*Candle is a ghost-provocative tool that is used to gather evidences and track possible presence of the Ghost on the Map*.”), \n3. Durability - the number of sessions in which the item can be used or the number of usages during the session (e.g. Candle have a durability of “*1 Usage*”, respectively one usage per session, or Radio has durability “*10 seconds*”), \n4. Price - the amount of in-game currency that is required to spend to procure the corresponding item (e.g. “*Candle Price: 100$*”).\n\nThis components uses services personal Database - `shop_db` , which contains information about each item details, mentioned previously.\n\n## Communication Contract\n\n### Exposed API Endpoints\n\n#### `GET /shop/items` - Consumed by Gateway\n\n**Description:** \n\nRetrieves all shop items or filtered items by category. Supports optional category query parameter for filtering.\n\n**Query Parameters**:\n\n`category` (optional): Category type used for filtering shop items (e.g., `INVESTIGATIVE`, `PROTECTIVE`)\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n1. No query parameter supplied - `/shop/items` (All Shop Items are retrieved):\n\n```json\n{\n  \"shopItems\": [\n    {\n      \"id\": \"emf\",\n      \"title\": \"EMF Reader\",\n      \"description\": \"Measures EMF Level.\",\n      \"category\": \"INVESTIGATIVE\",\n      \"durability\": 5,\n      \"price\": 50\n    }\n  ]\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30952553"
+	},
+	"item": [
+		{
+			"name": "Get all shop items",
+			"protocolProfileBehavior": {
+				"followRedirects": true,
+				"disableUrlEncoding": false,
+				"disableCookies": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "insomnia/11.6.1"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/api/shop/items?category=INVESTIGATIVE",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"shop",
+						"items"
+					],
+					"query": [
+						{
+							"key": "category",
+							"value": "INVESTIGATIVE",
+							"description": "Item Category ENUM required to filter shop items by their category"
+						}
+					]
+				},
+				"description": "#### `GET /shop/items` - Consumed by Gateway\n\n**Description:** \n\nRetrieves all shop items or filtered items by category. Supports optional category query parameter for filtering.\n\n**Query Parameters**:\n\n`category` (optional): Category type used for filtering shop items (e.g., `INVESTIGATIVE`, `PROTECTIVE`)\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n1. No query parameter supplied - `/shop/items` (All Shop Items are retrieved):\n```json\n{\n  \"shopItems\": [\n    {\n      \"id\": \"emf\",\n      \"title\": \"EMF Reader\",\n      \"description\": \"Measures EMF Level.\",\n      \"category\": \"INVESTIGATIVE\",\n      \"durability\": 5,\n      \"price\": 50\n    },\n    {\n      \"id\": \"crucifix\",\n      \"title\": \"Crucifix\",\n      \"description\": \"Prevents Ghost Attacks.\",\n      \"category\": \"PROTECTIVE\",\n      \"durability\": 3,\n      \"price\": 150\n    },\n    {\n      \"id\": \"radio\",\n      \"title\": \"Radio\",\n      \"description\": \"Enables communication across rooms.\",\n      \"category\": \"COMMUNICATION\",\n      \"durability\": 10,\n      \"price\": 150\n    }\n  ]\n}\n```\n2. Query parameter supplied - `/shop/items?category=investigative` (Filtered by category: `?category=INVESTIGATIVE`):\n```json\n{\n  \"shopItems\": [\n    {\n      \"id\": \"emf\",\n      \"title\": \"EMF Reader\",\n      \"description\": \"Measures EMF Level.\",\n      \"category\": \"INVESTIGATIVE\",\n      \"durability\": 5,\n      \"price\": 50\n    },\n    {\n      \"id\": \"salt\",\n      \"title\": \"Salt\",\n      \"description\": \"Salt used to track ghost footprints.\",\n      \"category\": \"INVESTIGATIVE\",\n      \"durability\": 4,\n      \"price\": 100\n    },\n    {\n      \"id\": \"uvLight\",\n      \"title\": \"UV Light\",\n      \"description\": \"Ultra-Violet Light that is used to highlight fingerprints and footprints\",\n      \"category\": \"INVESTIGATIVE\",\n      \"durability\": 10,\n      \"price\": 120\n    }\n  ]\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all shop item categories",
+			"protocolProfileBehavior": {
+				"followRedirects": true,
+				"disableUrlEncoding": false,
+				"disableCookies": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "insomnia/11.6.1"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/api/shop/categories",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"shop",
+						"categories"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				},
+				"description": "#### `GET /shop/categories` - Consumed by Inventory Service\n\n**Description:** \n\nRetrieves all available shop item categories for filtering and organization purposes.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"categories\": [\n    \"INVESTIGATIVE\",\n    \"PROTECTIVE\",\n    \"COMMUNICATION\",\n    \"CONSUMABLES\"\n  ]\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "Get shop item by id",
+			"protocolProfileBehavior": {
+				"followRedirects": true,
+				"disableUrlEncoding": false,
+				"disableCookies": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "insomnia/11.6.1"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/api/shop/items/:id",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"shop",
+						"items",
+						":id"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "emf"
+						}
+					]
+				},
+				"description": "#### `GET /shop/items/{itemId}` - Consumed by Inventory Service\n\n**Description:** \n\nRetrieves detailed information about a specific shop item by its ID.\n\n**Path Parameters**:\n\n`item_id` - Unique identifier of the shop item\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"id\": \"emf\",\n  \"title\": \"EMF Reader\",\n  \"description\": \"Measures EMF Level.\",\n  \"category\": \"INVESTIGATIVE\",\n  \"durability\": 5,\n  \"price\": 50\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "Test Timeout Limit (Artificial delay in response)",
+			"protocolProfileBehavior": {
+				"followRedirects": true,
+				"disableUrlEncoding": false,
+				"disableCookies": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "insomnia/11.6.1"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/api/test/timeout",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"test",
+						"timeout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

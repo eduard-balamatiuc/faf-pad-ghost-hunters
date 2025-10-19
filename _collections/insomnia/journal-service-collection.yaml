@@ -1,25 +1,25 @@
 type: collection.insomnia.rest/5.0
-name: journal-service-collection
+name: PAD_Journal_Service_Collection
 meta:
-  id: wrk_6c952f0fb6f7403ea377aa1601f2db06
-  created: 1758878781434
-  modified: 1758921739476
+  id: wrk_b7e2f1d9ae664c95961fc52b7bf7af4f
+  created: 1758712369751
+  modified: 1758712369751
   description: ""
 collection:
   - name: Journal Entry and Exit
     meta:
-      id: fld_89fc1bf22bb0471fa03bd2e25aec0de5
+      id: fld_e7754749ea344d1ab4a7d071faf863ae
       created: 1758847321176
       modified: 1758847321176
       sortKey: -1758847321176
       description: ""
     children:
-      - url: http://localhost:8083/journal/start
+      - url: http://localhost:8081/api/journal/start
         name: Journal Start - Add new Lobby
         meta:
-          id: req_db43374689854b9c865113d733b5ea96
+          id: req_082b5c3840874140a591d701f32917e8
           created: 1758844543977
-          modified: 1758881625895
+          modified: 1760054915393
           isPrivate: false
           description: ""
           sortKey: -1758847324792
@@ -52,12 +52,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:8083/journal/lobbies/:lobbyId/details
+      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/details
         name: Get Lobby Details by Lobby ID
         meta:
-          id: req_e71419ae26094f1a98df73257f841185
+          id: req_5c60f685dc294c83a5e6e64dff2597aa
           created: 1758844655488
-          modified: 1758881636486
+          modified: 1760045355429
           isPrivate: false
           description: ""
           sortKey: -1758847324892
@@ -76,12 +76,12 @@ collection:
         pathParameters:
           - name: lobbyId
             value: lobby123
-      - url: http://localhost:8081/journal/users/:userId/submit
+      - url: http://localhost:8081/api/journal/users/:userId/submit
         name: Submit Journal Entries to Rewarding
         meta:
-          id: req_cffe310df7eb4784a6d6b78436f43d4f
+          id: req_b0643a1a409f4d05b9071332d9a949d0
           created: 1758845230097
-          modified: 1758875554352
+          modified: 1760054908315
           isPrivate: false
           description: ""
           sortKey: -1758847324992
@@ -115,12 +115,12 @@ collection:
         pathParameters:
           - name: userId
             value: 550e8400-e29b-41d4-a716-446655440001
-      - url: http://localhost:8081/journal/end
+      - url: http://localhost:8081/api/journal/end
         name: Journal End - Clear Redis
         meta:
-          id: req_777cfe83c2f1480fb36df2aa883efafd
+          id: req_9d5614d25b4d460e9ca6fc5f5c079723
           created: 1758846425344
-          modified: 1758875558845
+          modified: 1760054918941
           isPrivate: false
           description: ""
           sortKey: -1758847324692
@@ -146,18 +146,18 @@ collection:
           rebuildPath: true
   - name: Symptoms
     meta:
-      id: fld_1381b6edfcec4b72ba4249383cf93b75
+      id: fld_36182b6878fe4deebe466e0faa0f18cc
       created: 1758847332458
       modified: 1758847332458
       sortKey: -1758847332458
       description: ""
     children:
-      - url: http://localhost:8081/journal/users/:userId/entry/symptoms
+      - url: http://localhost:8081/api/journal/users/:userId/entry/symptoms
         name: Select Symptoms Types by Lobby ID and User ID
         meta:
-          id: req_2d4fb2be360144298954546c6761eff2
+          id: req_1a2df451ed2e4986a384351c7436156a
           created: 1758830032920
-          modified: 1758875564328
+          modified: 1760054924636
           isPrivate: false
           description: ""
           sortKey: -1758847337331
@@ -185,13 +185,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440000
-      - url: http://localhost:8081/journal/lobbies/:lobbyId/users/:userId/symptoms/selected
+            value: 550e8400-e29b-41d4-a716-446655440001
+      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/users/:userId/symptoms/selected
         name: Get Selected Symptoms Type by Lobby ID and User ID
         meta:
-          id: req_edd5f37770524fb38d95abd689416ab5
+          id: req_fb6a643e13bd42d794666174eb799ca1
           created: 1758841151769
-          modified: 1758875606036
+          modified: 1760054921906
           isPrivate: false
           description: ""
           sortKey: -1758847337231
@@ -211,21 +211,21 @@ collection:
           - name: lobbyId
             value: lobby123
           - name: userId
-            value: ff4b02a4-49b6-49c4-a5d3-d5edfed07546
+            value: 550e8400-e29b-41d4-a716-446655440001
   - name: Ghosts
     meta:
-      id: fld_e19f76bc985d42f18e82aade043b934a
+      id: fld_c25febd28800423a83ee07a45eb88aef
       created: 1758847346588
       modified: 1758847360509
       sortKey: -1758847346588
       description: ""
     children:
-      - url: http://localhost:8081/journal/users/:userId/entry/ghost
+      - url: http://localhost:8081/api/journal/users/:userId/entry/ghost
         name: Select Ghost Type by Lobby ID and User ID
         meta:
-          id: req_01d8f2406380421597c090a7ef9605fe
+          id: req_f8e445ad59db426f8881394583a95826
           created: 1758837893131
-          modified: 1758875635522
+          modified: 1760054926486
           isPrivate: false
           description: ""
           sortKey: -1758875580896
@@ -255,13 +255,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: userId
-            value: ff4b02a4-49b6-49c4-a5d3-d5edfed07546
-      - url: http://localhost:8081/journal/lobbies/:lobbyId/users/:userId/ghost/selected
+            value: 550e8400-e29b-41d4-a716-446655440001
+      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/users/:userId/ghost/selected
         name: Get Selected Ghost Type by Lobby ID and User ID
         meta:
-          id: req_bd20e8d8f8f841f59baf5e6589ecab2b
+          id: req_43ca74a1828948e5bea0ce9e3aca0994
           created: 1758837967902
-          modified: 1758875589262
+          modified: 1760054928531
           isPrivate: false
           description: ""
           sortKey: -1758875580996
@@ -281,17 +281,46 @@ collection:
           - name: lobbyId
             value: lobby123
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440000
+            value: 550e8400-e29b-41d4-a716-446655440001
+  - name: Test
+    meta:
+      id: fld_42810c64fc21497595155e02b0b2b70e
+      created: 1760050828573
+      modified: 1760050828573
+      sortKey: -1760050828573
+      description: ""
+    children:
+      - url: http://localhost:8081/api/test/slow
+        name: Test Timeout Limit (Artificial Slowness)
+        meta:
+          id: req_7c1b467a6a5e48209f5adfa9adf52b3d
+          created: 1760050836843
+          modified: 1760054893321
+          isPrivate: false
+          description: ""
+          sortKey: -1760050836843
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:
-    id: jar_4b5392a674254dee937e82eb007b79db
+    id: jar_b5b790a62f363a61614e0e25c4909f91fd8fb5ad
     created: 1758712369755
     modified: 1758712369755
 environments:
   name: Base Environment
   meta:
-    id: env_ba28631f0c2b482ca4bd017f0efa3279
+    id: env_b5b790a62f363a61614e0e25c4909f91fd8fb5ad
     created: 1758712369754
     modified: 1758712369754
     isPrivate: false

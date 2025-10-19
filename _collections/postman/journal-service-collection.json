@@ -1,0 +1,451 @@
+{
+	"info": {
+		"_postman_id": "3eba5ad2-ee7a-44c1-9cd5-84d5aa84b050",
+		"name": "PAD_Journal_Service_Collection",
+		"description": "# Journal Service - Ghost Hunters Platform\n\n## Service Overview\n\nMicroservice responsible to provide to players a way to record symptoms manifested by the Ghost during the game by selecting from the list of all possible symptoms 3 specific symptoms that are considered to be manifested by the Ghost during the on-going game.\n\nBesides this, Journal Service will display the available symptoms from the Ghost Service, that holds information about every Ghost behavior and identification methods, that are displayed to players during the game to make notes and choose the Ghost Type when they decide to fininsh the investigation.\n\nAlso, Journal Service is responsible for the evaluation of the correctness of players guesses, rewarding them based on coincidences between chosen by the players set of symptoms and on-going Ghost Type true symptoms.\n\n## Communication Contract\n\n### Exposed API Endpoints\n\n#### `POST /api/journal/users/{user_id}/entry/symptoms` - Consumed by Gateway\n\n**Description:** \n\nUser selects the symptoms from the list of available symptoms and receives output based on the difficulty: \n1. Easy - filters ghosts that match at least two of the selected symptoms, \n2. Medium - filters ghosts that match at least one of the selected symptoms, \n3. Hard - no filtering is applied.\n\n**Path Parameters**:\n\n`user_id` - ID of the User that calls this endpoint in order to select symptoms from the general pool of all possible symptoms.\n\n**Payload:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\"],\n  \"typeBSymptoms\": []\n}\n```\n\n**Response:**\n1. Easy Difficulty - filters ghosts that match at least two of the selected symptoms:\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\", \"emfFive\"],\n  \"typeBSymptoms\": [],\n  \"ghostType\": [\n    {\n      \"id\": \"demon\",\n      \"name\": \"Demon\"\n    },\n    {\n      \"id\": \"obake\",\n      \"name\": \"Obake\"\n    }\n  ]\n}\n```\n2. Medium Difficulty - filters ghosts that match at least one of the selected symptoms:\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\", \"emfFive\"],\n  \"typeBSymptoms\": [],\n  \"ghostType\": [\n    {\n      \"id\": \"demon\",\n      \"name\": \"Demon\"\n    },\n    {\n      \"id\": \"spirit\",\n      \"name\": \"Spirit\"\n    },\n    {\n      \"id\": \"obake\",\n      \"name\": \"Obake\"\n    }\n  ]\n}\n```\n3. Hard Difficulty - returns all selected symptoms and ghosts:\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\", \"emfFive\"],\n  \"typeBSymptoms\": [],\n  \"ghostType\": [\n    {\n      \"id\": \"demon\",\n      \"name\": \"Demon\"\n    },\n    ...\n    {\n      \"id\": \"obake\",\n      \"name\": \"Obake\"\n    }\n  ]\n}\n```\n\n#### `POST /api/journal/users/{user_id}/entry/ghost` - Consumed by Gateway\n\n**Description:** \n\nUser selects the ghost type from the list of available types and receives output based on the choice and according to Ghost Service Encyclopedia.\n\n**Path Parameters**:\n\n`user_id` - ID of the User that calls this endpoint in order to select Ghost Type from the general pool of all possible Ghost Types.\n\n**Payload:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"ghostType\": {\n      \"id\": \"demon\",\n      \"name\": \"Demon\"\n    }\n}\n```\n\n**Response:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\", \"fingerprints\", \"usesRadio\", \"ghostWriting\"],\n  \"typeBSymptoms\": [\"huntsAlonePlayers\", \"huntsLowSanity\"],\n  \"ghostType\": {\n      \"id\": \"demon\",\n      \"name\": \"Demon\"\n    }\n}\n```\n\n#### `POST /api/journal/users/{user_id}/submit` - Consumed by Gateway\n\n**Description:** \n\nUser submits the selected Ghost Type and Symptoms and receives output based on the choice and according to Ghost Service Encyclopedia, as well as the reward in money and experience.\n\n**Path Parameters**:\n\n`user_id` - ID of the User that calls this endpoint in order to submit the selected Ghost Type and Symptoms from the general pool of all possible Ghost Types and Symptoms.\n\n**Payload:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"ghostType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  },\n  \"typeASymptoms\": [\"emfFive\", \"objectsThrown\", \"coldTemperatures\"],\n  \"typeBSymptoms\": [\"huntsAlonePlayers\", \"aggressiveWhenProvoked\"]\n}\n```\n\n**Response:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"isCorrectType\": true,\n  \"trueType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  },\n  \"submittedType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  },\n  \"accuracyScore\": 60,\n  \"rewardMoney\": 70,\n  \"rewardExp\": 50,\n  \"explanation\": \"Correctly identified with 3/5 symptoms observed\",\n  \"correctSymptoms\": [\"emfFive\", \"objectsThrown\", \"aggressiveWhenProvoked\"],\n  \"incorrectSymptoms\": [\"huntsAlonePlayers\", \"freezingTemperatures\"],\n  \"missedSymptoms\": [\"huntsHighSanity\", \"usesRadio\"]\n}\n```\n\n#### `GET /api/journal/lobbies/{lobby_id}/users/{user_id}/ghost/selected` - Consumed by Gateway\n\n**Path Parameters**:\n\n`lobby_id` - ID of the lobby from where the Users select their ghost entry.\n\n`user_id` - ID of the User that calls this endpoint in order to get their ghost selection.\n\n**Description:**\n\nGets currently selected ghost entry by User\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"ghostType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  }\n}\n```\n\n#### `GET /api/journal/lobbies/{lobby_id}/users/{user_id}/symptoms/selected` - Consumed by Gateway\n\n**Path Parameters**:\n\n`lobby_id` - ID of the lobby from where the Users select their symptoms entries.\n\n`user_id` - ID of the User that calls this endpoint in order to get their symptoms selection.\n\n**Description:**\n\nGets currently selected symptoms entry by User\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"freezingTemperature\", \"fingerprints\", \"usesRadio\", \"ghostWriting\"],\n  \"typeBSymptoms\": [\"huntsAlonePlayers\", \"huntsLowSanity\"]\n}\n```\n\n#### `POST /api/journal/start` - Consumed by Lobby Service\n\n**Description:** \n\nStarts a Journal thread in Journal Service.\n\n**Payload:**\n```json\n{\n    \"lobbyId\": \"lobby_xyz_789\",\n    \"hostId\": \"player_host_123\",\n    \"mapId\": \"map_id_farmhouse_123\",\n    \"difficulty\": \"medium\",\n    \"ghostType\": \"demon\",\n    \"session\": \"active\",\n    \"players\": [\"player_1\", \"player_2\"]\n}\n```\n\n**Response:**\n```json\nNone\n```\n\n#### `POST /api/journal/end` - Consumed by Lobby Service\n\n**Description:** \n\nEnd a Journal thread in Journal Service.\n\n**Payload:**\n```json\n{\n    \"lobbyId\": \"lobby_xyz_789\"\n}\n```\n\n**Response:**\n```json\nNone\n```\n\n### Consumed API Endpoints\n\n#### `GET /ghost/list` - Available in Ghost Service\n\n**Description:** \n\nGet all available ghost types in simplified format.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"ghosts\": [\n    { \n      \"id\": \"poltergeist\", \n      \"name\": \"Poltergeist\" \n    },\n    { \n      \"id\": \"demon\", \n      \"name\": \"Demon\" \n    },\n    { \n      \"id\": \"spirit\", \n      \"name\": \"Spirit\" \n    },\n    ...\n    { \n      \"id\": \"wraith\", \n      \"name\": \"Wraith\" \n    }\n  ]\n}\n```\n\n#### `GET /ghost/symptoms` - Available in Ghost Service\n\n**Description:** \n\nGet all available symptoms.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"symptoms\": [\n    { \n      \"id\": \"emfFive\", \n      \"name\": \"EMF Level 5\", \n      \"type\": \"typeA\", \n      \"description\": \"Electromagnetic field readings at maximum level\",\n    },\n    { \n      \"id\": \"objectsThrown\", \n      \"name\": \"Objects Thrown\", \n      \"type\": \"typeA\", \n      \"description\": \"Physical objects being moved or thrown\",\n    },\n    { \n      \"id\": \"coldTemperatures\", \n      \"name\": \"Freezing Temperatures\", \n      \"type\": \"typeA\", \n      \"description\": \"Room temperature drops below freezing\",\n    },\n    ...\n    { \n      \"id\": \"huntsAlonePlayers\", \n      \"name\": \"Hunts Alone Players\", \n      \"type\": \"typeB\", \n      \"description\": \"Preferentially targets isolated players\",\n    }\n  ]\n}\n```\n\n#### `GET /ghost/symptoms/list` - Available in Ghost Service\n\n**Description:** \n\nGet all available symptoms in simplified format.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"TypeASymptoms\": [\"emfFive\", \"coldTemperatures\", ..., \"noFootsteps\", \"coldBreath\"],\n  \"TypeBSymptoms\": [\"objectsThrown\", \"huntsLowSanity\", ..., \"teleportsToPlayers\", \"lightsFlicker\"],\n}\n```\n\n#### `GET /ghost/types` - Available in Ghost Service\n\n**Description:** \n\nGet all available ghost types with symptoms.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"ghosts\": [\n    {\n      \"id\": \"poltergeist\",\n      \"name\": \"Poltergeist\",\n      \"typeASymptoms\": [\"emfFive\", \"coldTemperatures\", \"ghostWriting\"],\n      \"typeBSymptoms\": [\"objectsThrown\", \"huntsLowSanity\"],\n      \"description\": \"Aggressive ghost that manipulates objects\"\n    },\n    ...\n    {\n      \"id\": \"demon\",\n      \"name\": \"Demon\",\n      \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"ghostWriting\"],\n      \"typeBSymptoms\": [\"objectsThrown\", \"huntsHighSanity\"],\n      \"description\": \"Aggressive ghost that manipulates objects\"\n    }\n  ]\n}\n```\n\n#### `GET /lobbies/{lobby_id}/ghost` - Available in Lobby Service\n\n**Description:** \n\nRetrieve the true Ghost Type from Lobby Service.\n\n**Path Parameters**:\n\n`lobby_id` - ID of the Lobby from which the true type of the Ghost is requested.\n\n**Payload:**\n```json\nNone\n```\n\n**Response:**\n```json\n{\n  \"lobbyId\": \"lobby123\",\n  \"trueGhostId\": \"demon\"\n}\n```\n\n#### `PUT /user/{user_id}/currency/transactions` - Available in User Management Service\n\n**Description:** \n\nUpdate Balance and Level of the Player according to the correctness of the predictions.\n\n**Path Parameters**:\n\n`user_id` - ID of the User that should be rewarded.\n\n**Payload:**\n```json\n{\n  \"type\": \"reward\",\n  \"amount\": 70,\n  \"expGained\": 50\n}\n```\n\n**Response:**\n```json\n{\n  \"transactionStatus\": \"success\"\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30952553"
+	},
+	"item": [
+		{
+			"name": "Journal Entry and Exit",
+			"item": [
+				{
+					"name": "Journal Start - Add new Lobby",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"hostId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"mapId\": \"map_id_farmhouse_123\",\n  \"difficulty\": \"medium\",\n  \"ghostType\": \"demon\",\n  \"session\": \"active\",\n  \"players\": [\n    \"550e8400-e29b-41d4-a716-446655440001\",\n\t\t\"550e8400-e29b-41d4-a716-446655440002\"\n  ]\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journal/start",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Lobby Details by Lobby ID",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/api/journal/lobbies/:lobbyId/details",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"lobbies",
+								":lobbyId",
+								"details"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "lobby123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Journal Entries to Rewarding",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"ghostType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  },\n  \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"ghostWriting\"],\n  \"typeBSymptoms\": [\"objectsThrown\", \"huntsHighSanity\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journal/users/:userId/submit",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"users",
+								":userId",
+								"submit"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Journal End - Clear Redis",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"lobbyId\": \"lobby123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journal/end",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"end"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Symptoms",
+			"item": [
+				{
+					"name": "Select Symptoms Types by Lobby ID and User ID",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"typeASymptoms\": [\"emfFive\", \"coldTemperatures\"],\n  \"typeBSymptoms\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journal/users/:userId/entry/symptoms",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"users",
+								":userId",
+								"entry",
+								"symptoms"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Selected Symptoms Type by Lobby ID and User ID",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/api/journal/lobbies/:lobbyId/users/:userId/symptoms/selected",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"lobbies",
+								":lobbyId",
+								"users",
+								":userId",
+								"symptoms",
+								"selected"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "lobby123"
+								},
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ghosts",
+			"item": [
+				{
+					"name": "Select Ghost Type by Lobby ID and User ID",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"lobbyId\": \"lobby123\",\n\t\"ghostType\": {\n\t\t\"id\": \"spirit\",\n\t\t\"name\": \"Spirit\"\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/journal/users/:userId/entry/ghost",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"users",
+								":userId",
+								"entry",
+								"ghost"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Selected Ghost Type by Lobby ID and User ID",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/api/journal/lobbies/:lobbyId/users/:userId/ghost/selected",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"journal",
+								"lobbies",
+								":lobbyId",
+								"users",
+								":userId",
+								"ghost",
+								"selected"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "lobby123"
+								},
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test",
+			"item": [
+				{
+					"name": "Test Timeout Limit (Artificial Slowness)",
+					"protocolProfileBehavior": {
+						"followRedirects": true,
+						"disableUrlEncoding": false,
+						"disableCookies": false
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "insomnia/11.6.1"
+							}
+						],
+						"url": {
+							"raw": "{{baseurl}}/api/test/slow",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"slow"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseurl",
+			"value": ""
+		}
+	]
+}
