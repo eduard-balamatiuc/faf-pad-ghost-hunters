@@ -1,0 +1,635 @@
+{
+	"info": {
+		"_postman_id": "f0ad92ad-c91e-411f-a5a2-886cd43c07c4",
+		"name": "map-service-collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29627327"
+	},
+	"item": [
+		{
+			"name": "Map Service API",
+			"item": [
+				{
+					"name": "Map Generation & Retrieval",
+					"item": [
+						{
+							"name": "Generate Map",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has map data', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('mapId');",
+											"        pm.expect(jsonData).to.have.property('name');",
+											"    });",
+											"    pm.test('Map ID is a string', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData.mapId).to.be.a('string');",
+											"        pm.environment.set('generated_map_id', jsonData.mapId);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map"
+									]
+								},
+								"description": "Generates a new random map for a game session.\n\n**Returns:**\n- mapId: Unique identifier for the generated map\n- name: Human-readable name for the map\n\n**Notes:**\n- Map generation includes rooms, connections, objects, and hiding places\n- Each map is procedurally generated with unique layout\n- Map ID should be stored for subsequent operations"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Map",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response contains complete map data', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('mapId');",
+											"        pm.expect(jsonData).to.have.property('name');",
+											"        pm.expect(jsonData).to.have.property('rooms');",
+											"        pm.expect(jsonData.rooms).to.be.an('array');",
+											"    });",
+											"    pm.test('Rooms have required properties', function () {",
+											"        const jsonData = pm.response.json();",
+											"        if (jsonData.rooms.length > 0) {",
+											"            const room = jsonData.rooms[0];",
+											"            pm.expect(room).to.have.property('roomId');",
+											"            pm.expect(room).to.have.property('name');",
+											"            pm.expect(room).to.have.property('connections');",
+											"            pm.expect(room).to.have.property('objects');",
+											"            pm.expect(room).to.have.property('hidingPlaces');",
+											"        }",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}"
+									]
+								},
+								"description": "Retrieves complete information about a specific map.\n\n**Path Parameters:**\n- mapId: The unique identifier of the map (URL encoded)\n\n**Returns:**\n- mapId: Map identifier\n- name: Map name\n- rooms: Array of all rooms with their properties\n- 404 if map not found\n\n**Room Properties:**\n- roomId, name, connections, objects, hidingPlaces"
+							},
+							"response": []
+						}
+					],
+					"description": "Core map operations including generation and retrieval."
+				},
+				{
+					"name": "Room Management",
+					"item": [
+						{
+							"name": "Get Room",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response contains room data', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('roomId');",
+											"        pm.expect(jsonData).to.have.property('name');",
+											"        pm.expect(jsonData).to.have.property('connections');",
+											"        pm.expect(jsonData).to.have.property('objects');",
+											"        pm.expect(jsonData).to.have.property('hidingPlaces');",
+											"    });",
+											"    pm.test('Connections and objects are arrays', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData.connections).to.be.an('array');",
+											"        pm.expect(jsonData.objects).to.be.an('array');",
+											"        pm.expect(jsonData.hidingPlaces).to.be.an('array');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}/rooms/{{room_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}",
+										"rooms",
+										"{{room_id}}"
+									]
+								},
+								"description": "Retrieves detailed information about a specific room in a map.\n**Path Parameters:** - mapId: The ID of the map (URL encoded) - roomId: The ID of the room within the map (URL encoded)\n**Returns:** - roomId: Room identifier - name: Room name - connections: Array of connected room IDs - objects: Array of interactable objects - hidingPlaces: Array of potential hiding spots - 404 if map or room not found"
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for retrieving and managing individual rooms within maps."
+				},
+				{
+					"name": "Object Management",
+					"item": [
+						{
+							"name": "Update Object Ghost State",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"isGhosted\": true\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}/rooms/{{room_id}}/objects/{{object_name}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}",
+										"rooms",
+										"{{room_id}}",
+										"objects",
+										"{{object_name}}"
+									]
+								},
+								"description": "Updates the ghost interaction state of a specific object in a room.\n**Path Parameters:** - mapId: The ID of the map (URL encoded) - roomId: The ID of the room (URL encoded) - objectName: The name of the object to update (URL encoded)\n**Required fields:** - isGhosted: Boolean indicating if the object is currently affected by ghost activity\n**Notes:** - Used to track which objects have been interacted with by the ghost - Affects gameplay mechanics and evidence collection - Triggers real-time updates via SSE"
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for managing objects and their ghost interaction states."
+				},
+				{
+					"name": "Real-time Updates",
+					"item": [
+						{
+							"name": "Stream Map Updates (SSE)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has SSE headers', function () {",
+											"        pm.expect(pm.response.headers['content-type']).to.include('text/event-stream');",
+											"        pm.expect(pm.response.headers['cache-control']).to.equal('no-cache');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}/updates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}",
+										"updates"
+									]
+								},
+								"description": "Establishes a Server-Sent Events connection for real-time map updates.\n**Path Parameters:** - mapId: The ID of the map to monitor (URL encoded)\n**Features:** - Real-time updates when objects change state - Ghost activity notifications - Player movement events - Automatic reconnection handling - Keep-alive pings every 30 seconds\n**Notes:** - This is a streaming endpoint that maintains an open connection - Use appropriate client libraries for SSE handling - Connection will close if map doesn't exist"
+							},
+							"response": []
+						}
+					],
+					"description": "Server-Sent Events (SSE) endpoints for real-time map updates."
+				},
+				{
+					"name": "Health & Monitoring",
+					"item": [
+						{
+							"name": "Health Check",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Service is healthy', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData.code).to.equal('healthy');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"health"
+									]
+								},
+								"description": "Basic health check endpoint for service monitoring.\n**Returns:** - Status: \"healthy\" when service is operational - Used by load balancers and monitoring systems"
+							},
+							"response": []
+						},
+						{
+							"name": "Task Metrics",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/metrics/tasks",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"metrics",
+										"tasks"
+									]
+								},
+								"description": "Retrieves metrics about task execution and concurrency limits.\n**Returns:** - Current task counts - Queue status - Performance metrics - Used for monitoring task execution limits"
+							},
+							"response": []
+						}
+					],
+					"description": "Health checks and monitoring endpoints for service observability."
+				},
+				{
+					"name": "Error Testing",
+					"item": [
+						{
+							"name": "Get Non-existent Map",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 404', function () {",
+											"        pm.response.to.have.code(404);",
+											"    });",
+											"    pm.test('Response contains not found error', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('error');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map/invalid-map-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"invalid-map-id"
+									]
+								},
+								"description": "Tests 404 handling for non-existent map IDs."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Non-existent Room",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 404', function () {",
+											"        pm.response.to.have.code(404);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}/rooms/invalid-room-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}",
+										"rooms",
+										"invalid-room-id"
+									]
+								},
+								"description": "Tests 404 handling for non-existent room IDs within valid maps."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Non-existent Object",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 404', function () {",
+											"        pm.response.to.have.code(404);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"isGhosted\": true\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/map/{{map_id}}/rooms/{{room_id}}/objects/invalid-object",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"map",
+										"{{map_id}}",
+										"rooms",
+										"{{room_id}}",
+										"objects",
+										"invalid-object"
+									]
+								},
+								"description": "Tests 404 handling for non-existent objects in rooms."
+							},
+							"response": []
+						}
+					],
+					"description": "Test requests for error handling and validation scenarios."
+				}
+			],
+			"description": "Complete API collection for Map Service - Ghost Hunters Game\n\nThis collection covers all endpoints for managing game maps, rooms, objects, and real-time map updates in the Ghost Hunters microservices architecture.\n\n**Base URL:** {{base_url}} (default: http://localhost:8084)\n\n**Authors:** Ghost Hunters Team - PAD Lab\n**Version:** 1.0.0"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		}
+	]
+}

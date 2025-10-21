@@ -1,0 +1,1046 @@
+{
+	"info": {
+		"_postman_id": "d1f82057-1fd7-4fbc-a9e7-9808483b7b67",
+		"name": "lobby-service-collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29627327"
+	},
+	"item": [
+		{
+			"name": "Lobby Service API",
+			"item": [
+				{
+					"name": "Lobby Management",
+					"item": [
+						{
+							"name": "Create Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has lobby data', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('lobbyId');",
+											"        pm.expect(jsonData).to.have.property('hostId');",
+											"        pm.expect(jsonData).to.have.property('mapId');",
+											"        pm.expect(jsonData).to.have.property('difficulty');",
+											"        pm.expect(jsonData).to.have.property('ghostType');",
+											"        pm.expect(jsonData).to.have.property('session');",
+											"        pm.expect(jsonData).to.have.property('players');",
+											"    });",
+											"    pm.test('Host is in players list', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData.players).to.include('player123');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"hostId\": \"player123\",\n    \"difficulty\": \"medium\",\n    \"ghostType\": \"poltergeist\"\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies"
+									]
+								},
+								"description": "Creates a new game lobby with specified difficulty and ghost type.\n\n**Required fields:**\n- hostId: Unique identifier of the player creating the lobby\n- difficulty: Game difficulty level (easy, medium, hard, nightmare)\n- ghostType: Type of ghost for the session\n\n**Validation:**\n- All fields are required\n- Host ID must be a valid string\n- Difficulty must be one of the predefined values\n- Ghost type must be a valid ghost identifier"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response contains lobby data', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('lobbyId');",
+											"        pm.expect(jsonData).to.have.property('hostId');",
+											"        pm.expect(jsonData).to.have.property('mapId');",
+											"        pm.expect(jsonData).to.have.property('difficulty');",
+											"        pm.expect(jsonData).to.have.property('ghostType');",
+											"        pm.expect(jsonData).to.have.property('session');",
+											"        pm.expect(jsonData).to.have.property('players');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}"
+									]
+								},
+								"description": "Retrieves detailed information about a specific lobby.\n\n**Path Parameters:**\n- lobbyId: The unique identifier of the lobby\n\n**Returns:**\n- Full lobby object with all properties\n- List of players in the lobby\n- Game settings (difficulty, ghost type, etc.)\n- 404 if lobby not found"
+							},
+							"response": []
+						},
+						{
+							"name": "Start Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"hostId\": \"player123\"\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/start",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"start"
+									]
+								},
+								"description": "Starts the game session for a lobby. Only the host can start the lobby.\n\n**Path Parameters:**\n- lobbyId: The ID of the lobby to start\n\n**Required fields:**\n- hostId: The ID of the player attempting to start (must be the host)\n\n**Actions performed:**\n- Validates that the requester is the host\n- Starts AI service for the ghost\n- Starts location service for the game\n- Transitions lobby to active state\n\n**Returns:**\n- 200 on success\n- 403 if not the host\n- 404 if lobby not found"
+							},
+							"response": []
+						}
+					],
+					"description": "Core lobby CRUD operations and lifecycle management."
+				},
+				{
+					"name": "Player Management",
+					"item": [
+						{
+							"name": "Add User to Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"player456\"\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/user",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"user"
+									]
+								},
+								"description": "Adds a new player to an existing lobby.\n**Path Parameters:** - lobbyId: The ID of the lobby to join\n**Required fields:** - userId: Unique identifier of the player joining\n**Validation:** - Lobby must exist - User ID must be provided - Player limit constraints may apply"
+							},
+							"response": []
+						},
+						{
+							"name": "Remove User from Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users/{{user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users",
+										"{{user_id}}"
+									]
+								},
+								"description": "Removes a player from a lobby.\n\n**Path Parameters:**\n- lobbyId: The ID of the lobby\n- userId: The ID of the player to remove\n\n**Notes:**\n- Can be called by the player themselves or potentially by host\n- If host leaves, lobby behavior should be defined"
+							},
+							"response": []
+						},
+						{
+							"name": "Update User Loadout",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"items\": [\n        {\"itemId\": \"emf_reader\"},\n        {\"itemId\": \"flashlight\"},\n        {\"itemId\": \"camera\"}\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users/{{user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users",
+										"{{user_id}}"
+									]
+								},
+								"description": "Updates a player's equipment and items loadout.\n**Path Parameters:** - lobbyId: The ID of the lobby - userId: The ID of the player\n**Required fields:** - items: Array of item objects with itemId\n**Validation:** - Items must be valid and owned by the player - Loadout constraints may apply based on game rules"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Users in Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has users array', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('lobbyId');",
+											"        pm.expect(jsonData).to.have.property('users');",
+											"        pm.expect(jsonData.users).to.be.an('array');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users"
+									]
+								},
+								"description": "Retrieves all players currently in a lobby.\n**Path Parameters:** - lobbyId: The ID of the lobby\n**Returns:** - Lobby ID - Array of user IDs in the lobby - 404 if lobby not found"
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for managing players within lobbies."
+				},
+				{
+					"name": "Player Status Management",
+					"item": [
+						{
+							"name": "Get User Status",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has status properties', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('deathStatus');",
+											"        pm.expect(jsonData).to.have.property('sanityLevel');",
+											"        pm.expect(jsonData.sanityLevel).to.be.within(0, 100);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users/{{user_id}}/status",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users",
+										"{{user_id}}",
+										"status"
+									]
+								},
+								"description": "Retrieves the current status of a player in the lobby.\n**Path Parameters:** - lobbyId: The ID of the lobby - userId: The ID of the player\n**Returns:** - Death status (boolean) - Sanity level (0-100) - 404 if player or lobby not found"
+							},
+							"response": []
+						},
+						{
+							"name": "Update User Status",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"deathStatus\": false,\n    \"sanityLevel\": 75\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users/{{user_id}}/status",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users",
+										"{{user_id}}",
+										"status"
+									]
+								},
+								"description": "Updates a player's status including death state and sanity level.\n**Path Parameters:** - lobbyId: The ID of the lobby - userId: The ID of the player\n**Required fields:** - deathStatus: Boolean indicating if player is dead - sanityLevel: Integer between 0-100\n**Validation:** - Sanity level must be between 0 and 100 - Death status affects gameplay mechanics"
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for managing player status, sanity, and game state."
+				},
+				{
+					"name": "Game Information",
+					"item": [
+						{
+							"name": "Get Lobby Ghost",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has ghost information', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('lobbyId');",
+											"        pm.expect(jsonData).to.have.property('trueGhostId');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/ghost",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"ghost"
+									]
+								},
+								"description": "Retrieves information about the ghost in the current lobby.\n**Path Parameters:** - lobbyId: The ID of the lobby\n**Returns:** - Lobby ID - True ghost ID (the actual ghost type for the session) - 404 if lobby not found"
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Items",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has items array', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('items');",
+											"        pm.expect(jsonData.items).to.be.an('array');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/users/{{user_id}}/items",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"users",
+										"{{user_id}}",
+										"items"
+									]
+								},
+								"description": "Retrieves all items currently held by a specific player.\n**Path Parameters:** - lobbyId: The ID of the lobby - userId: The ID of the player\n**Returns:** - Array of item objects with itemId - 404 if player or lobby not found"
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints for retrieving game-related information like ghost details and player items."
+				},
+				{
+					"name": "Real-time Updates",
+					"item": [
+						{
+							"name": "Stream Lobby Updates (SSE)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Response has SSE headers', function () {",
+											"        pm.expect(pm.response.headers['content-type']).to.include('text/event-stream');",
+											"        pm.expect(pm.response.headers['cache-control']).to.equal('no-cache');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/updates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"updates"
+									]
+								},
+								"description": "Establishes a Server-Sent Events connection for real-time lobby updates.\n**Path Parameters:** - lobbyId: The ID of the lobby to monitor\n**Features:** - Real-time updates when players join/leave - Status changes and game events - Automatic reconnection handling - Keep-alive pings every 30 seconds\n**Notes:** - This is a streaming endpoint that maintains an open connection - Use appropriate client libraries for SSE handling - Connection will close if lobby doesn't exist"
+							},
+							"response": []
+						}
+					],
+					"description": "Server-Sent Events (SSE) endpoints for real-time lobby updates."
+				},
+				{
+					"name": "Health & Monitoring",
+					"item": [
+						{
+							"name": "Health Check",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"    pm.test('Service is healthy', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData.code).to.equal('healthy');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/health",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"health"
+									]
+								},
+								"description": "Basic health check endpoint for service monitoring.\n**Returns:** - Status: \"healthy\" when service is operational - Used by load balancers and monitoring systems"
+							},
+							"response": []
+						},
+						{
+							"name": "Task Metrics",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 200', function () {",
+											"        pm.response.to.have.code(200);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/metrics/tasks",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"metrics",
+										"tasks"
+									]
+								},
+								"description": "Retrieves metrics about task execution and concurrency limits.\n**Returns:** - Current task counts - Queue status - Performance metrics - Used for monitoring task execution limits"
+							},
+							"response": []
+						}
+					],
+					"description": "Health checks and monitoring endpoints for service observability."
+				},
+				{
+					"name": "Error Testing",
+					"item": [
+						{
+							"name": "Create Lobby - Missing Fields",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 400', function () {",
+											"        pm.response.to.have.code(400);",
+											"    });",
+											"    pm.test('Response contains error message', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('error');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"hostId\": \"player123\"\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies"
+									]
+								},
+								"description": "Tests validation for missing required fields. Should return 400 error."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Non-existent Lobby",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 404', function () {",
+											"        pm.response.to.have.code(404);",
+											"    });",
+											"    pm.test('Response contains not found error', function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('error');",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/lobbies/invalid-lobby-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"invalid-lobby-id"
+									]
+								},
+								"description": "Tests 404 handling for non-existent lobby IDs."
+							},
+							"response": []
+						},
+						{
+							"name": "Start Lobby - Not Host",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": []
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"pm.test('afterResponse', function () {",
+											"    pm.test('Status code is 403', function () {",
+											"        pm.response.to.have.code(403);",
+											"    });",
+											"});"
+										]
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"followRedirects": true,
+								"disableUrlEncoding": false,
+								"disableCookies": false
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"hostId\": \"not-the-host\"\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/lobbies/{{lobby_id}}/start",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"lobbies",
+										"{{lobby_id}}",
+										"start"
+									]
+								},
+								"description": "Tests authorization when non-host tries to start lobby. Should return 403."
+							},
+							"response": []
+						}
+					],
+					"description": "Test requests for error handling and validation scenarios."
+				}
+			],
+			"description": "Complete API collection for Lobby Service - Ghost Hunters Game\n\nThis collection covers all endpoints for managing game lobbies, player management, and real-time lobby updates in the Ghost Hunters microservices architecture.\n\n**Base URL:** {{base_url}} (default: http://localhost:8083)\n\n**Authors:** Ghost Hunters Team - PAD Lab\n**Version:** 1.0.0"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		}
+	]
+}
