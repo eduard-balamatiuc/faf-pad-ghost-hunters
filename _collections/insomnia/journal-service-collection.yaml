@@ -14,12 +14,12 @@ collection:
       sortKey: -1758847321176
       description: ""
     children:
-      - url: http://localhost:8081/api/journal/start
+      - url: "{{baseurl}}/api/journal/start"
         name: Journal Start - Add new Lobby
         meta:
           id: req_082b5c3840874140a591d701f32917e8
           created: 1758844543977
-          modified: 1760054915393
+          modified: 1761053574819
           isPrivate: false
           description: ""
           sortKey: -1758847324792
@@ -28,15 +28,14 @@ collection:
           mimeType: application/json
           text: |
             {
-              "lobbyId": "lobby123",
-              "hostId": "550e8400-e29b-41d4-a716-446655440000",
+              "lobbyId": "lobby_c2d874d639342c02",
+              "hostId": "28b9cd31-ddc5-40ae-af34-3023ecf9c974",
               "mapId": "map_id_farmhouse_123",
               "difficulty": "medium",
               "ghostType": "demon",
               "session": "active",
               "players": [
-                "550e8400-e29b-41d4-a716-446655440001",
-            		"550e8400-e29b-41d4-a716-446655440002"
+                "28b9cd31-ddc5-40ae-af34-3023ecf9c974"
               ]
             }
         headers:
@@ -52,12 +51,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/details
+      - url: "{{baseurl}}/api/journal/lobbies/:lobbyId/details"
         name: Get Lobby Details by Lobby ID
         meta:
           id: req_5c60f685dc294c83a5e6e64dff2597aa
           created: 1758844655488
-          modified: 1760045355429
+          modified: 1761053571941
           isPrivate: false
           description: ""
           sortKey: -1758847324892
@@ -75,13 +74,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: lobbyId
-            value: lobby123
-      - url: http://localhost:8081/api/journal/users/:userId/submit
+            value: lobby_c2d874d639342c02
+      - url: "{{baseurl}}/api/journal/users/:userId/submit"
         name: Submit Journal Entries to Rewarding
         meta:
           id: req_b0643a1a409f4d05b9071332d9a949d0
           created: 1758845230097
-          modified: 1760054908315
+          modified: 1761053624869
           isPrivate: false
           description: ""
           sortKey: -1758847324992
@@ -90,13 +89,10 @@ collection:
           mimeType: application/json
           text: |-
             {
-              "lobbyId": "lobby123",
-              "userId": "550e8400-e29b-41d4-a716-446655440001",
-              "ghostType": {
-                "id": "demon",
-                "name": "Demon"
-              },
-              "typeASymptoms": ["emfFive", "fingerprints", "ghostWriting"],
+              "lobbyId": "lobby_c2d874d639342c02",
+              "userId": "28b9cd31-ddc5-40ae-af34-3023ecf9c974",
+              "ghostType": "demon",
+              "typeASymptoms": [],
               "typeBSymptoms": ["objectsThrown", "huntsHighSanity"]
             }
         headers:
@@ -114,13 +110,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440001
-      - url: http://localhost:8081/api/journal/end
+            value: 28b9cd31-ddc5-40ae-af34-3023ecf9c974
+      - url: "{{baseurl}}/api/journal/end"
         name: Journal End - Clear Redis
         meta:
           id: req_9d5614d25b4d460e9ca6fc5f5c079723
           created: 1758846425344
-          modified: 1760054918941
+          modified: 1761053577243
           isPrivate: false
           description: ""
           sortKey: -1758847324692
@@ -152,12 +148,12 @@ collection:
       sortKey: -1758847332458
       description: ""
     children:
-      - url: http://localhost:8081/api/journal/users/:userId/entry/symptoms
+      - url: "{{baseurl}}/api/journal/users/:userId/entry/symptoms"
         name: Select Symptoms Types by Lobby ID and User ID
         meta:
           id: req_1a2df451ed2e4986a384351c7436156a
           created: 1758830032920
-          modified: 1760054924636
+          modified: 1761053562718
           isPrivate: false
           description: ""
           sortKey: -1758847337331
@@ -167,7 +163,7 @@ collection:
           text: |-
             {
               "lobbyId": "lobby123",
-              "typeASymptoms": ["emfFive", "coldTemperatures"],
+              "typeASymptoms": ["emfFive"],
               "typeBSymptoms": []
             }
         headers:
@@ -185,13 +181,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440001
-      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/users/:userId/symptoms/selected
+            value: 4f9c40aa-82d0-4d6b-8bea-c8d13f71d547
+      - url: "{{baseurl}}/api/journal/lobbies/:lobbyId/users/:userId/symptoms/selected"
         name: Get Selected Symptoms Type by Lobby ID and User ID
         meta:
           id: req_fb6a643e13bd42d794666174eb799ca1
           created: 1758841151769
-          modified: 1760054921906
+          modified: 1761053565437
           isPrivate: false
           description: ""
           sortKey: -1758847337231
@@ -211,7 +207,7 @@ collection:
           - name: lobbyId
             value: lobby123
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440001
+            value: 4f9c40aa-82d0-4d6b-8bea-c8d13f71d547
   - name: Ghosts
     meta:
       id: fld_c25febd28800423a83ee07a45eb88aef
@@ -220,12 +216,12 @@ collection:
       sortKey: -1758847346588
       description: ""
     children:
-      - url: http://localhost:8081/api/journal/users/:userId/entry/ghost
+      - url: "{{baseurl}}/api/journal/users/:userId/entry/ghost"
         name: Select Ghost Type by Lobby ID and User ID
         meta:
           id: req_f8e445ad59db426f8881394583a95826
           created: 1758837893131
-          modified: 1760054926486
+          modified: 1761053612178
           isPrivate: false
           description: ""
           sortKey: -1758875580896
@@ -235,10 +231,7 @@ collection:
           text: |-
             {
             	"lobbyId": "lobby123",
-            	"ghostType": {
-            		"id": "spirit",
-            		"name": "Spirit"
-            	}
+            	"ghostType": "demon"
             }
         headers:
           - name: Content-Type
@@ -255,13 +248,13 @@ collection:
           rebuildPath: true
         pathParameters:
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440001
-      - url: http://localhost:8081/api/journal/lobbies/:lobbyId/users/:userId/ghost/selected
+            value: 95a5813b-7305-4fd1-b561-ad4d91aee0b3
+      - url: "{{baseurl}}/api/journal/lobbies/:lobbyId/users/:userId/ghost/selected"
         name: Get Selected Ghost Type by Lobby ID and User ID
         meta:
           id: req_43ca74a1828948e5bea0ce9e3aca0994
           created: 1758837967902
-          modified: 1760054928531
+          modified: 1761053554813
           isPrivate: false
           description: ""
           sortKey: -1758875580996
@@ -281,7 +274,7 @@ collection:
           - name: lobbyId
             value: lobby123
           - name: userId
-            value: 550e8400-e29b-41d4-a716-446655440001
+            value: 95a5813b-7305-4fd1-b561-ad4d91aee0b3
   - name: Test
     meta:
       id: fld_42810c64fc21497595155e02b0b2b70e
@@ -290,12 +283,12 @@ collection:
       sortKey: -1760050828573
       description: ""
     children:
-      - url: http://localhost:8081/api/test/slow
+      - url: "{{baseurl}}/api/test/slow"
         name: Test Timeout Limit (Artificial Slowness)
         meta:
           id: req_7c1b467a6a5e48209f5adfa9adf52b3d
           created: 1760050836843
-          modified: 1760054893321
+          modified: 1761053580791
           isPrivate: false
           description: ""
           sortKey: -1760050836843
@@ -322,5 +315,7 @@ environments:
   meta:
     id: env_b5b790a62f363a61614e0e25c4909f91fd8fb5ad
     created: 1758712369754
-    modified: 1758712369754
+    modified: 1761053510834
     isPrivate: false
+  data:
+    baseurl: http://localhost:8083

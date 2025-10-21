@@ -110,7 +110,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"ghostType\": {\n    \"id\": \"demon\",\n    \"name\": \"Demon\"\n  },\n  \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"ghostWriting\"],\n  \"typeBSymptoms\": [\"objectsThrown\", \"huntsHighSanity\"]\n}",
+							"raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"ghostType\": \"demon\",\n  \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"ghostWriting\"],\n  \"typeBSymptoms\": [\"objectsThrown\", \"huntsHighSanity\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -307,7 +307,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"lobbyId\": \"lobby123\",\n\t\"ghostType\": {\n\t\t\"id\": \"spirit\",\n\t\t\"name\": \"Spirit\"\n\t}\n}",
+							"raw": "{\n\t\"lobbyId\": \"lobby123\",\n\t\"ghostType\": \"spirit\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

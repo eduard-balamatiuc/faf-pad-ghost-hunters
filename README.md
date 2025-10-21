@@ -1004,10 +1004,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```json
     {
       "lobbyId": "lobby123",
-      "ghostType": {
-          "id": "demon",
-          "name": "Demon"
-        }
+      "ghostType": "demon"
     }
     ```
   - Response
@@ -1034,10 +1031,7 @@ Leveraged by Location and Ghost Services for effective communication, since one 
     ```json
     {
       "lobbyId": "lobby123",
-      "ghostType": {
-        "id": "demon",
-        "name": "Demon"
-      },
+      "ghostType": "demon",
       "typeASymptoms": ["emfFive", "objectsThrown", "coldTemperatures"],
       "typeBSymptoms": ["huntsAlonePlayers", "aggressiveWhenProvoked"]
     }
