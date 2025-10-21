@@ -1,0 +1,476 @@
+{
+	"info": {
+		"_postman_id": "315220ad-bfe9-4558-a91c-3b097d235ac7",
+		"name": "Ghost Hunters Inventory Service",
+		"description": "API collection for the Ghost Hunters Platform Inventory Service. Manage player equipment and items including purchase, retrieval, and durability tracking.\n\n**Base URL:** [http://localhost:8088](http://localhost:8088)\n\n**Service Overview:**  \nThe Inventory Service keeps track of items owned by players within the game. It handles item acquisition from the shop, tracks durability during gameplay, and manages item removal when durability reaches zero.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21970921"
+	},
+	"item": [
+		{
+			"name": "Get User Items",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/inventory/users/:userId/items?limit=20&offset=0",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"inventory",
+						"users",
+						":userId",
+						"items"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20",
+							"description": "Number of items per page (1-100, default: 20)"
+						},
+						{
+							"key": "offset",
+							"value": "0",
+							"description": "Number of items to skip for pagination (default: 0)"
+						},
+						{
+							"key": "category",
+							"value": "INVESTIGATIVE",
+							"description": "Filter by category: INVESTIGATIVE, PROTECTIVE, COMMUNICATION, CONSUMABLES",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{userId}}"
+						}
+					]
+				},
+				"description": "Retrieves a paginated list of items owned by a specific user, with optional category filtering.\n\n**Parameters:**\n- `limit` (optional): Number of items per page (default: 20, max: 100)\n- `offset` (optional): Number of items to skip (default: 0)\n- `category` (optional): Filter by category type"
+			},
+			"response": [
+				{
+					"name": "200 - Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"data\": [\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"itemId\": \"radio\",\n      \"itemName\": \"Radio\",\n      \"category\": \"COMMUNICATION\",\n      \"purchasePrice\": 50,\n      \"durability\": 5,\n      \"maxDurability\": 5,\n      \"createdAt\": \"2025-09-10T14:30:00Z\",\n      \"updatedAt\": \"2025-09-10T14:30:00Z\"\n    }\n  ],\n  \"hasMore\": false,\n  \"totalCount\": 1,\n  \"limit\": 20,\n  \"offset\": 0\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Single Item",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/inventory/users/:userId/items/:itemId",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"inventory",
+						"users",
+						":userId",
+						"items",
+						":itemId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{userId}}",
+							"description": "User ID"
+						},
+						{
+							"key": "itemId",
+							"value": "550e8400-e29b-41d4-a716-446655440000",
+							"description": "Item ID"
+						}
+					]
+				},
+				"description": "Retrieves detailed information about a specific item in user's inventory, including current durability status.\n\n**Parameters:**\n- `userId`: User ID (path parameter)\n- `itemId`: Inventory item UUID (path parameter)"
+			},
+			"response": [
+				{
+					"name": "200 - Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items/550e8400-e29b-41d4-a716-446655440000",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items",
+								"550e8400-e29b-41d4-a716-446655440000"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"itemId\": \"flashlight\",\n  \"itemName\": \"Flashlight\",\n  \"category\": \"INVESTIGATIVE\",\n  \"purchasePrice\": 50,\n  \"durability\": 5,\n  \"maxDurability\": 5,\n  \"createdAt\": \"2025-09-10T14:30:00Z\",\n  \"updatedAt\": \"2025-09-10T14:30:00Z\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Add Item to Inventory",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"itemId\": \"radio\"\n}"
+				},
+				"url": {
+					"raw": "{{API_URL}}/inventory/users/:userId/items",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"inventory",
+						"users",
+						":userId",
+						"items"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{userId}}"
+						}
+					]
+				},
+				"description": "Adds a purchased item to user's inventory after successful shop transaction, initializing durability and tracking purchase details.\n\n**Body Parameters:**\n- `itemId` (required): ID of the item being added (must be 1-255 characters)\n\n**Notes:**\n- Item details (name, category, durability) are fetched from the Shop Service\n- Purchase price is recorded for transaction tracking\n- Item durability is initialized to the item's maximum durability value"
+			},
+			"response": [
+				{
+					"name": "201 - Created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"itemId\": \"flashlight\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"itemId\": \"radio\",\n  \"itemName\": \"Radio\",\n  \"category\": \"COMMUNICATION\",\n  \"purchasePrice\": 50,\n  \"durability\": 5,\n  \"maxDurability\": 5,\n  \"createdAt\": \"2025-09-10T14:30:00Z\",\n  \"updatedAt\": \"2025-09-10T14:30:00Z\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Use Item",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/inventory/users/:userId/items/:itemId/use",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"inventory",
+						"users",
+						":userId",
+						"items",
+						":itemId",
+						"use"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{userId}}",
+							"description": "User ID"
+						},
+						{
+							"key": "itemId",
+							"value": "550e8400-e29b-41d4-a716-446655440000",
+							"description": "Item ID"
+						}
+					]
+				},
+				"description": "Uses an item during gameplay, decreasing its durability by 1. If durability reaches 0, the item is automatically deleted from inventory.\n\n**Parameters:**\n- `userId`: User ID (path parameter)\n- `itemId`: Inventory item UUID (path parameter)\n\n**Response:**\n- `success`: Boolean indicating operation success\n- `durability`: New durability value after use\n- `itemDeleted`: Boolean indicating if item was removed due to zero durability"
+			},
+			"response": [
+				{
+					"name": "200 - Item Used",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items/550e8400-e29b-41d4-a716-446655440000/use",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items",
+								"550e8400-e29b-41d4-a716-446655440000",
+								"use"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"success\": true,\n  \"durability\": 4,\n  \"itemDeleted\": false\n}"
+				},
+				{
+					"name": "200 - Item Deleted (Durability Reached 0)",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items/550e8400-e29b-41d4-a716-446655440000/use",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items",
+								"550e8400-e29b-41d4-a716-446655440000",
+								"use"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"success\": true,\n  \"durability\": 0,\n  \"itemDeleted\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete Item",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Set example values if not already set",
+							"if (!pm.variables.get('userId')) {",
+							"  pm.variables.set('userId', 'user-123');",
+							"}",
+							"if (!pm.variables.get('itemId')) {",
+							"  pm.variables.set('itemId', '550e8400-e29b-41d4-a716-446655440000');",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/inventory/users/:userId/items/:itemId",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"inventory",
+						"users",
+						":userId",
+						"items",
+						":itemId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{API_URL}}"
+						},
+						{
+							"key": "itemId",
+							"value": "550e8400-e29b-41d4-a716-446655440000"
+						}
+					]
+				},
+				"description": "Deletes/removes a specific item from user's inventory.\n\n**Parameters:**\n- `userId`: User ID (path parameter)\n- `itemId`: Inventory item UUID (path parameter)"
+			},
+			"response": [
+				{
+					"name": "200 - Success",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/inventory/users/user-123/items/550e8400-e29b-41d4-a716-446655440000",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"inventory",
+								"users",
+								"user-123",
+								"items",
+								"550e8400-e29b-41d4-a716-446655440000"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [],
+					"cookie": [],
+					"body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"itemId\": \"flashlight\",\n  \"itemName\": \"Flashlight\",\n  \"category\": \"INVESTIGATIVE\",\n  \"purchasePrice\": 50,\n  \"durability\": 5,\n  \"maxDurability\": 5,\n  \"createdAt\": \"2025-09-10T14:30:00Z\",\n  \"updatedAt\": \"2025-09-10T14:30:00Z\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "http://localhost:8088",
+			"description": "Base URL for the Inventory Service API"
+		},
+		{
+			"key": "userId",
+			"value": "user-123",
+			"description": "Example user ID for testing"
+		}
+	]
+}
