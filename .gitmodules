@@ -41,3 +41,7 @@
 [submodule "faf-pad-gateway"]
 	path = gateway
 	url = https://github.com/grumpycatyo-collab/faf-pad-gateway.git
+ 
+[submodule "discovery-service"]
+	path = discovery-service
+	url = https://github.com/eduard-balamatiuc/faf-pad-discovery-service.git
