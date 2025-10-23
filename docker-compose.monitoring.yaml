@@ -17,7 +17,6 @@ services:
 
   inventory-service:
     image: danielavornic/ghost-hunters-inventory-service:latest
-    pull_policy: always
     platform: linux/amd64
     container_name: ghost_hunters_inventory_service
     restart: unless-stopped
@@ -37,6 +36,10 @@ services:
     image: prom/prometheus:v3.7.2
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
     ports:
       - "9090:9090"
     networks:
@@ -44,8 +47,10 @@ services:
 
   grafana:
     image: grafana/grafana:9.0.0
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+    env_file:
+      - .env
+    volumes:
+      - grafana-data:/var/lib/grafana
     ports:
       - "3000:3000"
     networks:
@@ -53,6 +58,8 @@ services:
 
 volumes:
   postgres_data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   ghost_hunters_network:
