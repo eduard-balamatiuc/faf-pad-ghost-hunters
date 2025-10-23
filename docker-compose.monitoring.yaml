@@ -1,0 +1,58 @@
+services:
+  postgres_inventory_service:
+    image: postgres:15-alpine
+    platform: linux/amd64
+    container_name: ghost-hunters_inventory_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
+      POSTGRES_USER: ${INVENTORY_SVC_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD}
+    ports:
+      - "${INVENTORY_SVC_DB_EXTERNAL_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ghost_hunters_network
+
+  inventory-service:
+    image: danielavornic/ghost-hunters-inventory-service:latest
+    pull_policy: always
+    platform: linux/amd64
+    container_name: ghost_hunters_inventory_service
+    restart: unless-stopped
+    ports:
+      - "${INVENTORY_SVC_PORT:-8088}:${INVENTORY_SVC_PORT:-8088}"
+    env_file:
+      - .env
+    environment:
+      - INVENTORY_SVC_DB_HOST=postgres_inventory_service
+      - INVENTORY_SVC_DB_PORT=5432
+    depends_on:
+      - postgres_inventory_service
+    networks:
+      - ghost_hunters_network
+
+  prometheus:
+    image: prom/prometheus:v3.7.2
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - ghost_hunters_network
+
+  grafana:
+    image: grafana/grafana:9.0.0
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    networks:
+      - ghost_hunters_network
+
+volumes:
+  postgres_data:
+
+networks:
+  ghost_hunters_network:
