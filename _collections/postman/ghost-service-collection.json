@@ -1,0 +1,706 @@
+{
+	"info": {
+		"_postman_id": "ghost-service-collection-2024",
+		"name": "Ghost Service API",
+		"description": "Complete API collection for Ghost Service - Ghost Hunters Game\n\nThis collection covers all endpoints for managing ghost types, behaviors, and symptoms in the Ghost Hunters microservices architecture.\n\n**Base URL:** {{base_url}} (default: http://localhost:8086)\n\n**Authors:** Ghost Hunters Team - PAD Lab\n**Version:** 1.0.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ghost CRUD Operations",
+			"item": [
+				{
+					"name": "Create Ghost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql(\"Ghost created successfully\");",
+									"});",
+									"",
+									"pm.test(\"Response contains ghost ID\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"banshee\",\n    \"name\": \"Banshee\",\n    \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"coldTemperatures\"],\n    \"typeBSymptoms\": [\"huntsAlonePlayers\", \"fearOfCrucifixes\"],\n    \"description\": \"A vengeful spirit that wails to herald death. Known for its piercing screams and preference for hunting isolated players.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Creates a new ghost type in the database. \n\n**Required fields:**\n- id: Unique identifier (lowercase, alphanumeric, hyphens)\n- name: Display name for the ghost\n- typeASymptoms: Array of observable symptoms\n- typeBSymptoms: Array of behavioral symptoms\n- description: Detailed description\n\n**Validation:**\n- Ghost ID must be unique\n- At least one Type A symptom required\n- ID format: lowercase letters, numbers, hyphens only"
+					}
+				},
+				{
+					"name": "Get Ghost by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains ghost data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('typeASymptoms');",
+									"    pm.expect(jsonData).to.have.property('typeBSymptoms');",
+									"    pm.expect(jsonData).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/poltergeist",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"poltergeist"
+							]
+						},
+						"description": "Retrieves a specific ghost by its unique ID.\n\n**Path Parameters:**\n- ghostId: The unique identifier of the ghost\n\n**Returns:**\n- Full ghost object with all properties\n- 404 if ghost not found"
+					}
+				},
+				{
+					"name": "Update Ghost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql(\"Ghost updated successfully\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Banshee - Updated\",\n    \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"coldTemperatures\", \"ghostWriting\"],\n    \"typeBSymptoms\": [\"huntsAlonePlayers\", \"fearOfCrucifixes\", \"increasedActivityAtNight\"],\n    \"description\": \"UPDATED: A vengeful spirit that wails to herald death. Known for its piercing screams and preference for hunting isolated players. Now with increased nighttime activity.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost/banshee",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"banshee"
+							]
+						},
+						"description": "Updates an existing ghost's properties.\n\n**Path Parameters:**\n- ghostId: The ID of the ghost to update\n\n**Body:**\n- All ghost properties (except ID which comes from URL)\n- Validation rules apply same as create\n\n**Notes:**\n- UpdatedAt timestamp is automatically set\n- Ghost ID in URL takes precedence over any ID in body"
+					}
+				},
+				{
+					"name": "Delete Ghost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql(\"Ghost deleted successfully\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/banshee",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"banshee"
+							]
+						},
+						"description": "Deletes a ghost from the database.\n\n**Path Parameters:**\n- ghostId: The ID of the ghost to delete\n\n**Returns:**\n- Success message with deleted ghost ID\n- 404 if ghost not found\n\n**Cascade Effects:**\n- Related behavioral rules are also deleted\n- Operation is permanent"
+					}
+				}
+			],
+			"description": "Full CRUD operations for managing ghost entities in the database."
+		},
+		{
+			"name": "Contract Endpoints",
+			"item": [
+				{
+					"name": "Get All Ghost Types",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has ghosts array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ghosts');",
+									"    pm.expect(jsonData.ghosts).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Each ghost has required properties\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.ghosts.length > 0) {",
+									"        const ghost = jsonData.ghosts[0];",
+									"        pm.expect(ghost).to.have.property('id');",
+									"        pm.expect(ghost).to.have.property('name');",
+									"        pm.expect(ghost).to.have.property('typeASymptoms');",
+									"        pm.expect(ghost).to.have.property('typeBSymptoms');",
+									"        pm.expect(ghost).to.have.property('description');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"types"
+							]
+						},
+						"description": "**Team Contract Endpoint**\n\nRetrieves all available ghost types with complete information including symptoms and behavioral patterns.\n\n**Consumed by:**\n- Journal Service (for validation)\n- Gateway (for client requests)\n- Ghost AI Service (for behavior initialization)\n\n**Returns:**\n- Array of complete ghost objects\n- Full symptoms arrays\n- Behavioral information"
+					}
+				},
+				{
+					"name": "Get Simple Ghost List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has ghosts array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ghosts');",
+									"    pm.expect(jsonData.ghosts).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Each ghost has only id and name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.ghosts.length > 0) {",
+									"        const ghost = jsonData.ghosts[0];",
+									"        pm.expect(ghost).to.have.property('id');",
+									"        pm.expect(ghost).to.have.property('name');",
+									"        pm.expect(Object.keys(ghost)).to.have.lengthOf(2);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"list"
+							]
+						},
+						"description": "**Team Contract Endpoint**\n\nRetrieves simplified ghost list for UI display and selection purposes.\n\n**Consumed by:**\n- Journal Service (for dropdown lists)\n- Gateway (for client UI)\n\n**Returns:**\n- Lightweight array with only ID and name\n- Optimized for UI components\n- Faster response for simple listings"
+					}
+				},
+				{
+					"name": "Get Ghost Behavior",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has behavioral properties\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ghostId');",
+									"    pm.expect(jsonData).to.have.property('huntingTriggers');",
+									"    pm.expect(jsonData).to.have.property('abilities');",
+									"    pm.expect(jsonData).to.have.property('huntingCooldown');",
+									"    pm.expect(jsonData).to.have.property('aggressionLevel');",
+									"});",
+									"",
+									"pm.test(\"Hunting cooldown is a number\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.huntingCooldown).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/poltergeist/behavior",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"poltergeist",
+								"behavior"
+							]
+						},
+						"description": "**Team Contract Endpoint**\n\nRetrieves behavioral rules and templates for AI decision-making.\n\n**Consumed by:**\n- Ghost AI Service (for behavior patterns)\n\n**Path Parameters:**\n- ghostId: The ghost type to get behavior for\n\n**Returns:**\n- Hunting triggers array\n- Special abilities\n- Cooldown timings\n- Aggression level settings"
+					}
+				},
+				{
+					"name": "Get All Symptoms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has symptoms array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('symptoms');",
+									"    pm.expect(jsonData.symptoms).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Each symptom has required properties\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.symptoms.length > 0) {",
+									"        const symptom = jsonData.symptoms[0];",
+									"        pm.expect(symptom).to.have.property('id');",
+									"        pm.expect(symptom).to.have.property('name');",
+									"        pm.expect(symptom).to.have.property('type');",
+									"        pm.expect(symptom).to.have.property('description');",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Symptom types are valid\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.symptoms.forEach(symptom => {",
+									"        pm.expect(['typeA', 'typeB']).to.include(symptom.type);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/symptoms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"symptoms"
+							]
+						},
+						"description": "**Team Contract Endpoint**\n\nRetrieves all available symptoms categorized by type for game mechanics and validation.\n\n**Consumed by:**\n- Journal Service (for validation)\n- Location Service (for interaction tracking)\n\n**Returns:**\n- Complete symptoms database\n- Type categorization (typeA/typeB)\n- Detailed descriptions for each symptom"
+					}
+				}
+			],
+			"description": "API endpoints defined in the team communication contract. These are consumed by other microservices in the Ghost Hunters system."
+		},
+		{
+			"name": "Test Data Setup",
+			"item": [
+				{
+					"name": "Create Test Ghost - Poltergeist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ghost created or already exists\", function () {",
+									"    pm.expect([201, 409]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"poltergeist\",\n    \"name\": \"Poltergeist\",\n    \"typeASymptoms\": [\"emfFive\", \"objectsThrown\", \"coldTemperatures\"],\n    \"typeBSymptoms\": [\"huntsAlonePlayers\", \"aggressiveWhenProvoked\"],\n    \"description\": \"Aggressive ghost that manipulates objects and becomes more dangerous when provoked.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Creates the classic Poltergeist ghost for testing purposes."
+					}
+				},
+				{
+					"name": "Create Test Ghost - Demon",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ghost created or already exists\", function () {",
+									"    pm.expect([201, 409]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"demon\",\n    \"name\": \"Demon\",\n    \"typeASymptoms\": [\"emfFive\", \"fingerprints\", \"ghostWriting\"],\n    \"typeBSymptoms\": [\"huntsHighSanity\", \"extremelyAggressive\"],\n    \"description\": \"Extremely aggressive entity with high hunting frequency and the ability to hunt at higher sanity levels.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Creates the Demon ghost for testing aggressive behavior patterns."
+					}
+				},
+				{
+					"name": "Create Test Ghost - Spirit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ghost created or already exists\", function () {",
+									"    pm.expect([201, 409]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"spirit\",\n    \"name\": \"Spirit\",\n    \"typeASymptoms\": [\"emfFive\", \"ghostWriting\", \"spiritBox\"],\n    \"typeBSymptoms\": [\"huntsOnlyInGroups\", \"weakToSmudgeSticks\"],\n    \"description\": \"A basic vengeful spirit that seeks to harm the living but is deterred by smudge sticks.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Creates a basic Spirit ghost for testing standard behaviors."
+					}
+				}
+			],
+			"description": "Requests to set up test data for development and testing purposes. Run these to populate the database with sample ghosts."
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Create Ghost - Invalid ID Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains error message about ID format\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('lowercase letters, numbers, and hyphens');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"INVALID_ID!\",\n    \"name\": \"Invalid Ghost\",\n    \"typeASymptoms\": [\"emfFive\"],\n    \"typeBSymptoms\": [\"huntsBadly\"],\n    \"description\": \"This should fail validation\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Tests validation for invalid ghost ID format. Should return 400 error."
+					}
+				},
+				{
+					"name": "Create Ghost - Missing Type A Symptoms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains error about Type A symptoms\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('Type A symptom');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"invalid-ghost\",\n    \"name\": \"Invalid Ghost\",\n    \"typeASymptoms\": [],\n    \"typeBSymptoms\": [\"huntsBadly\"],\n    \"description\": \"This should fail validation for missing Type A symptoms\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost"
+							]
+						},
+						"description": "Tests validation for missing Type A symptoms. Should return 400 error."
+					}
+				},
+				{
+					"name": "Get Non-existent Ghost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response contains not found error\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/non-existent-ghost",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"non-existent-ghost"
+							]
+						},
+						"description": "Tests 404 handling for non-existent ghost IDs."
+					}
+				},
+				{
+					"name": "Get Behavior for Non-existent Ghost",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response contains behavior not found error\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('behavior not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ghost/non-existent-ghost/behavior",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ghost",
+								"non-existent-ghost",
+								"behavior"
+							]
+						},
+						"description": "Tests 404 handling for behavioral rules of non-existent ghosts."
+					}
+				}
+			],
+			"description": "Test requests for error handling and validation. These should return appropriate error codes and messages."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8086",
+			"type": "string"
+		}
+	]
+}
