@@ -127,12 +127,24 @@ services:
 
   grafana:
     image: grafana/grafana:9.0.0
+    container_name: ghost_hunters_grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/ghost-hunters-dashboard.json
     env_file:
       - .env
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana-dashboard.json:/var/lib/grafana/dashboards/ghost-hunters-dashboard.json:ro
+      - ./grafana-dashboards-provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     ports:
       - "3000:3000"
+    depends_on:
+      - loki
+      - prometheus
     networks:
       - ghost_hunters_network
 
