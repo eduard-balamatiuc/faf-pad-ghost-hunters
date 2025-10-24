@@ -1,0 +1,483 @@
+type: collection.insomnia.rest/5.0
+name: discovery-service-collection
+meta:
+  id: wrk_discovery_service_001
+  created: 1758900000000
+  modified: 1758900000000
+  description: "Discovery Service API Collection - Service registry and health monitoring for Ghost Hunters microservices"
+collection:
+  - name: Health & Monitoring
+    meta:
+      id: fld_health_monitoring
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000000
+      description: Health check and monitoring endpoints
+    children:
+      - url: "{{ _.base_url }}/health"
+        name: Service Health Check
+        meta:
+          id: req_health_check
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Check the health status of the discovery service itself
+          sortKey: -1758900000000
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/health"
+        name: Discovery Service Health
+        meta:
+          id: req_discovery_health
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Alternative health check endpoint for discovery service
+          sortKey: -1758900000001
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Service Registration
+    meta:
+      id: fld_service_registration
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000002
+      description: Service registration and management endpoints
+    children:
+      - url: "{{ _.base_url }}/api/v1/discovery/register"
+        name: Register Service
+        meta:
+          id: req_register_service
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Register a new service instance with the discovery service
+          sortKey: -1758900000000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_name": "lobby-service",
+              "service_id": "lobby-service-instance-001",
+              "host": "lobby-api",
+              "port": 8084,
+              "health_check_endpoint": "/health",
+              "metadata": {
+                "version": "1.0.0",
+                "environment": "development",
+                "region": "us-east-1"
+              },
+              "tags": ["go", "microservice", "lobby"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/register"
+        name: Register Gateway Service
+        meta:
+          id: req_register_gateway
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Register the gateway service
+          sortKey: -1758900000001
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_name": "gateway",
+              "service_id": "gateway-instance-001",
+              "host": "gateway-api",
+              "port": 8000,
+              "health_check_endpoint": "/health",
+              "metadata": {
+                "version": "1.0.0",
+                "environment": "development",
+                "framework": "fastapi"
+              },
+              "tags": ["python", "fastapi", "gateway"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/deregister/{{ _.service_id }}"
+        name: Deregister Service
+        meta:
+          id: req_deregister_service
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Deregister a service instance from the discovery service
+          sortKey: -1758900000002
+        method: DELETE
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Heartbeat & Maintenance
+    meta:
+      id: fld_heartbeat
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000003
+      description: Service heartbeat and maintenance endpoints
+    children:
+      - url: "{{ _.base_url }}/api/v1/discovery/heartbeat"
+        name: Send Heartbeat
+        meta:
+          id: req_heartbeat
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Send a heartbeat to keep service registration alive
+          sortKey: -1758900000000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_id": "{{ _.service_id }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Service Discovery
+    meta:
+      id: fld_service_discovery
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000004
+      description: Service discovery and lookup endpoints
+    children:
+      - url: "{{ _.base_url }}/api/v1/discovery/services"
+        name: Get All Services
+        meta:
+          id: req_get_all_services
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get all registered services
+          sortKey: -1758900000000
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/services?status=healthy"
+        name: Get Healthy Services
+        meta:
+          id: req_get_healthy_services
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get all services with healthy status
+          sortKey: -1758900000001
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/services?status=unhealthy"
+        name: Get Unhealthy Services
+        meta:
+          id: req_get_unhealthy_services
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get all services with unhealthy status
+          sortKey: -1758900000002
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/services/{{ _.service_name }}"
+        name: Get Services by Name
+        meta:
+          id: req_get_services_by_name
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get all instances of a specific service by name
+          sortKey: -1758900000003
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/service/{{ _.service_id }}"
+        name: Get Service by ID
+        meta:
+          id: req_get_service_by_id
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get a specific service instance by its ID
+          sortKey: -1758900000004
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Statistics & Information
+    meta:
+      id: fld_statistics
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000005
+      description: Service statistics and information endpoints
+    children:
+      - url: "{{ _.base_url }}/api/v1/discovery/service-names"
+        name: Get Service Names
+        meta:
+          id: req_get_service_names
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get a list of all unique service names
+          sortKey: -1758900000000
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/statistics"
+        name: Get Statistics
+        meta:
+          id: req_get_statistics
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Get comprehensive statistics about registered services
+          sortKey: -1758900000001
+        method: GET
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Example Workflows
+    meta:
+      id: fld_workflows
+      created: 1758900000000
+      modified: 1758900000000
+      sortKey: -1758900000006
+      description: Common service registration workflows
+    children:
+      - url: "{{ _.base_url }}/api/v1/discovery/register"
+        name: Register Ghost Service
+        meta:
+          id: req_workflow_register_ghost
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Register the ghost service (example workflow)
+          sortKey: -1758900000000
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_name": "ghost-service",
+              "service_id": "ghost-service-instance-001",
+              "host": "ghost-api",
+              "port": 8083,
+              "health_check_endpoint": "/health",
+              "metadata": {
+                "version": "1.0.0",
+                "environment": "development",
+                "type": "game-logic"
+              },
+              "tags": ["python", "fastapi", "ghost", "game"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/register"
+        name: Register Map Service
+        meta:
+          id: req_workflow_register_map
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Register the map service (example workflow)
+          sortKey: -1758900000001
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_name": "map-service",
+              "service_id": "map-service-instance-001",
+              "host": "map-api",
+              "port": 8085,
+              "health_check_endpoint": "/health",
+              "metadata": {
+                "version": "1.0.0",
+                "environment": "development",
+                "type": "map-generation"
+              },
+              "tags": ["go", "microservice", "map", "game"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/api/v1/discovery/register"
+        name: Register User Management Service
+        meta:
+          id: req_workflow_register_user_mgmt
+          created: 1758900000000
+          modified: 1758900000000
+          isPrivate: false
+          description: Register the user management service (example workflow)
+          sortKey: -1758900000002
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "service_name": "user-management-service",
+              "service_id": "user-mgmt-service-instance-001",
+              "host": "user-mgmt-api",
+              "port": 8081,
+              "health_check_endpoint": "/health",
+              "metadata": {
+                "version": "1.0.0",
+                "environment": "development",
+                "type": "authentication"
+              },
+              "tags": ["python", "fastapi", "auth", "users"]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
