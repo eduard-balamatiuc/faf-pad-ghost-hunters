@@ -153,7 +153,11 @@ services:
     volumes:
       - ghost_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -255,7 +259,7 @@ services:
     depends_on:
       - discovery-service
       - chat-mongo
-  
+
   ghost-ai-redis:
     image: redis:7-alpine
     platform: ${PLATFORM}
@@ -287,7 +291,13 @@ services:
       - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -419,7 +429,11 @@ services:
       - journal_redis_data:/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG"]
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -496,7 +510,11 @@ services:
     restart: always
     command: -p ${SHOP_SERVICE_DB_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}",
+        ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -534,6 +552,8 @@ services:
     container_name: discovery-service
     ports:
       - "8091:8091"
+    env_file:
+      - .env
     environment:
       - DISCOVERY_SERVICE_HOST=0.0.0.0
       - DISCOVERY_SERVICE_PORT=8091
