@@ -137,6 +137,7 @@ services:
       INVENTORY_SVC_DB_PORT: 5432
     depends_on:
       - inventory-postgres
+      - discovery-service
 
   ghost-postgres:
     image: postgres:13-alpine
@@ -185,6 +186,8 @@ services:
     depends_on:
       ghost-postgres:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
 
   location-redis:
     image: redis:7-alpine
@@ -219,6 +222,8 @@ services:
     depends_on:
       location-redis:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
 
   chat-mongo:
     image: mongo:7.0
@@ -248,6 +253,7 @@ services:
     ports:
       - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
     depends_on:
+      - discovery-service
       - chat-mongo
   
   ghost-ai-redis:
@@ -291,7 +297,6 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
-
 
   map-api:
     image: eduardbalamatiuc/map-service:latest
@@ -429,10 +434,28 @@ services:
       - .env
     environment:
       - GATEWAY_SERVICE_BASE_URL=${GATEWAY_SERVICE_INTERNAL_BASE_URL}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - ENVIRONMENT=development
     restart: on-failure
     depends_on:
       journal-redis:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${JOURNAL_SERVICE_GO_CONTAINER_PORT}/api/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
 
   shop-api:
     image: ghenntoggy/shop-service:latest
@@ -441,11 +464,30 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - NODE_ENV=development
     ports:
       - "${SHOP_SERVICE_NEST_LOCAL_PORT}:${SHOP_SERVICE_NEST_CONTAINER_PORT}"
     depends_on:
       shop-postgres:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${SHOP_SERVICE_NEST_CONTAINER_PORT}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
 
   shop-postgres:
     image: postgres:17
