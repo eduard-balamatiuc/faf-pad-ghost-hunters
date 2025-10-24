@@ -47,7 +47,11 @@ services:
     volumes:
       - postgres_ghost_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,7 +75,7 @@ services:
       - GHOST_SVC_DB_HOST=${GHOST_SVC_DB_HOST:-ghost-postgres}
       - GHOST_SVC_DB_PORT=${GHOST_SVC_DB_PORT:-5436}
       - GHOST_SVC_DB_USER=${GHOST_SVC_DB_USER:-ghost_user}
-      - GHOST_SVC_DB_PASSWORD=${GHOST_SVC_DB_PASSWORD:-ghostdb123}
+      - GHOST_SVC_DB_PASSWORD=${GHOST_SVC_DB_PASSWORD}
       - GHOST_SVC_DB_NAME=${GHOST_SVC_DB_NAME:-ghost_db}
       - ENVIRONMENT=${GHOST_SVC_ENVIRONMENT:-development}
       - DEBUG=${GHOST_SVC_DEBUG:-false}
