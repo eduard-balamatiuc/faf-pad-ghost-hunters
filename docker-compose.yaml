@@ -276,15 +276,22 @@ services:
       - "${GHOST_AI_SVC_PORT}:${GHOST_AI_SVC_PORT}"
     env_file:
       - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
+      - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/ghost/session/health"]
+      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     depends_on:
-      - ghost-ai-redis
+      ghost-ai-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
 
   map-api:
     image: eduardbalamatiuc/map-service:latest
