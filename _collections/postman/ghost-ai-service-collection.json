@@ -1,0 +1,677 @@
+{
+	"info": {
+		"_postman_id": "ghost-ai-service-collection",
+		"name": "Ghost AI Service",
+		"description": "Ghost AI Service API endpoints for the Ghost Hunters game. This service manages ghost behavior, activity generation, and sanity-based AI responses.\n\n## Base URL\n- Local Development: `http://localhost:3000`\n- Docker: `http://localhost:3000`\n\n## Features\n- Start/stop ghost AI sessions\n- Monitor ghost activities and behavior\n- Sanity-based dynamic AI responses\n- Support for multiple ghost types (Demon, Poltergeist, Spirit, Wraith)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "ghost-hunters-team"
+	},
+	"item": [
+		{
+			"name": "Ghost AI Management",
+			"item": [
+				{
+					"name": "Start Ghost AI Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(jsonData).to.have.property('lobbyId');",
+									"    pm.expect(jsonData).to.have.property('ghostType');",
+									"});",
+									"",
+									"pm.test(\"Status is started\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('started');",
+									"});",
+									"",
+									"// Store lobbyId for subsequent requests",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"lobbyId\", jsonData.lobbyId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby_demo_001\",\n  \"hostId\": \"player_host_demo\",\n  \"mapId\": \"farmhouse_classic_001\",\n  \"difficulty\": \"medium\",\n  \"ghostType\": \"demon\",\n  \"players\": [\"player_001\", \"player_002\", \"player_003\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"start"
+							]
+						},
+						"description": "Starts a new ghost AI session for the specified lobby. This initializes a ghost thread that will generate activities based on ghost type, difficulty, and player sanity levels.\n\n**Ghost Types Available:**\n- `demon`: Most aggressive, high hunting probability\n- `poltergeist`: Object manipulation focus\n- `spirit`: Evidence-focused behavior\n- `wraith`: Stealth and mobility\n\n**Difficulty Levels:**\n- `easy`: 15-second activity intervals\n- `medium`: 10-second activity intervals  \n- `hard`: 5-second activity intervals"
+					}
+				},
+				{
+					"name": "Start Ghost AI - Poltergeist Easy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Ghost type is reflected in response\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('started');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby_poltergeist_001\",\n  \"hostId\": \"player_host_002\",\n  \"mapId\": \"asylum_basement_001\",\n  \"difficulty\": \"easy\",\n  \"ghostType\": \"poltergeist\",\n  \"players\": [\"player_004\", \"player_005\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"start"
+							]
+						},
+						"description": "Example of starting a Poltergeist ghost on easy difficulty. Poltergeists focus on object manipulation and electrical interference."
+					}
+				},
+				{
+					"name": "Start Ghost AI - Wraith Hard",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"lobby_wraith_hard_001\",\n  \"hostId\": \"player_expert_001\",\n  \"mapId\": \"hospital_nightmare_001\",\n  \"difficulty\": \"hard\",\n  \"ghostType\": \"wraith\",\n  \"players\": [\"player_pro_001\", \"player_pro_002\", \"player_pro_003\", \"player_pro_004\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"start"
+							]
+						},
+						"description": "High-difficulty Wraith ghost session. Wraiths have enhanced mobility, teleportation abilities, and leave no footprints."
+					}
+				},
+				{
+					"name": "End Ghost AI Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Session ended successfully\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('ended');",
+									"    pm.expect(jsonData.lobbyId).to.equal(pm.collectionVariables.get('lobbyId'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"{{lobbyId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/end",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"end"
+							]
+						},
+						"description": "Terminates an active ghost AI session. This stops the ghost behavior loop and marks the session as terminated."
+					}
+				}
+			],
+			"description": "Core endpoints for managing ghost AI sessions - starting and stopping ghost behavior threads."
+		},
+		{
+			"name": "Ghost Monitoring",
+			"item": [
+				{
+					"name": "Get Ghost Activities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has activities array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('activities');",
+									"    pm.expect(jsonData).to.have.property('lobbyId');",
+									"});",
+									"",
+									"pm.test(\"Activities have required fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.activities.length > 0) {",
+									"        const activity = jsonData.activities[0];",
+									"        pm.expect(activity).to.have.property('id');",
+									"        pm.expect(activity).to.have.property('activityType');",
+									"        pm.expect(activity).to.have.property('timestamp');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/activities/{{lobbyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"activities",
+								"{{lobbyId}}"
+							]
+						},
+						"description": "Retrieves all ghost activities for a specific lobby. Response includes lobbyId (camelCase) and an activities array.\n\n**Activity Types Include:**\n- `hunt_started/hunt_ended`: Hunting phases\n- `object_interaction`: Object manipulation\n- `movement`: Ghost location changes"
+					}
+				},
+				{
+					"name": "Get Ghost Activities - Poltergeist",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/activities/lobby_poltergeist_001",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"activities",
+								"lobby_poltergeist_001"
+							]
+						},
+						"description": "Monitor activities for the Poltergeist session. Poltergeist activities focus heavily on object manipulation."
+					}
+				},
+				{
+					"name": "Get Ghost Session Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Session data is complete\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('sessionId');",
+									"    pm.expect(jsonData).to.have.property('lobbyId');",
+									"    pm.expect(jsonData).to.have.property('ghostType');",
+									"    pm.expect(jsonData).to.have.property('currentState');",
+									"    pm.expect(jsonData).to.have.property('huntCooldown');",
+									"    pm.expect(jsonData).to.have.property('currentRoom');",
+									"});",
+									"",
+									"pm.test(\"Session has timestamp fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('startedAt');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/session/{{lobbyId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"session",
+								"{{lobbyId}}"
+							]
+						},
+						"description": "Gets the current status of a ghost session including:\n- Session metadata (sessionId, lobbyId, ghostType)\n- Current room location\n- Current state (active, hunting, idle)\n- Sanity threshold and hunt cooldown\n- Started timestamp"
+					}
+				},
+				{
+					"name": "Get Non-Existent Session (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error response format\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.error).to.equal('NOT_FOUND');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/session/non_existent_lobby",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"session",
+								"non_existent_lobby"
+							]
+						},
+						"description": "Test error handling for non-existent ghost sessions. Should return 404 with proper error format."
+					}
+				}
+			],
+			"description": "Endpoints for monitoring ghost behavior, activities, and session status."
+		},
+		{
+			"name": "Real-time Events (SSE)",
+			"item": [
+				{
+					"name": "Stream Ghost Events",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/event-stream"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/events/{{lobbyId}}/player_001",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"events",
+								"{{lobbyId}}",
+								"player_001"
+							]
+						},
+						"description": "Opens a Server-Sent Events (SSE) stream for real-time ghost event updates for a specific player in a lobby.\n\n**Event Types:**\n- `ghost_perception`: Player-specific sensory information (sounds, visuals, proximity)\n- `ghost_status`: Ghost activity status updates (hunting, movement, interactions)\n- `no_session`: Sent when no active ghost session exists\n\n**Stream Details:**\n- Update frequency: 500ms\n- Keep-alive interval: 15 seconds\n- Connection persists until client disconnects or session ends\n\n**Note:** This endpoint is best tested using EventSource in JavaScript or a dedicated SSE client. Postman may not display streaming responses correctly."
+					}
+				},
+				{
+					"name": "Stream Ghost Events - Specific Lobby",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/event-stream"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ghost/events/lobby_demo_001/player_002",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ghost",
+								"events",
+								"lobby_demo_001",
+								"player_002"
+							]
+						},
+						"description": "Example SSE stream for a specific player (player_002) in lobby_demo_001. This demonstrates how different players receive their own perception events."
+					}
+				}
+			],
+			"description": "Server-Sent Events (SSE) endpoints for real-time ghost event streaming to game clients."
+		},
+		{
+			"name": "Integration Tests",
+			"item": [
+				{
+					"name": "Full Workflow Test",
+					"item": [
+						{
+							"name": "1. Start Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Session started successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.equal('started');",
+											"});",
+											"",
+											"// Wait for ghost activities to generate",
+											"setTimeout(() => {}, 2000);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"lobbyId\": \"integration_test_lobby\",\n  \"hostId\": \"integration_host\",\n  \"mapId\": \"test_map_001\",\n  \"difficulty\": \"hard\",\n  \"ghostType\": \"demon\",\n  \"players\": [\"test_player_001\", \"test_player_002\"]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/ai/start",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ai",
+										"start"
+									]
+								}
+							}
+						},
+						{
+							"name": "2. Check Session Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Session is active\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.currentState).to.equal('active');",
+											"    pm.expect(jsonData.ghostType).to.equal('demon');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/ghost/session/integration_test_lobby",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ghost",
+										"session",
+										"integration_test_lobby"
+									]
+								}
+							}
+						},
+						{
+							"name": "3. Monitor Activities (Wait 5s)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Wait 5 seconds for activities to generate",
+											"setTimeout(() => {}, 5000);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Activities generated\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.activities).to.be.an('array');",
+											"    pm.expect(jsonData.activities.length).to.be.at.least(1);",
+											"});",
+											"",
+											"pm.test(\"Demon activities present\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    if (jsonData.activities.length > 0) {",
+											"        const hasHuntingActivity = jsonData.activities.some(a => ",
+											"            a.activityType.includes('hunt') || ",
+											"            a.activityType.includes('aggressive')",
+											"        );",
+											"        // Demons should show aggressive behavior",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/ghost/activities/integration_test_lobby",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ghost",
+										"activities",
+										"integration_test_lobby"
+									]
+								}
+							}
+						},
+						{
+							"name": "4. End Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Session ended successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.status).to.equal('ended');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"lobbyId\": \"integration_test_lobby\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/ai/end",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ai",
+										"end"
+									]
+								}
+							}
+						}
+					],
+					"description": "Complete workflow test that starts a session, monitors it, and ends it."
+				}
+			],
+			"description": "Integration tests that validate the complete ghost AI workflow."
+		},
+		{
+			"name": "Performance Tests",
+			"item": [
+				{
+					"name": "Concurrent Sessions Test",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lobbyId\": \"stress_test_{{$randomInt}}\",\n  \"hostId\": \"stress_host_{{$randomInt}}\",\n  \"mapId\": \"stress_map_{{$randomInt}}\",\n  \"difficulty\": \"{{$randomArrayElement(['easy', 'medium', 'hard']}}\",\n  \"ghostType\": \"{{$randomArrayElement(['demon', 'poltergeist', 'spirit', 'wraith'])}}\",\n  \"players\": [\"stress_p1_{{$randomInt}}\", \"stress_p2_{{$randomInt}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"start"
+							]
+						},
+						"description": "Stress test with random data. Run this multiple times concurrently to test the service's ability to handle multiple ghost sessions."
+					}
+				}
+			],
+			"description": "Performance and stress testing endpoints."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Making request to Ghost AI Service...');",
+					"",
+					"// Set timestamp for request tracking",
+					"pm.collectionVariables.set('requestTimestamp', new Date().toISOString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script for all requests",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Content-Type is JSON', function () {",
+					"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"});",
+					"",
+					"// Log response for debugging",
+					"console.log('Response Status:', pm.response.status);",
+					"console.log('Response Time:', pm.response.responseTime + 'ms');"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "lobbyId",
+			"value": "lobby_demo_001",
+			"type": "string"
+		},
+		{
+			"key": "ghostThreadId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

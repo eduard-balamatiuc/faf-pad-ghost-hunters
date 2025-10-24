@@ -1,0 +1,313 @@
+{
+	"info": {
+		"_postman_id": "f92029cf-5486-49b8-b0ee-a50695288fd3",
+		"name": "Ghost Hunters Chat Service REST",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21970921"
+	},
+	"item": [
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Get Messages by Lobby",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/messages?limit=50&offset=0",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{USER_ID}}",
+									"description": "Filter messages by user ID",
+									"disabled": true
+								},
+								{
+									"key": "roomId",
+									"value": "",
+									"description": "Filter messages by room ID",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Maximum number of messages to return (default: 50)"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Pagination offset (default: 0)"
+								},
+								{
+									"key": "since",
+									"value": "",
+									"description": "ISO 8601 timestamp to fetch messages since this time (e.g., 2025-10-21T00:00:00Z)",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "{{LOBBY_ID}}"
+								}
+							]
+						},
+						"description": "Retrieve paginated messages for a lobby with optional filtering by user, room, or timestamp"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Message by ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/messages/:messageId",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"messages",
+								":messageId"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "lobby-ghost-hunters"
+								},
+								{
+									"key": "messageId",
+									"value": "{{LOBBY_ID}}"
+								}
+							]
+						},
+						"description": "Retrieve a specific message by its ID within a lobby"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Message (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Updated message content\"\n}"
+						},
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/messages/:messageId",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"messages",
+								":messageId"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "{{LOBBY_ID}}"
+								},
+								{
+									"key": "messageId",
+									"value": "{{MESSAGE_ID}}"
+								}
+							]
+						},
+						"description": "Update a message's content (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Message (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/messages/:messageId",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"messages",
+								":messageId"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "{{LOBBY_ID}}"
+								},
+								{
+									"key": "messageId",
+									"value": "{{LOBBY_ID}}"
+								}
+							]
+						},
+						"description": "Delete a message from the lobby"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chat Sessions",
+			"item": [
+				{
+					"name": "Get Sessions by Lobby (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/sessions?connected=true&limit=50&offset=0",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "connected",
+									"value": "true",
+									"description": "Filter by connection status (true|false, default: true)"
+								},
+								{
+									"key": "roomId",
+									"value": "",
+									"description": "Filter sessions by room ID",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Maximum number of sessions to return (default: 50)"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Pagination offset (default: 0)"
+								},
+								{
+									"key": "since",
+									"value": "",
+									"description": "ISO 8601 timestamp to fetch sessions since this time",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "{{LOBBY_ID}}"
+								}
+							]
+						},
+						"description": "Retrieve paginated chat sessions for a lobby with optional filtering"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Session (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/chat/lobbies/:lobbyId/sessions/users/:userId",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"chat",
+								"lobbies",
+								":lobbyId",
+								"sessions",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "lobbyId",
+									"value": "{{LOBBY_ID}}"
+								},
+								{
+									"key": "userId",
+									"value": "{{USER_ID}}"
+								}
+							]
+						},
+						"description": "Retrieve the chat session for a specific user in a lobby"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "WS_URL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "LOBBY_ID",
+			"value": "lobby-001",
+			"type": "string"
+		},
+		{
+			"key": "USER_ID",
+			"value": "user-123",
+			"type": "string"
+		},
+		{
+			"key": "ROOM_ID",
+			"value": "room-main",
+			"type": "string"
+		},
+		{
+			"key": "RADIO_ITEM_ID",
+			"value": "radio-001",
+			"type": "string"
+		},
+		{
+			"key": "MESSAGE_ID",
+			"value": "message-001",
+			"type": "string"
+		},
+		{
+			"key": "SESSION_ID",
+			"value": "session-001",
+			"type": "string"
+		}
+	]
+}

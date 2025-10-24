@@ -1,0 +1,708 @@
+{
+  "info": {
+    "name": "Location Service - Lab 2",
+    "description": "Ghost Hunters Platform - Location Service API Collection\nIncludes External (Client-facing), Internal (Service-to-service), and SSE streaming endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "External - Location (Client-facing)",
+      "description": "Client-facing endpoints exposed through the gateway",
+      "item": [
+        {
+          "name": "Start Location Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lobbyId\": \"lobby123\",\n  \"hostId\": \"user1\",\n  \"mapId\": \"house1\",\n  \"difficulty\": \"medium\",\n  \"ghostType\": \"poltergeist\",\n  \"session\": \"active\",\n  \"players\": [\"user1\", \"user2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "start"
+              ]
+            },
+            "description": "Start location tracking for a lobby (requires authentication)"
+          }
+        },
+        {
+          "name": "End Location Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lobbyId\": \"lobby123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/end",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "end"
+              ]
+            },
+            "description": "End location tracking for a lobby (requires authentication)"
+          }
+        },
+        {
+          "name": "Update Player Room",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"living_room\",\n  \"state\": \"moving\",\n  \"speaking\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/user456/room",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "room"
+              ]
+            },
+            "description": "Update player's room and state"
+          }
+        },
+        {
+          "name": "Get Current Player Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/user456/current",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "current"
+              ]
+            },
+            "description": "Get current player location"
+          }
+        },
+        {
+          "name": "Equip Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"flashlight\",\n  \"itemType\": \"flashlight\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/user456/equip",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "equip"
+              ]
+            },
+            "description": "Equip an item for the player"
+          }
+        },
+        {
+          "name": "Interact With Object",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objectName\": \"TV\",\n  \"activeItem\": \"flashlight\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/user456/interact",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "interact"
+              ]
+            },
+            "description": "Interact with an object in the room"
+          }
+        },
+        {
+          "name": "Get Communication Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/communication",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "communication"
+              ]
+            },
+            "description": "Get communication data for players in lobby"
+          }
+        },
+        {
+          "name": "Remove Player",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"playerDeath\",\n  \"deathCause\": \"ghostAttack\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/external/location/lobby123/users/user456",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "external",
+                "location",
+                "lobby123",
+                "users",
+                "user456"
+              ]
+            },
+            "description": "Remove player from lobby"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internal - Location (Service-to-service)",
+      "description": "Internal endpoints for service-to-service communication (Ghost AI, Chat Service)",
+      "item": [
+        {
+          "name": "[INTERNAL] Start Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lobby_id\": \"lobby123\",\n  \"players\": [\n    {\"user_id\": \"user1\", \"username\": \"Player1\"},\n    {\"user_id\": \"user2\", \"username\": \"Player2\"}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/tracking/start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "tracking",
+                "start"
+              ]
+            },
+            "description": "Start location tracking for a lobby (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] End Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lobby_id\": \"lobby123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/tracking/end",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "tracking",
+                "end"
+              ]
+            },
+            "description": "End location tracking for a lobby (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Update Player Location",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": \"living_room\",\n  \"state\": \"moving\",\n  \"speaking\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456"
+              ]
+            },
+            "description": "Update player location and state (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Get Player Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456/current",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "current"
+              ]
+            },
+            "description": "Get current player location and status (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Remove Player",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"playerDeath\",\n  \"death_cause\": \"ghostAttack\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456"
+              ]
+            },
+            "description": "Mark player as dead/removed (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Equip Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"flashlight\",\n  \"item_type\": \"flashlight\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456/equip",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "equip"
+              ]
+            },
+            "description": "Equip an item for the player (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Interact with Object",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object_name\": \"TV\",\n  \"active_item\": \"flashlight\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456/interact",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "interact"
+              ]
+            },
+            "description": "Interact with an object in the room (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Get Player Room",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456/room?include_others=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "room"
+              ],
+              "query": [
+                {
+                  "key": "include_others",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get player's room with occupancy information (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL] Get Communication Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/communication",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "communication"
+              ]
+            },
+            "description": "Get complete communication data for lobby (internal)"
+          }
+        },
+        {
+          "name": "[INTERNAL SSE] Stream All Players",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/stream",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "stream"
+              ]
+            },
+            "description": "Stream all player positions for Ghost AI Service (1s interval) - SSE endpoint"
+          }
+        },
+        {
+          "name": "[INTERNAL SSE] Stream Single Player",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/internal/location/location/lobby123/users/user456/stream",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "internal",
+                "location",
+                "location",
+                "lobby123",
+                "users",
+                "user456",
+                "stream"
+              ]
+            },
+            "description": "Stream single player position for targeted Ghost AI behavior (500ms interval) - SSE endpoint"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Direct Service Access (Development Only)",
+      "description": "Direct access to Location Service bypassing gateway (for development/testing)",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{location_service_url}}/health",
+              "host": [
+                "{{location_service_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check if Location Service is running"
+          }
+        },
+        {
+          "name": "Direct: Start Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lobby_id\": \"lobby123\",\n  \"players\": [{\"user_id\": \"user1\"}]\n}"
+            },
+            "url": {
+              "raw": "{{location_service_url}}/location/start",
+              "host": [
+                "{{location_service_url}}"
+              ],
+              "path": [
+                "location",
+                "start"
+              ]
+            },
+            "description": "Direct access to start tracking"
+          }
+        },
+        {
+          "name": "Direct: Stream All Positions (SSE)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "url": {
+              "raw": "{{location_service_url}}/location/lobby123/stream",
+              "host": [
+                "{{location_service_url}}"
+              ],
+              "path": [
+                "location",
+                "lobby123",
+                "stream"
+              ]
+            },
+            "description": "Direct SSE stream access"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "location_service_url",
+      "value": "http://localhost:8087",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
