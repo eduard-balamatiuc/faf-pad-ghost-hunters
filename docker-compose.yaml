@@ -281,7 +281,7 @@ services:
       - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${GHOST_AI_SVC_PORT}/health"]
+      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
