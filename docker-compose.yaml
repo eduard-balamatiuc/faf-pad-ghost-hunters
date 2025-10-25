@@ -652,7 +652,7 @@ services:
     restart: unless-stopped
 
   discovery-service:
-    build: ../faf-pad-discovery-service
+    image: eduardbalamatiuc/discovery-service:latest
     platform: ${PLATFORM}
     container_name: discovery-service
     ports:
