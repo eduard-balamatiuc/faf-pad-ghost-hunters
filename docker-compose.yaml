@@ -47,57 +47,7 @@ services:
       retries: 3
 
   user-mgmt-postgres:
-  gateway-api:
-    image: grumpycatyocollab/ghost-hunters-gateway:latest
-    platform: ${PLATFORM}
-    container_name: gateway-api
-    ports:
-      - "${GATEWAY_API_EXPOSED_PORT}:${GATEWAY_API_EXPOSED_PORT}"
-    volumes:
-      - ./gateway:/app
-    env_file:
-      - .env
-    environment:
-      API_ENV: ${API_ENV}
-      LOG_LEVEL: ${LOG_LEVEL}
-      SECRET_KEY: ${SECRET_KEY}
-      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST}
-      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT}
-      GATEWAY_REDIS_DB: ${GATEWAY_REDIS_DB}
-      TASK_TIMEOUT: ${TASK_TIMEOUT}
-      CONCURRENT_TASK_LIMIT: ${CONCURRENT_TASK_LIMIT}
-      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL}
-      GATEWAY_HOST: ${GATEWAY_HOST}
-      GATEWAY_PORT: ${GATEWAY_PORT}
-    command: uvicorn main:app --host 0.0.0.0 --port ${GATEWAY_API_EXPOSED_PORT} --reload
-    depends_on:
-      gateway-redis:
-        condition: service_healthy
-      discovery-service:
-        condition: service_healthy
-
-  gateway-redis:
-    image: redis:7-alpine
-    platform: ${PLATFORM}
-    container_name: gateway-redis
-    command: redis-server --port ${GATEWAY_REDIS_PORT}
-    ports:
-      - "${GATEWAY_REDIS_PORT}:${GATEWAY_REDIS_PORT}"
-    volumes:
-      - gateway_redis_data:/data
-    env_file:
-      - .env
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_PORT}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  user-mgmt-postgres:
     image: postgres:17
-    platform: ${PLATFORM}
-    container_name: user-mgmt-postgres
     platform: ${PLATFORM}
     container_name: user-mgmt-postgres
     environment:
@@ -107,9 +57,7 @@ services:
     command: -p ${USER_MGMT_DB_PORT}
     ports:
       - "${USER_MGMT_DB_PORT}:${USER_MGMT_DB_PORT}"
-      - "${USER_MGMT_DB_PORT}:${USER_MGMT_DB_PORT}"
     volumes:
-      - user_mgmt_postgres_data:/var/lib/postgresql/data
       - user_mgmt_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test:
@@ -122,22 +70,15 @@ services:
       retries: 5
 
   user-mgmt-api:
-  user-mgmt-api:
     image: grumpycatyocollab/user-management-api:latest
-    platform: ${PLATFORM}
-    container_name: user-mgmt-api
     platform: ${PLATFORM}
     container_name: user-mgmt-api
     depends_on:
       user-mgmt-postgres:
         condition: service_healthy
       discovery-service:
-      user-mgmt-postgres:
-        condition: service_healthy
-      discovery-service:
         condition: service_healthy
     ports:
-      - "${USER_MGMT_API_EXPOSED_PORT}:${USER_MGMT_API_EXPOSED_PORT}"
       - "${USER_MGMT_API_EXPOSED_PORT}:${USER_MGMT_API_EXPOSED_PORT}"
     environment:
       USER_MGMT_AUTH_KEYSFOLDER: ${USER_MGMT_AUTH_KEYSFOLDER}
@@ -151,9 +92,6 @@ services:
       USER_MGMT_WEB_API_HOST: ${USER_MGMT_API_HOST}
       USER_MGMT_DISCOVERY_SERVICE_URL: http://discovery-service:8091
       USER_MGMT_DISCOVERY_SERVICE_HOST: user-mgmt-api
-      USER_MGMT_WEB_API_HOST: ${USER_MGMT_API_HOST}
-      USER_MGMT_DISCOVERY_SERVICE_URL: http://discovery-service:8091
-      USER_MGMT_DISCOVERY_SERVICE_HOST: user-mgmt-api
     restart: unless-stopped
     healthcheck:
       test:
@@ -164,13 +102,7 @@ services:
           "--tries=1",
           "--spider",
           "http://localhost:${USER_MGMT_API_EXPOSED_PORT}/health",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:${USER_MGMT_API_EXPOSED_PORT}/health",
         ]
-      timeout: 10s
       timeout: 10s
       interval: 30s
       retries: 3
@@ -196,28 +128,7 @@ services:
     platform: ${PLATFORM}
     container_name: inventory-api
     restart: unless-stopped
-  inventory-postgres:
-    image: postgres:15-alpine
-    platform: ${PLATFORM}
-    container_name: inventory-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
-      POSTGRES_USER: ${INVENTORY_SVC_DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD}
     ports:
-      - "${INVENTORY_SVC_DB_EXTERNAL_PORT:-5433}:5432"
-    volumes:
-      - inventory_postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
-  inventory-api:
-    image: danielavornic/ghost-hunters-inventory-service:latest
-    platform: ${PLATFORM}
-    container_name: inventory-api
-    restart: unless-stopped
-    ports:
-      - "${INVENTORY_SVC_PORT:-8088}:${INVENTORY_SVC_PORT:-8088}"
       - "${INVENTORY_SVC_PORT:-8088}:${INVENTORY_SVC_PORT:-8088}"
     env_file:
       - .env
@@ -226,6 +137,7 @@ services:
       INVENTORY_SVC_DB_PORT: 5432
     depends_on:
       - inventory-postgres
+      - discovery-service
 
   ghost-postgres:
     image: postgres:13-alpine
@@ -241,7 +153,11 @@ services:
     volumes:
       - ghost_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -294,12 +210,11 @@ services:
       retries: 3
 
   location-api:
-    image: marinbizzareadventrue/location-service:v2.0.0
+    image: marinbizzareadventrue/location-service:latest
     platform: ${PLATFORM}
     container_name: location-api
     restart: unless-stopped
     ports:
-      - "${LOCATION_SVC_PORT:-8087}:${LOCATION_SVC_PORT:-8087}"
       - "${LOCATION_SVC_PORT:-8087}:${LOCATION_SVC_PORT:-8087}"
     env_file:
       - .env
@@ -325,17 +240,10 @@ services:
       MONGO_INITDB_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-chat-mongo}
     ports:
       - "${CHAT_SVC_MONGO_PORT:-27017}:27017"
-      - "${CHAT_SVC_MONGO_PORT:-27017}:27017"
     volumes:
       - chat_mongo_data:/data/db
       - chat_mongo_config:/data/configdb
-      - chat_mongo_data:/data/db
-      - chat_mongo_config:/data/configdb
 
-  chat-api:
-    image: danielavornic/ghost-hunters-chat-service:latest
-    platform: ${PLATFORM}
-    container_name: chat-api
   chat-api:
     image: danielavornic/ghost-hunters-chat-service:latest
     platform: ${PLATFORM}
@@ -346,14 +254,12 @@ services:
     environment:
       - CHAT_SVC_NODE_ENV=production
       - CHAT_SVC_DATABASE_URL=mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@chat-mongo:27017/${CHAT_SVC_MONGO_DATABASE:-chat-mongo}?authSource=admin
-      - CHAT_SVC_NODE_ENV=production
-      - CHAT_SVC_DATABASE_URL=mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@chat-mongo:27017/${CHAT_SVC_MONGO_DATABASE:-chat-mongo}?authSource=admin
     ports:
       - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
-      - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
     depends_on:
+      - discovery-service
       - chat-mongo
-  
+
   ghost-ai-redis:
     image: redis:7-alpine
     platform: ${PLATFORM}
@@ -380,15 +286,27 @@ services:
       - "${GHOST_AI_SVC_PORT}:${GHOST_AI_SVC_PORT}"
     env_file:
       - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
+      - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/ghost/session/health"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     depends_on:
-      - ghost-ai-redis
+      ghost-ai-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
 
   map-api:
     image: eduardbalamatiuc/map-service:latest
@@ -396,7 +314,6 @@ services:
     container_name: map-api
     ports:
       - "${MAP_SERVICE_SERVICE_CONTAINER_PORT}:${MAP_SERVICE_SERVER_PORT}"
-      - "${MAP_SERVICE_SERVICE_CONTAINER_PORT}:${MAP_SERVICE_SERVER_PORT}"
     env_file:
       - .env
     environment:
@@ -407,18 +324,7 @@ services:
       - MAP_SERVICE_MAX_CONCURRENT_TASKS=${MAP_SERVICE_MAX_CONCURRENT_TASKS}
       - DISCOVERY_SERVICE_URL=http://discovery-service:8091
       - MAP_SERVICE_HOST=map-api
-      - MAP_SERVICE_REDIS_HOST=${MAP_SERVICE_REDIS_HOST}
-      - MAP_SERVICE_REDIS_PORT=${MAP_SERVICE_REDIS_PORT}
-      - MAP_SERVICE_SERVER_PORT=${MAP_SERVICE_SERVER_PORT}
-      - MAP_SERVICE_TASK_TIMEOUT=${MAP_SERVICE_TASK_TIMEOUT}
-      - MAP_SERVICE_MAX_CONCURRENT_TASKS=${MAP_SERVICE_MAX_CONCURRENT_TASKS}
-      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
-      - MAP_SERVICE_HOST=map-api
     depends_on:
-      map-redis:
-        condition: service_healthy
-      discovery-service:
-        condition: service_healthy
       map-redis:
         condition: service_healthy
       discovery-service:
@@ -432,7 +338,6 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:${MAP_SERVICE_SERVER_PORT}/health",
           "http://localhost:${MAP_SERVICE_SERVER_PORT}/health",
         ]
       timeout: 10s
@@ -460,43 +365,11 @@ services:
     image: eduardbalamatiuc/lobby-service:latest
     platform: ${PLATFORM}
     container_name: lobby-api
-  map-redis:
-    image: redis:7-alpine
-    platform: ${PLATFORM}
-    container_name: map-redis
     ports:
-      - "${MAP_SERVICE_REDIS_PORT}:${MAP_SERVICE_REDIS_PORT}"
-    command: redis-server --appendonly yes --port ${MAP_SERVICE_REDIS_PORT}
-    volumes:
-      - map_redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "${MAP_SERVICE_REDIS_PORT}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  lobby-api:
-    image: eduardbalamatiuc/lobby-service:latest
-    platform: ${PLATFORM}
-    container_name: lobby-api
-    ports:
-      - "${LOBBY_SERVICE_SERVICE_CONTAINER_PORT}:${LOBBY_SERVICE_SERVER_PORT}"
       - "${LOBBY_SERVICE_SERVICE_CONTAINER_PORT}:${LOBBY_SERVICE_SERVER_PORT}"
     env_file:
       - .env
     environment:
-      - LOBBY_SERVICE_REDIS_HOST=${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
-      - LOBBY_SERVICE_REDIS_PORT=${LOBBY_SERVICE_REDIS_PORT}
-      - LOBBY_SERVICE_SERVER_PORT=${LOBBY_SERVICE_SERVER_PORT}
-      - LOBBY_SERVICE_TASK_TIMEOUT=${LOBBY_SERVICE_TASK_TIMEOUT}
-      - LOBBY_SERVICE_MAX_CONCURRENT_TASKS=${LOBBY_SERVICE_MAX_CONCURRENT_TASKS}
-      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
-      - LOBBY_SERVICE_HOST=lobby-api
-      - LOBBY_SERVICE_MAP_SERVICE_URL=http://gateway-api:8000/api/v1/internal/map
-      - LOBBY_SERVICE_AI_SERVICE_URL=http://gateway-api:8000/api/v1/internal/ai
-      - LOBBY_SERVICE_LOCATION_SERVICE_URL=http://gateway-api:8000/api/v1/internal/location
-      - LOBBY_SERVICE_JOURNAL_SERVICE_URL=http://gateway-api:8000/api/v1/internal/journal
       - LOBBY_SERVICE_REDIS_HOST=${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
       - LOBBY_SERVICE_REDIS_PORT=${LOBBY_SERVICE_REDIS_PORT}
       - LOBBY_SERVICE_SERVER_PORT=${LOBBY_SERVICE_SERVER_PORT}
@@ -513,10 +386,6 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
-      lobby-redis:
-        condition: service_healthy
-      discovery-service:
-        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test:
@@ -527,7 +396,6 @@ services:
           "--tries=1",
           "--spider",
           "http://localhost:${LOBBY_SERVICE_SERVER_PORT}/health",
-          "http://localhost:${LOBBY_SERVICE_SERVER_PORT}/health",
         ]
       timeout: 10s
       interval: 30s
@@ -535,19 +403,13 @@ services:
       start_period: 40s
 
   lobby-redis:
-  lobby-redis:
     image: redis:7-alpine
-    platform: ${PLATFORM}
-    container_name: lobby-redis
     platform: ${PLATFORM}
     container_name: lobby-redis
     ports:
       - "${LOBBY_SERVICE_REDIS_PORT}:${LOBBY_SERVICE_REDIS_PORT}"
     command: redis-server --appendonly yes --port ${LOBBY_SERVICE_REDIS_PORT}
-      - "${LOBBY_SERVICE_REDIS_PORT}:${LOBBY_SERVICE_REDIS_PORT}"
-    command: redis-server --appendonly yes --port ${LOBBY_SERVICE_REDIS_PORT}
     volumes:
-      - lobby_redis_data:/data
       - lobby_redis_data:/data
     restart: unless-stopped
     healthcheck:
@@ -561,25 +423,17 @@ services:
     platform: ${PLATFORM}
     container_name: journal-redis
     command: redis-server --save 20 1 --loglevel notice --requirepass ${JOURNAL_SERVICE_REDIS_PASSWORD} --port ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "${LOBBY_SERVICE_REDIS_PORT}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  journal-redis:
-    image: redis:latest
-    platform: ${PLATFORM}
-    container_name: journal-redis
-    command: redis-server --save 20 1 --loglevel notice --requirepass ${JOURNAL_SERVICE_REDIS_PASSWORD} --port ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}
     ports:
-      - "${JOURNAL_SERVICE_REDIS_HOST_PORT}:${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}"
       - "${JOURNAL_SERVICE_REDIS_HOST_PORT}:${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}"
     volumes:
       - journal_redis_data:/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG"]
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -594,10 +448,28 @@ services:
       - .env
     environment:
       - GATEWAY_SERVICE_BASE_URL=${GATEWAY_SERVICE_INTERNAL_BASE_URL}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - ENVIRONMENT=development
     restart: on-failure
     depends_on:
       journal-redis:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${JOURNAL_SERVICE_GO_CONTAINER_PORT}/api/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
 
   shop-api:
     image: ghenntoggy/shop-service:latest
@@ -606,11 +478,30 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - NODE_ENV=development
     ports:
       - "${SHOP_SERVICE_NEST_LOCAL_PORT}:${SHOP_SERVICE_NEST_CONTAINER_PORT}"
     depends_on:
       shop-postgres:
         condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${SHOP_SERVICE_NEST_CONTAINER_PORT}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
 
   shop-postgres:
     image: postgres:17
@@ -619,7 +510,11 @@ services:
     restart: always
     command: -p ${SHOP_SERVICE_DB_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}",
+        ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -657,6 +552,8 @@ services:
     container_name: discovery-service
     ports:
       - "8091:8091"
+    env_file:
+      - .env
     environment:
       - DISCOVERY_SERVICE_HOST=0.0.0.0
       - DISCOVERY_SERVICE_PORT=8091
@@ -686,11 +583,9 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - ghost_hunters_network
 
   promtail:
     image: grafana/promtail:2.9.0
@@ -698,18 +593,16 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail-config.yml:/etc/promtail/config.yml
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
-    networks:
-      - ghost_hunters_network
 
   prometheus:
     image: prom/prometheus:v3.7.2
     container_name: ghost_hunters_prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -720,8 +613,6 @@ services:
       discovery-service:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - ghost_hunters_network
 
   grafana:
     image: grafana/grafana:11.0.0
@@ -733,16 +624,14 @@ services:
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/ghost-hunters-dashboard.json
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./grafana-dashboard.json:/var/lib/grafana/dashboards/ghost-hunters-dashboard.json:ro
-      - ./grafana-dashboards-provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana-dashboard.json:/var/lib/grafana/dashboards/ghost-hunters-dashboard.json:ro
+      - ./monitoring/grafana-dashboards-provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     ports:
       - "3001:3000"
     depends_on:
       - prometheus
       - loki
-    networks:
-      - ghost_hunters_network
 
 volumes:
   user_mgmt_postgres_data:
@@ -758,26 +647,6 @@ volumes:
   journal_redis_data:
   shop_postgres_data:
   discovery_redis_data:
-<<<<<<< HEAD
-  user_mgmt_postgres_data:
-  gateway_redis_data:
-  inventory_postgres_data:
-  ghost_postgres_data:
-  location_redis_data:
-  chat_mongo_data:
-  chat_mongo_config:
-  ghost_ai_redis_data:
-  map_redis_data:
-  lobby_redis_data:
-  journal_redis_data:
-  shop_postgres_data:
-  discovery_redis_data:
-=======
   loki_data:
   prometheus_data:
   grafana_data:
-
-networks:
-  ghost_hunters_network:
-    driver: bridge
->>>>>>> ded69ce (feat: grafana integration with prometeus with service discovery and lokiwith promtail aka PORTMALL)
