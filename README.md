@@ -2254,6 +2254,89 @@ Key responsibilities:
   - Usage
     When `eventType` is "huntStarted", the Chat Service blocks radio communication for users in `hauntedRooms`. When `eventType` is "huntEnded", radio communication is restored for all users in the lobby.
 
+## SSE Events
+
+### Ghost AI Service - Real-time Event Streaming
+
+The Ghost AI Service provides Server-Sent Events (SSE) for real-time ghost perception and status updates during active game sessions.
+
+#### `GET /ghost/events/{lobby_id}/{user_id}` - SSE Stream
+
+Establishes a Server-Sent Events (SSE) connection for real-time ghost event streaming to a specific player. The stream sends periodic updates about ghost perception and status changes based on the current ghost session state.
+
+**Path Parameters:**
+- `lobby_id` (string, required): The unique identifier for the lobby/game session
+- `user_id` (string, required): The unique identifier for the player receiving the events
+
+**Event Types:**
+
+1. **`ghost_perception`** - Player-specific perception data (sent every 500ms)
+   - Contains sensory information the player perceives based on ghost proximity and state
+   - Fields:
+     - `sound` (string, optional): Audio cues - "heartbeat", "footsteps", "breathing", "creak", "whisper", "silence"
+     - `visual` (string, optional): Visual cues - "shadow", "flickering_lights", "none"
+     - `isHunting` (boolean): Whether the ghost is currently in hunting mode
+     - `proximityLevel` (string): Distance indicator - "far", "near", "very_near", "same_room"
+     - `timestamp` (ISO 8601 datetime): When the perception was generated
+
+2. **`ghost_status`** - Ghost activity status updates
+   - Sent when significant ghost actions occur
+   - Fields:
+     - `lobbyId` (string): The lobby identifier
+     - `eventType` (string): Type of event - "huntStarted", "huntEnded", "ghostMoved", "objectInteraction"
+     - `ghostLocation` (string, optional): Current room the ghost is in
+     - `timestamp` (ISO 8601 datetime): When the event occurred
+     - `details` (string, optional): Additional context about the event
+
+3. **`no_session`** - Sent when no active ghost session exists
+   - Indicates the ghost AI session has ended or doesn't exist
+   - Data: `{}`
+
+**Example Response (SSE Stream):**
+
+```
+event: ghost_perception
+data: {"sound":"heartbeat","visual":"shadow","isHunting":true,"proximityLevel":"near","timestamp":"2025-09-26T10:08:15Z"}
+
+event: ghost_status
+data: {"lobbyId":"lobby_xyz_789","eventType":"huntStarted","ghostLocation":"basement","timestamp":"2025-09-26T10:08:00Z","details":"hunt_started"}
+
+event: no_session
+data: {}
+```
+
+**Connection Details:**
+- Protocol: Server-Sent Events (SSE) / text/event-stream
+- Keep-alive interval: 15 seconds
+- Update frequency: 500ms per tick
+
+**Usage Example (JavaScript):**
+```javascript
+const eventSource = new EventSource(`/ghost/events/${lobbyId}/${userId}`);
+
+eventSource.addEventListener('ghost_perception', (event) => {
+  const perception = JSON.parse(event.data);
+  console.log('Ghost perception:', perception);
+  // Update UI with sound/visual cues
+});
+
+eventSource.addEventListener('ghost_status', (event) => {
+  const status = JSON.parse(event.data);
+  console.log('Ghost status:', status);
+  // Handle hunt state changes
+});
+
+eventSource.addEventListener('no_session', (event) => {
+  console.log('No active ghost session');
+  eventSource.close();
+});
+
+eventSource.onerror = (error) => {
+  console.error('SSE connection error:', error);
+  // Implement reconnection logic
+};
+```
+
 ## Development Guidelines
 
 ### Git Workflow & Branch Strategy & Naming Convention
