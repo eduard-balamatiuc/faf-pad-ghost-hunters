@@ -153,7 +153,11 @@ services:
     volumes:
       - ghost_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -255,7 +259,7 @@ services:
     depends_on:
       - discovery-service
       - chat-mongo
-  
+
   ghost-ai-redis:
     image: redis:7-alpine
     platform: ${PLATFORM}
@@ -287,7 +291,13 @@ services:
       - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -419,7 +429,11 @@ services:
       - journal_redis_data:/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG"]
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -496,7 +510,11 @@ services:
     restart: always
     command: -p ${SHOP_SERVICE_DB_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}",
+        ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -534,6 +552,8 @@ services:
     container_name: discovery-service
     ports:
       - "8091:8091"
+    env_file:
+      - .env
     environment:
       - DISCOVERY_SERVICE_HOST=0.0.0.0
       - DISCOVERY_SERVICE_PORT=8091
@@ -556,6 +576,63 @@ services:
       retries: 3
       start_period: 40s
 
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: ghost_hunters_loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: ghost_hunters_promtail
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  prometheus:
+    image: prom/prometheus:v3.7.2
+    container_name: ghost_hunters_prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - "9090:9090"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: ghost_hunters_grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/ghost-hunters-dashboard.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana-dashboard.json:/var/lib/grafana/dashboards/ghost-hunters-dashboard.json:ro
+      - ./monitoring/grafana-dashboards-provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+      - loki
+
 volumes:
   user_mgmt_postgres_data:
   gateway_redis_data:
@@ -570,3 +647,6 @@ volumes:
   journal_redis_data:
   shop_postgres_data:
   discovery_redis_data:
+  loki_data:
+  prometheus_data:
+  grafana_data:

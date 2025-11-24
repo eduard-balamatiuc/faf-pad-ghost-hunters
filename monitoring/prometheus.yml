@@ -1,0 +1,44 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Discovery Service integration - dynamic service discovery
+  - job_name: "discovered-services"
+    http_sd_configs:
+      - url: "http://discovery-service:8091/api/v1/discovery/prometheus/sd"
+        refresh_interval: 30s
+    relabel_configs:
+      # Metrics path is already /metrics by default
+      - target_label: __metrics_path__
+        replacement: /metrics
+
+  # Docker service discovery for monitoring stack itself
+  - job_name: "docker-services"
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+    relabel_configs:
+      # Only scrape containers with label prometheus.scrape=true
+      - source_labels: [__meta_docker_container_label_prometheus_scrape]
+        regex: "true"
+        action: keep
+      # Use service name as job label
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: job
+      # Use container name as instance label
+      - source_labels: [__meta_docker_container_name]
+        regex: /(.*)
+        target_label: instance
+      # Get metrics port from label or default
+      - source_labels: [__meta_docker_container_label_prometheus_port]
+        regex: (.+)
+        target_label: __address__
+        replacement: $1
+      # Default metrics path
+      - source_labels: [__meta_docker_container_label_prometheus_path]
+        regex: (.+)
+        target_label: __metrics_path__
