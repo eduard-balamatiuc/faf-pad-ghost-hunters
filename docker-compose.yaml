@@ -1,17 +1,64 @@
 services:
-  postgres:
+  gateway-api:
+    image: grumpycatyocollab/ghost-hunters-gateway:latest
+    platform: ${PLATFORM}
+    container_name: gateway-api
+    ports:
+      - "${GATEWAY_API_EXPOSED_PORT}:${GATEWAY_API_EXPOSED_PORT}"
+    volumes:
+      - ./gateway:/app
+    env_file:
+      - .env
+    environment:
+      API_ENV: ${API_ENV}
+      LOG_LEVEL: ${LOG_LEVEL}
+      SECRET_KEY: ${SECRET_KEY}
+      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST}
+      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT}
+      GATEWAY_REDIS_DB: ${GATEWAY_REDIS_DB}
+      TASK_TIMEOUT: ${TASK_TIMEOUT}
+      CONCURRENT_TASK_LIMIT: ${CONCURRENT_TASK_LIMIT}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL}
+      GATEWAY_HOST: ${GATEWAY_HOST}
+      GATEWAY_PORT: ${GATEWAY_PORT}
+    command: uvicorn main:app --host 0.0.0.0 --port ${GATEWAY_API_EXPOSED_PORT} --reload
+    depends_on:
+      gateway-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
+  gateway-redis:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: gateway-redis
+    command: redis-server --port ${GATEWAY_REDIS_PORT}
+    ports:
+      - "${GATEWAY_REDIS_PORT}:${GATEWAY_REDIS_PORT}"
+    volumes:
+      - gateway_redis_data:/data
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_PORT}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  user-mgmt-postgres:
     image: postgres:17
-    platform: linux/amd64
-    container_name: user-management-postgres-prod
+    platform: ${PLATFORM}
+    container_name: user-mgmt-postgres
     environment:
       POSTGRES_DB: ${USER_MGMT_DB_DBNAME}
       POSTGRES_USER: ${USER_MGMT_DB_USER}
       POSTGRES_PASSWORD: ${USER_MGMT_DB_PASSWORD}
     command: -p ${USER_MGMT_DB_PORT}
     ports:
-      - "${USER_MGMT_DB_PORT:-5435}:${USER_MGMT_DB_PORT:-5432}"
+      - "${USER_MGMT_DB_PORT}:${USER_MGMT_DB_PORT}"
     volumes:
-      - user_management_postgres_data_prod:/var/lib/postgresql/data
+      - user_mgmt_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test:
         [
@@ -22,15 +69,17 @@ services:
       timeout: 5s
       retries: 5
 
-  user-management-api:
+  user-mgmt-api:
     image: grumpycatyocollab/user-management-api:latest
-    platform: linux/amd64
-    container_name: user-management-api-prod
+    platform: ${PLATFORM}
+    container_name: user-mgmt-api
     depends_on:
-      postgres:
+      user-mgmt-postgres:
+        condition: service_healthy
+      discovery-service:
         condition: service_healthy
     ports:
-      - "${API_EXPOSED_PORT}:${API_EXPOSED_PORT}"
+      - "${USER_MGMT_API_EXPOSED_PORT}:${USER_MGMT_API_EXPOSED_PORT}"
     environment:
       USER_MGMT_AUTH_KEYSFOLDER: ${USER_MGMT_AUTH_KEYSFOLDER}
       USER_MGMT_AUTH_ACTIVEKID: ${USER_MGMT_AUTH_ACTIVEKID}
@@ -40,162 +89,9 @@ services:
       USER_MGMT_DB_PASSWORD: ${USER_MGMT_DB_PASSWORD}
       USER_MGMT_DB_DBNAME: ${USER_MGMT_DB_DBNAME}
       USER_MGMT_DB_SSLMODE: ${USER_MGMT_DB_SSLMODE}
-      USER_MGMT_WEB_API_HOST: ${API_HOST}
-
-  ghost-ai-service:
-    image: grumpycatyocollab/ghost-ai-api:latest
-    platform: linux/amd64
-    container_name: ghost-ai-service
-    ports:
-      - "${GHOST_AI_SVC_PORT}:${GHOST_AI_SVC_PORT}"
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - ghost-hunters-network
-    depends_on:
-      redis-ghost-ai-service:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/ghost/session/health",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  redis-ghost-ai-service:
-    image: redis:7-alpine
-    command: redis-server --port ${GHOST_AI_SVC_REDIS_PORT}
-    ports:
-      - "${GHOST_AI_SVC_REDIS_PORT}:${GHOST_AI_SVC_REDIS_PORT}"
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - ghost-hunters-network
-    healthcheck:
-      test: [ "CMD", "redis-cli", "-p", "${GHOST_AI_SVC_REDIS_PORT}", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  redis_journal_service:
-    image: redis:latest
-    platform: linux/amd64
-    container_name: journal_service_redis_container
-    command: redis-server --save 20 1 --loglevel notice --requirepass ${JOURNAL_SERVICE_REDIS_PASSWORD}
-    ports:
-      - "${JOURNAL_SERVICE_REDIS_HOST_PORT}:${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}"
-    volumes:
-      - redis_journal_service_data:/data
-    restart: always
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "redis-cli -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG",
-        ]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-
-  journal_service_app:
-    image: ghenntoggy/journal-service:latest
-    platform: linux/amd64
-    container_name: journal_service_go_container
-    depends_on:
-      redis_journal_service:
-        condition: service_healthy
-    ports:
-      - "${JOURNAL_SERVICE_GO_LOCAL_PORT}:${JOURNAL_SERVICE_GO_CONTAINER_PORT}"
-    env_file:
-      - .env
-    environment:
-      - JOURNAL_SERVICE_GO_LOCAL_PORT=${JOURNAL_SERVICE_GO_LOCAL_PORT}
-      - JOURNAL_SERVICE_GO_CONTAINER_PORT=${JOURNAL_SERVICE_GO_CONTAINER_PORT}
-      - JOURNAL_SERVICE_APP_HOST=${JOURNAL_SERVICE_APP_HOST}
-      - JOURNAL_SERVICE_REDIS_HOST=${JOURNAL_SERVICE_REDIS_HOST}
-      - JOURNAL_SERVICE_REDIS_CONTAINER_PORT=${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}
-      - JOURNAL_SERVICE_REDIS_PASSWORD=${JOURNAL_SERVICE_REDIS_PASSWORD}
-    restart: on-failure
-
-  lobby-service-redis:
-    image: redis:8.2.1-alpine
-    container_name: lobby-redis-prod
-    ports:
-      - "${LOBBY_SERVICE_REDIS_CONTAINER_PORT:-6377}:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - lobby_service_redis_data_prod:/data
-    networks:
-      - lobby-network
-    restart: unless-stopped
-
-  shop_service_app:
-    image: ghenntoggy/shop-service:latest
-    platform: linux/amd64
-    container_name: shop_service_app_container
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      DATABASE_HOST: ${SHOP_SERVICE_DB_HOST}
-      DATABASE_PORT: ${SHOP_SERVICE_DB_PORT}
-      DATABASE_USER: ${SHOP_SERVICE_DB_USER}
-      DATABASE_PASSWORD: ${SHOP_SERVICE_DB_PASSWORD}
-      DATABASE_NAME: ${SHOP_SERVICE_DB_NAME}
-    ports:
-      - "${SHOP_SERVICE_NEST_LOCAL_PORT}:${SHOP_SERVICE_NEST_CONTAINER_PORT}"
-    depends_on:
-      postgres_shop_service:
-        condition: service_healthy
-
-  postgres_shop_service:
-    image: postgres:latest
-    platform: linux/amd64
-    container_name: shop_service_db_container
-    restart: always
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB}",
-        ]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-    volumes:
-      - postgres_shop_service_data:/var/lib/postgresql/data
-    env_file:
-      - .env
-    environment:
-      POSTGRES_DB: ${SHOP_SERVICE_POSTGRES_DB}
-      POSTGRES_USER: ${SHOP_SERVICE_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${SHOP_SERVICE_POSTGRES_PASSWORD}
-    ports:
-      - "${SHOP_SERVICE_LOCAL_DB_PORT:-5434}:${SHOP_SERVICE_DB_PORT:-5432}"
-
-  lobby-service-prod:
-    image: eduardbalamatiuc/lobby-service:latest
-    container_name: lobby-service-prod
-    ports:
-      - "${LOBBY_SERVICE_SERVICE_CONTAINER_PORT:-8084}:${LOBBY_SERVICE_SERVER_PORT:-8084}"
-    env_file:
-      - .env
-    environment:
-      - LOBBY_SERVICE_REDIS_HOST=${LOBBY_SERVICE_REDIS_HOST:-redis}
-      - LOBBY_SERVICE_REDIS_PORT=${LOBBY_SERVICE_REDIS_PORT:-6379}
-      - LOBBY_SERVICE_SERVER_PORT=${LOBBY_SERVICE_SERVER_PORT:-8080}
-    depends_on:
-      - lobby-service-redis
-    networks:
-      - lobby-network
+      USER_MGMT_WEB_API_HOST: ${USER_MGMT_API_HOST}
+      USER_MGMT_DISCOVERY_SERVICE_URL: http://discovery-service:8091
+      USER_MGMT_DISCOVERY_SERVICE_HOST: user-mgmt-api
     restart: unless-stopped
     healthcheck:
       test:
@@ -205,111 +101,17 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:${LOBBY_SERVICE_SERVER_PORT:-8084}/health",
+          "http://localhost:${USER_MGMT_API_EXPOSED_PORT}/health",
         ]
       timeout: 10s
       interval: 30s
       retries: 3
       start_period: 40s
 
-  map-service:
-    image: eduardbalamatiuc/map-service:latest
-    container_name: map-service-prod
-    ports:
-      - "${MAP_SERVICE_SERVICE_CONTAINER_PORT:-8085}:${MAP_SERVICE_SERVER_PORT:-8085}"
-    env_file:
-      - .env
-    environment:
-      - MAP_SERVICE_REDIS_HOST=${MAP_SERVICE_REDIS_HOST:-redis}
-      - MAP_SERVICE_REDIS_PORT=${MAP_SERVICE_REDIS_PORT:-6379}
-      - MAP_SERVICE_SERVER_PORT=${MAP_SERVICE_SERVER_PORT:-8084}
-    depends_on:
-      - map-service-redis
-    networks:
-      - map-network
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:${MAP_SERVICE_SERVER_PORT:-8085}/health",
-        ]
-      timeout: 10s
-      interval: 30s
-      retries: 3
-      start_period: 40s
-
-  map-service-redis:
-    image: redis:7-alpine
-    container_name: map-service-redis
-    ports:
-      - "${MAP_SERVICE_REDIS_CONTAINER_PORT:-6380}:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - map-service-redis_data:/data
-    networks:
-      - map-network
-    restart: unless-stopped
-
-  mongodb:
-    image: mongo:7.0
-    platform: linux/amd64
-    container_name: ghost_hunters_chat_mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-ghost_hunters_chat}
-    ports:
-      - "${CHAT_SVC_MONGO_PORT:-27017}:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
-    networks:
-      - ghost_hunters_network
-
-  mongo-express:
-    image: mongo-express:1.0.2
-    platform: linux/amd64
-    container_name: ghost_hunters_chat_mongo_express
-    restart: unless-stopped
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
-      ME_CONFIG_MONGODB_URL: mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@mongodb:27017/
-      ME_CONFIG_BASICAUTH: "false"
-    ports:
-      - "${CHAT_SVC_MONGO_EXPRESS_PORT:-5438}:8081"
-    depends_on:
-      - mongodb
-    networks:
-      - ghost_hunters_network
-
-  chat-service:
-    image: danielavornic/ghost-hunters-chat-service:latest
-    platform: linux/amd64
-    container_name: ghost_hunters_chat_service
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - CHAT_SVC_NODE_ENV=production
-      - CHAT_SVC_DATABASE_URL=mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${CHAT_SVC_MONGO_DATABASE:-ghost_hunters_chat}?authSource=admin
-    ports:
-      - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
-    depends_on:
-      - mongodb
-    networks:
-      - ghost_hunters_network
-
-  postgres_inventory_service:
+  inventory-postgres:
     image: postgres:15-alpine
-    platform: linux/amd64
-    container_name: ghost-hunters_inventory_postgres
+    platform: ${PLATFORM}
+    container_name: inventory-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
@@ -318,157 +120,327 @@ services:
     ports:
       - "${INVENTORY_SVC_DB_EXTERNAL_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - inventory_postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - ghost_hunters_network
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    platform: linux/amd64
-    container_name: ghost_hunters_inventory_pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${INVENTORY_SVC_PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${INVENTORY_SVC_PGADMIN_DEFAULT_PASSWORD}
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "${INVENTORY_SVC_PGADMIN_EXTERNAL_PORT:-4040}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres_inventory_service
-    networks:
-      - ghost_hunters_network
-
-  inventory-service:
+  inventory-api:
     image: danielavornic/ghost-hunters-inventory-service:latest
-    platform: linux/amd64
-    container_name: ghost_hunters_inventory_service
+    platform: ${PLATFORM}
+    container_name: inventory-api
     restart: unless-stopped
     ports:
       - "${INVENTORY_SVC_PORT:-8088}:${INVENTORY_SVC_PORT:-8088}"
     env_file:
       - .env
     environment:
-      - INVENTORY_SVC_DB_HOST=postgres_inventory_service
-      - INVENTORY_SVC_DB_PORT=5432
+      INVENTORY_SVC_DB_HOST: inventory-postgres
+      INVENTORY_SVC_DB_PORT: 5432
     depends_on:
-      - postgres_inventory_service
-    networks:
-      - ghost_hunters_network
+      - inventory-postgres
+      - discovery-service
 
-  # Ghost Service Database
-  ghost-db:
+  ghost-postgres:
     image: postgres:13-alpine
-    platform: linux/amd64
     container_name: ghost-postgres
+    restart: unless-stopped
+    command: -p ${GHOST_SVC_DB_PORT:-5436}
     environment:
       POSTGRES_DB: ${GHOST_SVC_DB_NAME:-ghost_db}
       POSTGRES_USER: ${GHOST_SVC_DB_USER:-ghost_user}
       POSTGRES_PASSWORD: ${GHOST_SVC_DB_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
-      - "${GHOST_SVC_DB_PORT:-5436}:5432"
+      - "${GHOST_SVC_DB_PORT:-5436}:${GHOST_SVC_DB_PORT:-5436}"
     volumes:
-      - ghost_db_data:/var/lib/postgresql/data
+      - ghost_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - ghost_hunters_network
-    restart: unless-stopped
 
-  # Ghost Service Application
-  ghost-service:
-    image: marinbizzareadventrue/ghost-service:v1.1.0
-    platform: linux/amd64
-    container_name: ghost-service-app
+  ghost-api:
+    image: marinbizzareadventrue/ghost-service:v2.0.0
+    platform: ${PLATFORM}
+    container_name: ghost-api
+    restart: unless-stopped
+    ports:
+      - "${GHOST_SVC_PORT:-8086}:${GHOST_SVC_PORT:-8086}"
+    env_file:
+      - .env
     environment:
       - PORT=${GHOST_SVC_PORT:-8086}
       - HOST=${GHOST_SVC_HOST:-0.0.0.0}
-      - DB_URL=postgres://${GHOST_SVC_DB_USER:-ghost_user}:${GHOST_SVC_DB_PASSWORD}@ghost-db:5432/${GHOST_SVC_DB_NAME:-ghost_db}?sslmode=disable
+      - DB_URL=${GHOST_SVC_DB_URL}
+      - GHOST_SVC_DB_HOST=${GHOST_SVC_DB_HOST:-ghost-postgres}
+      - GHOST_SVC_DB_PORT=${GHOST_SVC_DB_PORT:-5436}
+      - GHOST_SVC_DB_USER=${GHOST_SVC_DB_USER:-ghost_user}
+      - GHOST_SVC_DB_PASSWORD=${GHOST_SVC_DB_PASSWORD}
+      - GHOST_SVC_DB_NAME=${GHOST_SVC_DB_NAME:-ghost_db}
       - ENVIRONMENT=${GHOST_SVC_ENVIRONMENT:-development}
       - DEBUG=${GHOST_SVC_DEBUG:-false}
       - GIN_MODE=${GHOST_SVC_GIN_MODE:-release}
       - LOG_LEVEL=${GHOST_SVC_LOG_LEVEL:-info}
       - MAX_GHOSTS_PER_LOBBY=${GHOST_SVC_MAX_GHOSTS_PER_LOBBY:-1}
-      - GHOST_TTL=${GHOST_SVC_GHOST_TTL:-7200}
-      - SYMPTOM_TTL=${GHOST_SVC_SYMPTOM_TTL:-3600}
-      - DEFAULT_GHOST_AGGRESSION=${GHOST_SVC_DEFAULT_GHOST_AGGRESSION:-0.3}
-      - EVIDENCE_GENERATION_RATE=${GHOST_SVC_EVIDENCE_GENERATION_RATE:-0.5}
-      - HUNT_COOLDOWN_SECONDS=${GHOST_SVC_HUNT_COOLDOWN_SECONDS:-30}
-      - AUTO_POPULATE_DATA=${GHOST_SVC_AUTO_POPULATE_DATA:-true}
-      - LOG_FORMAT=${GHOST_SVC_LOG_FORMAT:-json}
-    env_file:
-      - .env
-    ports:
-      - "${GHOST_SVC_PORT:-8086}:${GHOST_SVC_PORT:-8086}"
+      - CONCURRENT_TASK_LIMIT=${CONCURRENT_TASK_LIMIT:-100}
+      - TASK_TIMEOUT=${TASK_TIMEOUT:-30}
     depends_on:
-      ghost-db:
+      ghost-postgres:
         condition: service_healthy
-    networks:
-      - ghost_hunters_network
-    restart: unless-stopped
+      discovery-service:
+        condition: service_healthy
 
-  # Location Service Redis Database
-  location-service-redis:
-    image: redis:6-alpine
+  location-redis:
+    image: redis:7-alpine
     platform: linux/amd64
     container_name: location-redis
+    command: redis-server --port 6377
     ports:
-      - "${LOCATION_SVC_REDIS_PORT:-6378}:6379"
+      - "6377:6377"
     volumes:
-      - location_service_redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-    networks:
-      - ghost_hunters_network
+      - location_redis_data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6377", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-  # Location Service
-  location-service:
-    image: marinbizzareadventrue/location-service:v1.2.0
-    platform: linux/amd64
-    container_name: location-service
+  location-api:
+    image: marinbizzareadventrue/location-service:latest
+    platform: ${PLATFORM}
+    container_name: location-api
+    restart: unless-stopped
     ports:
       - "${LOCATION_SVC_PORT:-8087}:${LOCATION_SVC_PORT:-8087}"
-    environment:
-      - PORT=${LOCATION_SVC_PORT:-8087}
-      - HOST=${LOCATION_SVC_HOST:-0.0.0.0}
-      - REDIS_URL=redis://location-service-redis:6379/0
-      - MAP_SERVICE_URL=http://map-service:${MAP_SERVICE_SERVER_PORT:-8085}
-      - LOBBY_SERVICE_URL=http://lobby-service-prod:${LOBBY_SERVICE_SERVER_PORT:-8084}
-      - INVENTORY_SERVICE_URL=http://inventory-service:${INVENTORY_SVC_PORT:-8088}
-      - ENVIRONMENT=${LOCATION_SVC_ENVIRONMENT:-development}
-      - DEBUG=${LOCATION_SVC_DEBUG:-false}
-      - LOG_LEVEL=${LOCATION_SVC_LOG_LEVEL:-info}
-      - MAX_PLAYERS_PER_LOBBY=${LOCATION_SVC_MAX_PLAYERS_PER_LOBBY:-8}
-      - LOCATION_TTL=${LOCATION_SVC_LOCATION_TTL:-3600}
-      - LOBBY_TTL=${LOCATION_SVC_LOBBY_TTL:-7200}
-      - HAUNTING_TTL=${LOCATION_SVC_HAUNTING_TTL:-3600}
-      - DEFAULT_PLAYER_SANITY=${LOCATION_SVC_DEFAULT_PLAYER_SANITY:-100}
-      - GHOST_DETECTION_RATE=${LOCATION_SVC_GHOST_DETECTION_RATE:-0.3}
-      - MOCK_EXTERNAL_SERVICES=${LOCATION_SVC_MOCK_EXTERNAL_SERVICES:-true}
-      - AUTO_POPULATE_DATA=${LOCATION_SVC_AUTO_POPULATE_DATA:-true}
-      - LOG_FORMAT=${LOCATION_SVC_LOG_FORMAT:-json}
-      - HEALTH_ENDPOINT=${LOCATION_SVC_HEALTH_ENDPOINT:-/health}
-      - HEALTH_TIMEOUT=${LOCATION_SVC_HEALTH_TIMEOUT:-10}
     env_file:
       - .env
+    environment:
+      PORT: ${LOCATION_SVC_PORT:-8087}
+      REDIS_URL: redis://location-redis:6377/0
+      CONCURRENT_TASK_LIMIT: ${CONCURRENT_TASK_LIMIT:-100}
+      TASK_TIMEOUT: ${TASK_TIMEOUT:-30}
     depends_on:
-      location-service-redis:
+      location-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
+  chat-mongo:
+    image: mongo:7.0
+    platform: ${PLATFORM}
+    container_name: chat-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-chat-mongo}
+    ports:
+      - "${CHAT_SVC_MONGO_PORT:-27017}:27017"
+    volumes:
+      - chat_mongo_data:/data/db
+      - chat_mongo_config:/data/configdb
+
+  chat-api:
+    image: danielavornic/ghost-hunters-chat-service:latest
+    platform: ${PLATFORM}
+    container_name: chat-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CHAT_SVC_NODE_ENV=production
+      - CHAT_SVC_DATABASE_URL=mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@chat-mongo:27017/${CHAT_SVC_MONGO_DATABASE:-chat-mongo}?authSource=admin
+    ports:
+      - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
+    depends_on:
+      - discovery-service
+      - chat-mongo
+  
+  ghost-ai-redis:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: ghost-ai-redis
+    command: redis-server --port ${GHOST_AI_SVC_REDIS_PORT}
+    ports:
+      - "${GHOST_AI_SVC_REDIS_PORT}:${GHOST_AI_SVC_REDIS_PORT}"
+    volumes:
+      - ghost_ai_redis_data:/data
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GHOST_AI_SVC_REDIS_PORT}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ghost-ai-api:
+    image: grumpycatyocollab/ghost-ai-api:latest
+    platform: ${PLATFORM}
+    container_name: ghost-ai-api
+    ports:
+      - "${GHOST_AI_SVC_PORT}:${GHOST_AI_SVC_PORT}"
+    env_file:
+      - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
+      - GHOST_AI_SVC_SERVICE_HOST=ghost-ai-api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${GHOST_AI_SVC_HOST}:${GHOST_AI_SVC_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      ghost-ai-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
+  map-api:
+    image: eduardbalamatiuc/map-service:latest
+    platform: ${PLATFORM}
+    container_name: map-api
+    ports:
+      - "${MAP_SERVICE_SERVICE_CONTAINER_PORT}:${MAP_SERVICE_SERVER_PORT}"
+    env_file:
+      - .env
+    environment:
+      - MAP_SERVICE_REDIS_HOST=${MAP_SERVICE_REDIS_HOST}
+      - MAP_SERVICE_REDIS_PORT=${MAP_SERVICE_REDIS_PORT}
+      - MAP_SERVICE_SERVER_PORT=${MAP_SERVICE_SERVER_PORT}
+      - MAP_SERVICE_TASK_TIMEOUT=${MAP_SERVICE_TASK_TIMEOUT}
+      - MAP_SERVICE_MAX_CONCURRENT_TASKS=${MAP_SERVICE_MAX_CONCURRENT_TASKS}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - MAP_SERVICE_HOST=map-api
+    depends_on:
+      map-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${MAP_SERVICE_SERVER_PORT}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  map-redis:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: map-redis
+    ports:
+      - "${MAP_SERVICE_REDIS_PORT}:${MAP_SERVICE_REDIS_PORT}"
+    command: redis-server --appendonly yes --port ${MAP_SERVICE_REDIS_PORT}
+    volumes:
+      - map_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${MAP_SERVICE_REDIS_PORT}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  lobby-api:
+    image: eduardbalamatiuc/lobby-service:latest
+    platform: ${PLATFORM}
+    container_name: lobby-api
+    ports:
+      - "${LOBBY_SERVICE_SERVICE_CONTAINER_PORT}:${LOBBY_SERVICE_SERVER_PORT}"
+    env_file:
+      - .env
+    environment:
+      - LOBBY_SERVICE_REDIS_HOST=${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
+      - LOBBY_SERVICE_REDIS_PORT=${LOBBY_SERVICE_REDIS_PORT}
+      - LOBBY_SERVICE_SERVER_PORT=${LOBBY_SERVICE_SERVER_PORT}
+      - LOBBY_SERVICE_TASK_TIMEOUT=${LOBBY_SERVICE_TASK_TIMEOUT}
+      - LOBBY_SERVICE_MAX_CONCURRENT_TASKS=${LOBBY_SERVICE_MAX_CONCURRENT_TASKS}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - LOBBY_SERVICE_HOST=lobby-api
+      - LOBBY_SERVICE_MAP_SERVICE_URL=http://gateway-api:8000/api/v1/internal/map
+      - LOBBY_SERVICE_AI_SERVICE_URL=http://gateway-api:8000/api/v1/internal/ai
+      - LOBBY_SERVICE_LOCATION_SERVICE_URL=http://gateway-api:8000/api/v1/internal/location
+      - LOBBY_SERVICE_JOURNAL_SERVICE_URL=http://gateway-api:8000/api/v1/internal/journal
+    depends_on:
+      lobby-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${LOBBY_SERVICE_SERVER_PORT}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  lobby-redis:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: lobby-redis
+    ports:
+      - "${LOBBY_SERVICE_REDIS_PORT}:${LOBBY_SERVICE_REDIS_PORT}"
+    command: redis-server --appendonly yes --port ${LOBBY_SERVICE_REDIS_PORT}
+    volumes:
+      - lobby_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${LOBBY_SERVICE_REDIS_PORT}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  journal-redis:
+    image: redis:latest
+    platform: ${PLATFORM}
+    container_name: journal-redis
+    command: redis-server --save 20 1 --loglevel notice --requirepass ${JOURNAL_SERVICE_REDIS_PASSWORD} --port ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}
+    ports:
+      - "${JOURNAL_SERVICE_REDIS_HOST_PORT}:${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}"
+    volumes:
+      - journal_redis_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT} -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  journal-api:
+    image: ghenntoggy/journal-service:latest
+    platform: ${PLATFORM}
+    container_name: journal-api
+    ports:
+      - "${JOURNAL_SERVICE_GO_LOCAL_PORT}:${JOURNAL_SERVICE_GO_CONTAINER_PORT}"
+    env_file:
+      - .env
+    environment:
+      - GATEWAY_SERVICE_BASE_URL=${GATEWAY_SERVICE_INTERNAL_BASE_URL}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - ENVIRONMENT=development
+    restart: on-failure
+    depends_on:
+      journal-redis:
+        condition: service_healthy
+      discovery-service:
         condition: service_healthy
     healthcheck:
       test:
@@ -478,32 +450,123 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:${LOCATION_SVC_PORT:-8087}${LOCATION_SVC_HEALTH_ENDPOINT:-/health}",
+          "http://localhost:${JOURNAL_SERVICE_GO_CONTAINER_PORT}/api/health",
         ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  shop-api:
+    image: ghenntoggy/shop-service:latest
+    platform: ${PLATFORM}
+    container_name: shop-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - NODE_ENV=development
+    ports:
+      - "${SHOP_SERVICE_NEST_LOCAL_PORT}:${SHOP_SERVICE_NEST_CONTAINER_PORT}"
+    depends_on:
+      shop-postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${SHOP_SERVICE_NEST_CONTAINER_PORT}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  shop-postgres:
+    image: postgres:17
+    platform: ${PLATFORM}
+    container_name: shop-postgres
+    restart: always
+    command: -p ${SHOP_SERVICE_DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - shop_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${SHOP_SERVICE_POSTGRES_DB}
+      - POSTGRES_USER=${SHOP_SERVICE_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${SHOP_SERVICE_POSTGRES_PASSWORD}
+    ports:
+      - "${SHOP_SERVICE_LOCAL_DB_PORT}:${SHOP_SERVICE_DB_PORT}"
+
+  # Discovery Service
+  discovery-redis:
+    image: redis:8.2.1-alpine
+    platform: ${PLATFORM}
+    container_name: discovery-redis
+    ports:
+      - "6391:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - discovery_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  discovery-service:
+    image: eduardbalamatiuc/discovery-service:latest
+    platform: ${PLATFORM}
+    container_name: discovery-service
+    ports:
+      - "8091:8091"
+    environment:
+      - DISCOVERY_SERVICE_HOST=0.0.0.0
+      - DISCOVERY_SERVICE_PORT=8091
+      - DISCOVERY_SERVICE_REDIS_HOST=discovery-redis
+      - DISCOVERY_SERVICE_REDIS_PORT=6379
+      - SERVICE_TTL=300
+      - HEALTH_CHECK_INTERVAL=30
+      - HEALTH_CHECK_TIMEOUT=10
+      - MAX_HEALTH_CHECK_FAILURES=3
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=development
+    depends_on:
+      discovery-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    restart: unless-stopped
-    networks:
-      - ghost_hunters_network
 
 volumes:
-  lobby_service_redis_data_prod:
-  postgres_shop_service_data:
-  user_management_postgres_data_prod:
-  map-service-redis_data:
-  redis_journal_service_data:
-  mongodb_data:
-  mongodb_config:
-  postgres_data:
-  pgadmin_data:
-  ghost_db_data:
-  location_service_redis_data:
-  redis-ghost-ai-service_data:
-
-networks:
-  ghost-hunters-network:
-  ghost_hunters_network:
-  lobby-network:
-  map-network:
+  user_mgmt_postgres_data:
+  gateway_redis_data:
+  inventory_postgres_data:
+  ghost_postgres_data:
+  location_redis_data:
+  chat_mongo_data:
+  chat_mongo_config:
+  ghost_ai_redis_data:
+  map_redis_data:
+  lobby_redis_data:
+  journal_redis_data:
+  shop_postgres_data:
+  discovery_redis_data:
