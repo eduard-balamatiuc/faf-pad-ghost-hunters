@@ -45,3 +45,7 @@
 [submodule "discovery-service"]
 	path = discovery-service
 	url = https://github.com/eduard-balamatiuc/faf-pad-discovery-service.git
+
+[submodule "message-broker"]
+	path = message-broker
+	url = https://github.com/danielavornic/faf-pad-message-broker.git
