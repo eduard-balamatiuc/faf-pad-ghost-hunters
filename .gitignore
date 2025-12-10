@@ -1,1 +1,5 @@
 .env
+
+# Airflow
+airflow/logs/
+airflow/**/__pycache__/
