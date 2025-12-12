@@ -228,7 +228,29 @@ It integrates with the Location Service to determine who can talk to whom, with 
 
 The following diagram illustrates the microservices architecture with API Gateway, load balancer, and service communication patterns:
 
-![Architecture Diagram](_assets/architecture.svg)
+![Architecture Diagram](_assets/architecture_diagram.svg)
+
+#### DB Replication
+1. PostgreSQL - Inventory Service Example
+
+![PostgreSQL - Replication](_assets/db_replication.jpg)
+
+2. Redis - Lobby Service Example
+
+![Redis - Replication](_assets/db_replication_2.png)
+
+3. MongoDB - Chat Service Example
+
+![MongoDB - Replication](_assets/db_replication_3.png)
+
+#### SAGA Transacation Diagrams
+1. Successful Purchase Transaction - Sequence Diagram
+
+![SAGA - Success](_assets/saga_success.jpg)
+
+2. Failed Purchase Transaction - Sequence Diagram
+
+![SAGA - Failure](_assets/saga_failure.jpg)
 
 ## Tech Stack
 
