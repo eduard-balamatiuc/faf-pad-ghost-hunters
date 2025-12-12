@@ -1,0 +1,5 @@
+# Airflow DAG dependencies
+psycopg2-binary>=2.9.0
+pymongo>=4.0.0
+redis>=5.0.0
+requests>=2.28.0

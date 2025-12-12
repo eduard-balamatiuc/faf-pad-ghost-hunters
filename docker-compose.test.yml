@@ -1,0 +1,902 @@
+services:
+  message-broker:
+    image: danielavornic/faf-pad-message-broker:latest
+    platform: ${PLATFORM}
+    container_name: faf-pad-message-broker
+    ports:
+      - "${BROKER_PORT:-8002}:8002"
+      - "${BROKER_GRPC_PORT:-50051}:50051"
+    environment:
+      BROKER_PORT: 8002
+      GRPC_PORT: 50051
+      BROKER_ID: ${BROKER_ID:-message-broker-1}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      PERSISTENCE_PATH: ${PERSISTENCE_PATH:-/tmp/message-broker/queues}
+      MESSAGE_TTL_SECONDS: ${MESSAGE_TTL_SECONDS:-1800}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - message_broker_data:/tmp/message-broker
+    networks:
+      - pad-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8002/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  discovery-redis:
+    image: redis:8.2.1-alpine
+    container_name: discovery-redis
+    ports:
+      - "${DISCOVERY_REDIS_PORT:-6391}:${DISCOVERY_SERVICE_REDIS_PORT:-6379}"
+    command: redis-server --appendonly yes --port ${DISCOVERY_SERVICE_REDIS_PORT:-6379}
+    volumes:
+      - discovery_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${DISCOVERY_SERVICE_REDIS_PORT:-6379}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pad-network
+    restart: unless-stopped
+
+  discovery-service:
+    image: eduardbalamatiuc/discovery-service:latest
+    platform: ${PLATFORM}
+    # build:
+    #   context: ./faf-pad-discovery-service/
+    #   dockerfile: Dockerfile
+    container_name: discovery-service
+    ports:
+      - "${DISCOVERY_SERVICE_PORT:-8091}:${DISCOVERY_SERVICE_PORT:-8091}"
+    environment:
+      DISCOVERY_SERVICE_HOST: ${DISCOVERY_SERVICE_HOST:-0.0.0.0}
+      DISCOVERY_SERVICE_PORT: ${DISCOVERY_SERVICE_PORT:-8091}
+      DISCOVERY_SERVICE_REDIS_HOST: ${DISCOVERY_SERVICE_REDIS_HOST:-discovery-redis}
+      DISCOVERY_SERVICE_REDIS_PORT: ${DISCOVERY_SERVICE_REDIS_PORT:-6379}
+      SERVICE_TTL: ${SERVICE_TTL:-300}
+      HEALTH_CHECK_INTERVAL: ${HEALTH_CHECK_INTERVAL:-30}
+      HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-10}
+      MAX_HEALTH_CHECK_FAILURES: ${MAX_HEALTH_CHECK_FAILURES:-3}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    depends_on:
+      discovery-redis:
+        condition: service_healthy
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DISCOVERY_SERVICE_PORT:-8091}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  gateway-redis:
+    image: redis:7-alpine
+    container_name: gateway-redis
+    command: redis-server --port ${GATEWAY_REDIS_PORT:-6379}
+    ports:
+      - "${GATEWAY_REDIS_PORT:-6379}:${GATEWAY_REDIS_PORT:-6379}"
+    volumes:
+      - gateway_redis_data:/data
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_PORT:-6379}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  gateway-api:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: grumpycatyocollab/ghost-hunters-gateway:latest
+    platform: ${PLATFORM}
+    container_name: gateway-api
+    ports:
+      - "${GATEWAY_API_EXPOSED_PORT:-8000}:${GATEWAY_API_EXPOSED_PORT:-8000}"
+    volumes:
+      - .:/app
+    environment:
+      API_ENV: ${API_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      CACHE_TTL: ${CACHE_TTL:-300}
+      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST:-gateway-redis}
+      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT:-6379}
+      GATEWAY_REDIS_DB: ${GATEWAY_REDIS_DB:-0}
+      TASK_TIMEOUT: ${TASK_TIMEOUT:-30}
+      CONCURRENT_TASK_LIMIT: ${CONCURRENT_TASK_LIMIT:-100}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      GATEWAY_HOST: ${GATEWAY_HOST:-gateway-api}
+      GATEWAY_PORT: ${GATEWAY_API_EXPOSED_PORT:-8000}
+      MESSAGE_BROKER_HOST: ${MESSAGE_BROKER_HOST:-message-broker}
+      MESSAGE_BROKER_GRPC_PORT: ${MESSAGE_BROKER_GRPC_PORT:-50051}
+      MESSAGE_BROKER_REQUEST_TIMEOUT: ${MESSAGE_BROKER_REQUEST_TIMEOUT:-30}
+      MESSAGE_BROKER_REPLY_QUEUE: ${MESSAGE_BROKER_REPLY_QUEUE:-gateway-replies}
+    command: uvicorn main:app --host 0.0.0.0 --port ${GATEWAY_API_EXPOSED_PORT:-8000} --reload
+    depends_on:
+      gateway-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_healthy
+    networks:
+      - pad-network
+    restart: unless-stopped
+
+  user-mgmt-postgres:
+    image: postgres:17
+    container_name: user-mgmt-postgres
+    environment:
+      POSTGRES_DB: ${USER_MGMT_DB_DBNAME:-user_management_db}
+      POSTGRES_USER: ${USER_MGMT_DB_USER:-user_mgmt_user}
+      POSTGRES_PASSWORD: ${USER_MGMT_DB_PASSWORD:-user_mgmt_pass}
+    command: -p ${USER_MGMT_DB_PORT:-5432}
+    ports:
+      - "${USER_MGMT_DB_PORT:-5432}:${USER_MGMT_DB_PORT:-5432}"
+    volumes:
+      - user_mgmt_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pad-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${USER_MGMT_DB_USER:-user_mgmt_user} -p ${USER_MGMT_DB_PORT:-5432}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  user-mgmt-api:
+    # build:
+    #   context: ./../user-management-service/
+    #   dockerfile: Dockerfile
+    image: grumpycatyocollab/user-management-api:latest
+    platform: ${PLATFORM}
+    depends_on:
+      user-mgmt-postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_healthy
+    deploy:
+      replicas: 1
+    ports:
+      - "${USER_MGMT_API_EXPOSED_PORT:-8001}:${USER_MGMT_API_EXPOSED_PORT:-8001}"
+    environment:
+      USER_MGMT_AUTH_KEYSFOLDER: ${USER_MGMT_AUTH_KEYSFOLDER:-/app/keys}
+      USER_MGMT_AUTH_ACTIVEKID: ${USER_MGMT_AUTH_ACTIVEKID:-1}
+      USER_MGMT_DB_HOST: ${USER_MGMT_DB_HOST:-user-mgmt-postgres}
+      USER_MGMT_DB_PORT: ${USER_MGMT_DB_PORT:-5432}
+      USER_MGMT_DB_USER: ${USER_MGMT_DB_USER:-user_mgmt_user}
+      USER_MGMT_DB_PASSWORD: ${USER_MGMT_DB_PASSWORD:-user_mgmt_pass}
+      USER_MGMT_DB_DBNAME: ${USER_MGMT_DB_DBNAME:-user_management_db}
+      USER_MGMT_DB_SSLMODE: ${USER_MGMT_DB_SSLMODE:-disable}
+      USER_MGMT_WEB_API_HOST: ${USER_MGMT_WEB_API_HOST:-0.0.0.0}
+      USER_MGMT_API_HOST: ${USER_MGMT_API_HOST:-user-mgmt-api}
+      USER_MGMT_DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      USER_MGMT_DISCOVERY_SERVICE_HOST: ${USER_MGMT_DISCOVERY_SERVICE_HOST:-user-mgmt-api}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      MESSAGE_BROKER_URL: ${MESSAGE_BROKER_HOST:-message-broker}:${MESSAGE_BROKER_GRPC_PORT:-50051}
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${USER_MGMT_API_EXPOSED_PORT:-8001}/health",
+        ]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  inventory-postgres:
+    image: postgres:15-alpine
+    container_name: inventory-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
+      POSTGRES_USER: ${INVENTORY_SVC_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD:-postgres_pass}
+    command: -p ${INVENTORY_SVC_DB_PORT:-5433}
+    ports:
+      - "${INVENTORY_SVC_DB_EXTERNAL_PORT:-5433}:${INVENTORY_SVC_DB_PORT:-5433}"
+    volumes:
+      - inventory_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pad-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${INVENTORY_SVC_DB_USERNAME:-postgres} -d ${INVENTORY_SVC_DB_DATABASE:-inventory_db} -p ${INVENTORY_SVC_DB_PORT:-5433}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  inventory-api:
+    image: danielavornic/ghost-hunters-inventory-service:latest
+    platform: ${PLATFORM}
+    # build:
+    #   context: ./../ghost-hunters-inventory-service/
+    #   dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      replicas: 3
+    environment:
+      INVENTORY_SVC_DB_HOST: ${INVENTORY_SVC_DB_HOST:-inventory-postgres}
+      INVENTORY_SVC_DB_PORT: ${INVENTORY_SVC_DB_PORT:-5433}
+      INVENTORY_SVC_DB_USERNAME: ${INVENTORY_SVC_DB_USERNAME:-postgres}
+      INVENTORY_SVC_DB_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD:-postgres_pass}
+      INVENTORY_SVC_DB_DATABASE: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
+      INVENTORY_SVC_PORT: ${INVENTORY_SVC_PORT:-8088}
+      INVENTORY_SVC_PORT_GRPC: ${INVENTORY_SVC_PORT_GRPC:-50051}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      INVENTORY_SVC_HOST: ${INVENTORY_SVC_HOST:-inventory-api}
+    depends_on:
+      inventory-postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - pad-network
+
+  ghost-postgres:
+    image: postgres:15-alpine
+    container_name: ghost-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GHOST_SVC_DB_NAME:-ghost_db}
+      POSTGRES_USER: ${GHOST_SVC_DB_USER:-ghost_user}
+      POSTGRES_PASSWORD: ${GHOST_SVC_DB_PASSWORD:-ghostdb123}
+    command: -p ${GHOST_SVC_DB_PORT:-5436}
+    ports:
+      - "${GHOST_SVC_DB_PORT:-5436}:${GHOST_SVC_DB_PORT:-5436}"
+    volumes:
+      - ghost_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pad-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GHOST_SVC_DB_USER:-ghost_user} -d ${GHOST_SVC_DB_NAME:-ghost_db} -p ${GHOST_SVC_DB_PORT:-5436}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ghost-api:
+    image: marinbizzareadventrue/ghost-service:v2.0.0
+    platform: ${PLATFORM}
+    restart: unless-stopped
+    ports:
+      - "50056:50056"
+    environment:
+      GHOST_SVC_PORT: ${GHOST_SVC_PORT:-8086}
+      GHOST_SVC_HOST: ${GHOST_SVC_HOST:-0.0.0.0}
+      GHOST_SVC_ENVIRONMENT: ${GHOST_SVC_ENVIRONMENT:-development}
+      GHOST_SVC_DB_HOST: ${GHOST_SVC_DB_HOST:-ghost-postgres}
+      GHOST_SVC_DB_PORT: ${GHOST_SVC_DB_PORT:-5436}
+      GHOST_SVC_DB_USER: ${GHOST_SVC_DB_USER:-ghost_user}
+      GHOST_SVC_DB_PASSWORD: ${GHOST_SVC_DB_PASSWORD:-ghostdb123}
+      GHOST_SVC_DB_NAME: ${GHOST_SVC_DB_NAME:-ghost_db}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      MESSAGE_BROKER_URL: ${MESSAGE_BROKER_URL:-message-broker:50051}
+      GHOST_SVC_AUTO_POPULATE_DATA: ${GHOST_SVC_AUTO_POPULATE_DATA:-true}
+    depends_on:
+      ghost-postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_started
+    networks:
+      - pad-network
+
+  # Lobby Service Dependencies
+  lobby-redis:
+    image: redis:7-alpine
+    container_name: lobby-redis
+    ports:
+      - "${LOBBY_SERVICE_REDIS_PORT:-6374}:${LOBBY_SERVICE_REDIS_PORT:-6374}"
+    command: redis-server --appendonly yes --port ${LOBBY_SERVICE_REDIS_PORT:-6374}
+    volumes:
+      - lobby_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${LOBBY_SERVICE_REDIS_PORT:-6374}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pad-network
+
+  # Map Service Dependencies
+  map-redis:
+    image: redis:7-alpine
+    container_name: map-redis
+    ports:
+      - "${MAP_SERVICE_REDIS_PORT:-6375}:${MAP_SERVICE_REDIS_PORT:-6375}"
+    command: redis-server --appendonly yes --port ${MAP_SERVICE_REDIS_PORT:-6375}
+    volumes:
+      - map_redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${MAP_SERVICE_REDIS_PORT:-6375}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pad-network
+
+  location-redis:
+    image: redis:7-alpine
+    container_name: location-redis
+    command: redis-server --port ${LOCATION_SVC_REDIS_PORT:-6377}
+    ports:
+      - "${LOCATION_SVC_REDIS_PORT:-6377}:${LOCATION_SVC_REDIS_PORT:-6377}"
+    volumes:
+      - location_redis_data:/data
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${LOCATION_SVC_REDIS_PORT:-6377}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Map Service
+  map-api:
+    image: eduardbalamatiuc/map-service:latest
+    platform: ${PLATFORM}
+    container_name: map-api
+    ports:
+      - "${MAP_SERVICE_SERVICE_CONTAINER_PORT:-8085}:${MAP_SERVICE_SERVER_PORT:-8085}"
+      - "${MAP_SERVICE_GRPC_PORT:-50054}:50054"
+    environment:
+      - MAP_SERVICE_REDIS_HOST=${MAP_SERVICE_REDIS_HOST:-map-redis}
+      - MAP_SERVICE_REDIS_PORT=${MAP_SERVICE_REDIS_PORT:-6375}
+      - MAP_SERVICE_SERVER_PORT=${MAP_SERVICE_SERVER_PORT:-8085}
+      - MAP_SERVICE_GRPC_PORT=${MAP_SERVICE_GRPC_PORT:-50054}
+      - MAP_SERVICE_TASK_TIMEOUT=${MAP_SERVICE_TASK_TIMEOUT:-25}
+      - MAP_SERVICE_MAX_CONCURRENT_TASKS=${MAP_SERVICE_MAX_CONCURRENT_TASKS:-100}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      - MAP_SERVICE_HOST=${MAP_SERVICE_HOST:-map-api}
+      - MAP_SERVICE_ID=${MAP_SERVICE_ID:-map-service-1}
+      - MESSAGE_BROKER_GRPC_URL=${MESSAGE_BROKER_GRPC_URL:-message-broker:50051}
+    depends_on:
+      map-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${MAP_SERVICE_SERVER_PORT:-8085}/health"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  # Lobby Service
+  lobby-api:
+    image: eduardbalamatiuc/lobby-service:latest
+    platform: ${PLATFORM}
+    container_name: lobby-api
+    ports:
+      - "${LOBBY_SERVICE_SERVICE_CONTAINER_PORT:-8084}:${LOBBY_SERVICE_SERVER_PORT:-8084}"
+    environment:
+      - LOBBY_SERVICE_REDIS_HOST=${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
+      - LOBBY_SERVICE_REDIS_PORT=${LOBBY_SERVICE_REDIS_PORT:-6374}
+      - LOBBY_SERVICE_SERVER_PORT=${LOBBY_SERVICE_SERVER_PORT:-8084}
+      - LOBBY_SERVICE_TASK_TIMEOUT=${LOBBY_SERVICE_TASK_TIMEOUT:-25}
+      - LOBBY_SERVICE_MAX_CONCURRENT_TASKS=${LOBBY_SERVICE_MAX_CONCURRENT_TASKS:-100}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      - LOBBY_SERVICE_HOST=${LOBBY_SERVICE_HOST:-lobby-api}
+      - LOBBY_SERVICE_ID=${LOBBY_SERVICE_ID:-lobby-service-1}
+      - MESSAGE_BROKER_URL=${MESSAGE_BROKER_URL:-message-broker:50051}
+      - LOBBY_SERVICE_MAP_SERVICE_URL=${LOBBY_SERVICE_MAP_SERVICE_URL:-http://map-api:8085}
+    depends_on:
+      lobby-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_healthy
+      map-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${LOBBY_SERVICE_SERVER_PORT:-8084}/health"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  location-api:
+    image: marinbizzareadventrue/location-service:latest
+    platform: ${PLATFORM}
+    restart: unless-stopped
+    ports:
+      - "50057:50057"
+    environment:
+      LOCATION_SVC_PORT: ${LOCATION_SVC_PORT:-8087}
+      LOCATION_SVC_HOST: ${LOCATION_SVC_HOST:-0.0.0.0}
+      LOCATION_SVC_ENVIRONMENT: ${LOCATION_SVC_ENVIRONMENT:-development}
+      REDIS_URL: redis://location-redis:6377/0
+      LOCATION_SVC_REDIS_HOST: ${LOCATION_SVC_REDIS_HOST:-location-redis}
+      LOCATION_SVC_REDIS_PORT: ${LOCATION_SVC_REDIS_PORT:-6377}
+      DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
+      MESSAGE_BROKER_URL: ${MESSAGE_BROKER_URL:-message-broker:50051}
+      LOCATION_SVC_MOCK_EXTERNAL_SERVICES: ${LOCATION_SVC_MOCK_EXTERNAL_SERVICES:-true}
+      LOCATION_SVC_AUTO_POPULATE_DATA: ${LOCATION_SVC_AUTO_POPULATE_DATA:-true}
+    depends_on:
+      location-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      message-broker:
+        condition: service_started
+    networks:
+      - pad-network
+  
+  journal-redis:
+    image: redis:8.0
+    container_name: journal-redis
+    command: redis-server --save 20 1 --loglevel notice --requirepass ${JOURNAL_SERVICE_REDIS_PASSWORD}
+    networks:
+      - pad-network
+    ports:
+      - "${JOURNAL_SERVICE_REDIS_HOST_PORT}:${JOURNAL_SERVICE_REDIS_CONTAINER_PORT}"
+    volumes:
+      - journal_redis_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${JOURNAL_SERVICE_REDIS_PASSWORD} ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+  
+  journal-service:
+    image: ghenntoggy/journal-service:latest
+    platform: ${PLATFORM}
+    deploy:
+      replicas: 3
+    networks:
+      - pad-network
+    depends_on:
+      journal-redis:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: on-failure
+
+  shop-service:
+    image: ghenntoggy/shop-service:latest
+    platform: ${PLATFORM}
+    restart: unless-stopped
+    deploy:
+      replicas: 3
+    env_file:
+      - .env
+    networks:
+      - pad-network
+    depends_on:
+      shop_postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+  
+  shop_postgres:
+    image: postgres:17
+    container_name: shop-postgres
+    restart: always
+    command: -p ${SHOP_SERVICE_DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHOP_SERVICE_POSTGRES_USER} -d ${SHOP_SERVICE_POSTGRES_DB} -p ${SHOP_SERVICE_DB_PORT}"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - shop_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - pad-network
+    environment:
+      POSTGRES_DB: ${SHOP_SERVICE_POSTGRES_DB}
+      POSTGRES_USER: ${SHOP_SERVICE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SHOP_SERVICE_POSTGRES_PASSWORD}
+    ports:
+      - "${SHOP_SERVICE_LOCAL_DB_PORT}:${SHOP_SERVICE_DB_PORT}"
+
+  ghost-ai-service:
+    image: grumpycatyocollab/ghost-ai-api:latest
+    platform: ${PLATFORM}
+    container_name: ghost-ai-service
+    ports:
+      - "${GHOST_AI_SVC_PORT:-3000}:${GHOST_AI_SVC_PORT:-3000}"
+      - "${GHOST_AI_SVC_GRPC_PORT:-50052}:${GHOST_AI_SVC_GRPC_PORT:-50052}"
+    environment:
+      - GHOST_AI_SVC_PORT=${GHOST_AI_SVC_PORT:-3000}
+      - GHOST_AI_SVC_HOST=${GHOST_AI_SVC_HOST:-0.0.0.0}
+      - GHOST_AI_SVC_REDIS_URL=redis://ghost-ai-redis:${GHOST_AI_SVC_REDIS_PORT:-6372}
+      - GHOST_AI_SVC_REDIS_PORT=${GHOST_AI_SVC_REDIS_PORT:-6372}
+      - GATEWAY_URL=${GATEWAY_URL:-http://gateway-api:8000}
+      - MESSAGE_BROKER_URL=${MESSAGE_BROKER_URL:-message-broker:50051}
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8091
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${GHOST_AI_SVC_PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - pad-network
+    depends_on:
+      message-broker:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+      ghost-ai-redis:
+        condition: service_healthy
+      ghost-api:
+        condition: service_started
+      location-api:
+        condition: service_started
+
+  ghost-ai-redis:
+    container_name: ghost-ai-redis
+    image: redis:7-alpine
+    command: redis-server --port ${GHOST_AI_SVC_REDIS_PORT:-6372}
+    ports:
+      - "${GHOST_AI_SVC_REDIS_PORT:-6372}:${GHOST_AI_SVC_REDIS_PORT:-6372}"
+    restart: unless-stopped
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GHOST_AI_SVC_REDIS_PORT:-6372}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============== CHAT SERVICE ==============
+  chat-mongo:
+    image: mongo:7.0
+    platform: ${PLATFORM}
+    container_name: chat-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-chat-mongo}
+    ports:
+      - "${CHAT_SVC_MONGO_PORT:-27017}:27017"
+    volumes:
+      - chat_mongo_data:/data/db
+      - chat_mongo_config:/data/configdb
+    networks:
+      - pad-network
+
+  chat-api:
+    image: danielavornic/ghost-hunters-chat-service:latest
+    platform: ${PLATFORM}
+    container_name: chat-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CHAT_SVC_NODE_ENV=production
+      - CHAT_SVC_DATABASE_URL=mongodb://${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}:${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}@chat-mongo:27017/${CHAT_SVC_MONGO_DATABASE:-chat-mongo}?authSource=admin
+    ports:
+      - "${CHAT_SVC_PORT:-8089}:${CHAT_SVC_PORT:-8089}"
+    depends_on:
+      - chat-mongo
+    networks:
+      - pad-network
+
+  # ============== CLICKHOUSE (Data Warehouse) ==============
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.1
+    platform: ${PLATFORM}
+    container_name: clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-warehouse}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse123}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "${CLICKHOUSE_NATIVE_PORT:-9000}:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+    networks:
+      - pad-network
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============== AIRFLOW ==============
+  airflow-postgres:
+    image: postgres:15-alpine
+    platform: ${PLATFORM}
+    container_name: airflow-postgres
+    restart: unless-stopped
+    command: -p ${AIRFLOW_DB_PORT:-5440}
+    environment:
+      POSTGRES_DB: ${AIRFLOW_DB_NAME:-airflow}
+      POSTGRES_USER: ${AIRFLOW_DB_USER:-airflow}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow123}
+    ports:
+      - "${AIRFLOW_DB_PORT:-5440}:${AIRFLOW_DB_PORT:-5440}"
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_DB_USER:-airflow} -d ${AIRFLOW_DB_NAME:-airflow} -p ${AIRFLOW_DB_PORT:-5440}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    platform: ${PLATFORM}
+    container_name: airflow-init
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow123}@airflow-postgres:${AIRFLOW_DB_PORT:-5440}/${AIRFLOW_DB_NAME:-airflow}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-admin}
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create --username $${_AIRFLOW_WWW_USER_USERNAME} --password $${_AIRFLOW_WWW_USER_PASSWORD} --firstname Admin --lastname User --role Admin --email admin@example.com || true
+    networks:
+      - pad-network
+    depends_on:
+      airflow-postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    platform: ${PLATFORM}
+    container_name: airflow-webserver
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow123}@airflow-postgres:${AIRFLOW_DB_PORT:-5440}/${AIRFLOW_DB_NAME:-airflow}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      # Service database connections for DAGs
+      USER_MGMT_DB_HOST: ${USER_MGMT_DB_HOST:-user-mgmt-postgres}
+      USER_MGMT_DB_PORT: ${USER_MGMT_DB_PORT:-5432}
+      USER_MGMT_DB_USER: ${USER_MGMT_DB_USER:-user_mgmt_user}
+      USER_MGMT_DB_PASSWORD: ${USER_MGMT_DB_PASSWORD:-user_mgmt_pass}
+      USER_MGMT_DB_DBNAME: ${USER_MGMT_DB_DBNAME:-user_management_db}
+      INVENTORY_SVC_DB_HOST: ${INVENTORY_SVC_DB_HOST:-inventory-postgres}
+      INVENTORY_SVC_DB_PORT: ${INVENTORY_SVC_DB_PORT:-5433}
+      INVENTORY_SVC_DB_USERNAME: ${INVENTORY_SVC_DB_USERNAME:-postgres}
+      INVENTORY_SVC_DB_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD:-postgres_pass}
+      INVENTORY_SVC_DB_DATABASE: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
+      GHOST_SVC_DB_HOST: ${GHOST_SVC_DB_HOST:-ghost-postgres}
+      GHOST_SVC_DB_PORT: ${GHOST_SVC_DB_PORT:-5436}
+      GHOST_SVC_DB_USER: ${GHOST_SVC_DB_USER:-ghost_user}
+      GHOST_SVC_DB_PASSWORD: ${GHOST_SVC_DB_PASSWORD:-ghostdb123}
+      GHOST_SVC_DB_NAME: ${GHOST_SVC_DB_NAME:-ghost_db}
+      SHOP_SERVICE_DB_HOST: ${SHOP_SERVICE_DB_HOST:-shop-postgres}
+      SHOP_SERVICE_DB_PORT: ${SHOP_SERVICE_DB_PORT:-5434}
+      SHOP_SERVICE_DB_USER: ${SHOP_SERVICE_POSTGRES_USER:-postgres}
+      SHOP_SERVICE_DB_PASSWORD: ${SHOP_SERVICE_POSTGRES_PASSWORD}
+      SHOP_SERVICE_DB_NAME: ${SHOP_SERVICE_POSTGRES_DB:-shop_db}
+      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST:-gateway-redis}
+      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT:-6379}
+      LOCATION_SVC_REDIS_HOST: ${LOCATION_SVC_REDIS_HOST:-location-redis}
+      LOCATION_SVC_REDIS_PORT: ${LOCATION_SVC_REDIS_PORT:-6377}
+      MAP_SERVICE_REDIS_HOST: ${MAP_SERVICE_REDIS_HOST:-map-redis}
+      MAP_SERVICE_REDIS_PORT: ${MAP_SERVICE_REDIS_PORT:-6375}
+      LOBBY_SERVICE_REDIS_HOST: ${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
+      LOBBY_SERVICE_REDIS_PORT: ${LOBBY_SERVICE_REDIS_PORT:-6374}
+      JOURNAL_SERVICE_REDIS_HOST: ${JOURNAL_SERVICE_REDIS_HOST:-journal-redis}
+      JOURNAL_SERVICE_REDIS_PORT: ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT:-6379}
+      JOURNAL_SERVICE_REDIS_PASSWORD: ${JOURNAL_SERVICE_REDIS_PASSWORD}
+      GHOST_AI_SVC_REDIS_HOST: ${GHOST_AI_SVC_REDIS_HOST:-ghost-ai-redis}
+      GHOST_AI_SVC_REDIS_PORT: ${GHOST_AI_SVC_REDIS_PORT:-6372}
+      DISCOVERY_REDIS_HOST: ${DISCOVERY_SERVICE_REDIS_HOST:-discovery-redis}
+      DISCOVERY_REDIS_PORT: ${DISCOVERY_SERVICE_REDIS_PORT:-6379}
+      # ClickHouse Data Warehouse
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_HTTP_PORT: 8123
+      CLICKHOUSE_NATIVE_PORT: 9000
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-warehouse}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse123}
+      # MongoDB Chat Service
+      CHAT_SVC_MONGO_HOST: chat-mongo
+      CHAT_SVC_MONGO_PORT: 27017
+      CHAT_SVC_MONGO_USERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
+      CHAT_SVC_MONGO_PASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
+      CHAT_SVC_MONGO_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-chat-mongo}
+    ports:
+      - "${AIRFLOW_WEBSERVER_PORT:-8090}:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    command: webserver
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    platform: ${PLATFORM}
+    container_name: airflow-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow123}@airflow-postgres:${AIRFLOW_DB_PORT:-5440}/${AIRFLOW_DB_NAME:-airflow}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      # DAG file scanning settings
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 10
+      AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: 10
+      AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 60
+      AIRFLOW__CORE__DAG_FILE_PROCESSOR_TIMEOUT: 120
+      # Service database connections for DAGs
+      USER_MGMT_DB_HOST: ${USER_MGMT_DB_HOST:-user-mgmt-postgres}
+      USER_MGMT_DB_PORT: ${USER_MGMT_DB_PORT:-5432}
+      USER_MGMT_DB_USER: ${USER_MGMT_DB_USER:-user_mgmt_user}
+      USER_MGMT_DB_PASSWORD: ${USER_MGMT_DB_PASSWORD:-user_mgmt_pass}
+      USER_MGMT_DB_DBNAME: ${USER_MGMT_DB_DBNAME:-user_management_db}
+      INVENTORY_SVC_DB_HOST: ${INVENTORY_SVC_DB_HOST:-inventory-postgres}
+      INVENTORY_SVC_DB_PORT: ${INVENTORY_SVC_DB_PORT:-5433}
+      INVENTORY_SVC_DB_USERNAME: ${INVENTORY_SVC_DB_USERNAME:-postgres}
+      INVENTORY_SVC_DB_PASSWORD: ${INVENTORY_SVC_DB_PASSWORD:-postgres_pass}
+      INVENTORY_SVC_DB_DATABASE: ${INVENTORY_SVC_DB_DATABASE:-inventory_db}
+      GHOST_SVC_DB_HOST: ${GHOST_SVC_DB_HOST:-ghost-postgres}
+      GHOST_SVC_DB_PORT: ${GHOST_SVC_DB_PORT:-5436}
+      GHOST_SVC_DB_USER: ${GHOST_SVC_DB_USER:-ghost_user}
+      GHOST_SVC_DB_PASSWORD: ${GHOST_SVC_DB_PASSWORD:-ghostdb123}
+      GHOST_SVC_DB_NAME: ${GHOST_SVC_DB_NAME:-ghost_db}
+      SHOP_SERVICE_DB_HOST: ${SHOP_SERVICE_DB_HOST:-shop-postgres}
+      SHOP_SERVICE_DB_PORT: ${SHOP_SERVICE_DB_PORT:-5434}
+      SHOP_SERVICE_DB_USER: ${SHOP_SERVICE_POSTGRES_USER:-postgres}
+      SHOP_SERVICE_DB_PASSWORD: ${SHOP_SERVICE_POSTGRES_PASSWORD}
+      SHOP_SERVICE_DB_NAME: ${SHOP_SERVICE_POSTGRES_DB:-shop_db}
+      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST:-gateway-redis}
+      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT:-6379}
+      LOCATION_SVC_REDIS_HOST: ${LOCATION_SVC_REDIS_HOST:-location-redis}
+      LOCATION_SVC_REDIS_PORT: ${LOCATION_SVC_REDIS_PORT:-6377}
+      MAP_SERVICE_REDIS_HOST: ${MAP_SERVICE_REDIS_HOST:-map-redis}
+      MAP_SERVICE_REDIS_PORT: ${MAP_SERVICE_REDIS_PORT:-6375}
+      LOBBY_SERVICE_REDIS_HOST: ${LOBBY_SERVICE_REDIS_HOST:-lobby-redis}
+      LOBBY_SERVICE_REDIS_PORT: ${LOBBY_SERVICE_REDIS_PORT:-6374}
+      JOURNAL_SERVICE_REDIS_HOST: ${JOURNAL_SERVICE_REDIS_HOST:-journal-redis}
+      JOURNAL_SERVICE_REDIS_PORT: ${JOURNAL_SERVICE_REDIS_CONTAINER_PORT:-6379}
+      JOURNAL_SERVICE_REDIS_PASSWORD: ${JOURNAL_SERVICE_REDIS_PASSWORD}
+      GHOST_AI_SVC_REDIS_HOST: ${GHOST_AI_SVC_REDIS_HOST:-ghost-ai-redis}
+      GHOST_AI_SVC_REDIS_PORT: ${GHOST_AI_SVC_REDIS_PORT:-6372}
+      DISCOVERY_REDIS_HOST: ${DISCOVERY_SERVICE_REDIS_HOST:-discovery-redis}
+      DISCOVERY_REDIS_PORT: ${DISCOVERY_SERVICE_REDIS_PORT:-6379}
+      # ClickHouse Data Warehouse
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_HTTP_PORT: 8123
+      CLICKHOUSE_NATIVE_PORT: 9000
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-warehouse}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse123}
+      # MongoDB Chat Service
+      CHAT_SVC_MONGO_HOST: chat-mongo
+      CHAT_SVC_MONGO_PORT: 27017
+      CHAT_SVC_MONGO_USERNAME: ${CHAT_SVC_MONGO_ROOT_USERNAME:-admin}
+      CHAT_SVC_MONGO_PASSWORD: ${CHAT_SVC_MONGO_ROOT_PASSWORD:-password}
+      CHAT_SVC_MONGO_DATABASE: ${CHAT_SVC_MONGO_DATABASE:-chat-mongo}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    command: scheduler
+    networks:
+      - pad-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+volumes:
+  message_broker_data:
+  discovery_redis_data:
+  gateway_redis_data:
+  user_mgmt_postgres_data:
+  inventory_postgres_data:
+  ghost_postgres_data:
+  lobby_redis_data:
+  map_redis_data:
+  location_redis_data:
+  shop_postgres_data:
+  journal_redis_data:
+  chat_mongo_data:
+  chat_mongo_config:
+  airflow_postgres_data:
+  clickhouse_data:
+  clickhouse_logs:
+
+networks:
+  pad-network:
+    driver: bridge
