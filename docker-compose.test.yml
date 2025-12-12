@@ -80,41 +80,144 @@ services:
       retries: 3
       start_period: 40s
 
-  gateway-redis:
-    image: redis:7-alpine
-    container_name: gateway-redis
-    command: redis-server --port ${GATEWAY_REDIS_PORT:-6379}
+  # Redis Cluster visualization UI (access at http://localhost:${REDIS_INSIGHT_PORT})
+  redis-insight:
+    image: redis/redisinsight:latest
+    platform: ${PLATFORM}
+    container_name: redis-insight
     ports:
-      - "${GATEWAY_REDIS_PORT:-6379}:${GATEWAY_REDIS_PORT:-6379}"
+      - "${REDIS_INSIGHT_PORT:-5540}:5540"
     volumes:
-      - gateway_redis_data:/data
+      - redis_insight_data:/data
+    restart: unless-stopped
+    networks:
+      - pad-network
+    depends_on:
+      gateway-redis-cluster-init:
+        condition: service_completed_successfully
+
+  # Redis Cluster nodes for gateway caching (sharding with hash slots)
+  gateway-redis-node-0:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: ${GATEWAY_REDIS_NODE_0_HOST:-gateway-redis-node-0}
+    command: >
+      redis-server
+      --port ${GATEWAY_REDIS_NODE_0_PORT:-7000}
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    ports:
+      - "${GATEWAY_REDIS_NODE_0_PORT:-7000}:${GATEWAY_REDIS_NODE_0_PORT:-7000}"
+    volumes:
+      - gateway_redis_node_0_data:/data
     networks:
       - pad-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_PORT:-6379}", "ping"]
+      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_NODE_0_PORT:-7000}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
 
+  gateway-redis-node-1:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: ${GATEWAY_REDIS_NODE_1_HOST:-gateway-redis-node-1}
+    command: >
+      redis-server
+      --port ${GATEWAY_REDIS_NODE_1_PORT:-7001}
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    ports:
+      - "${GATEWAY_REDIS_NODE_1_PORT:-7001}:${GATEWAY_REDIS_NODE_1_PORT:-7001}"
+    volumes:
+      - gateway_redis_node_1_data:/data
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_NODE_1_PORT:-7001}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  gateway-redis-node-2:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: ${GATEWAY_REDIS_NODE_2_HOST:-gateway-redis-node-2}
+    command: >
+      redis-server
+      --port ${GATEWAY_REDIS_NODE_2_PORT:-7002}
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    ports:
+      - "${GATEWAY_REDIS_NODE_2_PORT:-7002}:${GATEWAY_REDIS_NODE_2_PORT:-7002}"
+    volumes:
+      - gateway_redis_node_2_data:/data
+    networks:
+      - pad-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${GATEWAY_REDIS_NODE_2_PORT:-7002}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Init container to create the Redis cluster
+  gateway-redis-cluster-init:
+    image: redis:7-alpine
+    platform: ${PLATFORM}
+    container_name: gateway-redis-cluster-init
+    environment:
+      - REDIS_NODE_0=${GATEWAY_REDIS_NODE_0_HOST:-gateway-redis-node-0}:${GATEWAY_REDIS_NODE_0_PORT:-7000}
+      - REDIS_NODE_1=${GATEWAY_REDIS_NODE_1_HOST:-gateway-redis-node-1}:${GATEWAY_REDIS_NODE_1_PORT:-7001}
+      - REDIS_NODE_2=${GATEWAY_REDIS_NODE_2_HOST:-gateway-redis-node-2}:${GATEWAY_REDIS_NODE_2_PORT:-7002}
+      - REDIS_CHECK_HOST=${GATEWAY_REDIS_NODE_0_HOST:-gateway-redis-node-0}
+      - REDIS_CHECK_PORT=${GATEWAY_REDIS_NODE_0_PORT:-7000}
+    networks:
+      - pad-network
+    depends_on:
+      gateway-redis-node-0:
+        condition: service_healthy
+      gateway-redis-node-1:
+        condition: service_healthy
+      gateway-redis-node-2:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        echo 'Checking Redis Cluster status...'
+        sleep 2
+        if redis-cli -h $$REDIS_CHECK_HOST -p $$REDIS_CHECK_PORT cluster info | grep -q 'cluster_state:ok'; then
+          echo 'Redis Cluster already exists and is healthy'
+        else
+          echo 'Creating Redis Cluster...'
+          redis-cli --cluster create $$REDIS_NODE_0 $$REDIS_NODE_1 $$REDIS_NODE_2 --cluster-replicas 0 --cluster-yes
+          echo 'Redis Cluster created successfully!'
+        fi
+    restart: "no"
+
   gateway-api:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
     image: grumpycatyocollab/ghost-hunters-gateway:latest
     platform: ${PLATFORM}
     container_name: gateway-api
     ports:
       - "${GATEWAY_API_EXPOSED_PORT:-8000}:${GATEWAY_API_EXPOSED_PORT:-8000}"
     volumes:
-      - .:/app
+      - ./gateway:/app
     environment:
       API_ENV: ${API_ENV:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       CACHE_TTL: ${CACHE_TTL:-300}
-      GATEWAY_REDIS_HOST: ${GATEWAY_REDIS_HOST:-gateway-redis}
-      GATEWAY_REDIS_PORT: ${GATEWAY_REDIS_PORT:-6379}
-      GATEWAY_REDIS_DB: ${GATEWAY_REDIS_DB:-0}
+      # Redis Cluster configuration (comma-separated host:port nodes)
+      GATEWAY_REDIS_CLUSTER_NODES: ${GATEWAY_REDIS_NODE_0_HOST:-gateway-redis-node-0}:${GATEWAY_REDIS_NODE_0_PORT:-7000},${GATEWAY_REDIS_NODE_1_HOST:-gateway-redis-node-1}:${GATEWAY_REDIS_NODE_1_PORT:-7001},${GATEWAY_REDIS_NODE_2_HOST:-gateway-redis-node-2}:${GATEWAY_REDIS_NODE_2_PORT:-7002}
       TASK_TIMEOUT: ${TASK_TIMEOUT:-30}
       CONCURRENT_TASK_LIMIT: ${CONCURRENT_TASK_LIMIT:-100}
       DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
@@ -126,8 +229,8 @@ services:
       MESSAGE_BROKER_REPLY_QUEUE: ${MESSAGE_BROKER_REPLY_QUEUE:-gateway-replies}
     command: uvicorn main:app --host 0.0.0.0 --port ${GATEWAY_API_EXPOSED_PORT:-8000} --reload
     depends_on:
-      gateway-redis:
-        condition: service_healthy
+      gateway-redis-cluster-init:
+        condition: service_completed_successfully
       discovery-service:
         condition: service_healthy
       message-broker:
@@ -162,17 +265,12 @@ services:
     restart: unless-stopped
 
   user-mgmt-api:
-    # build:
-    #   context: ./../user-management-service/
-    #   dockerfile: Dockerfile
     image: grumpycatyocollab/user-management-api:latest
     platform: ${PLATFORM}
     depends_on:
       user-mgmt-postgres:
         condition: service_healthy
       discovery-service:
-        condition: service_healthy
-      message-broker:
         condition: service_healthy
     deploy:
       replicas: 1
@@ -187,7 +285,7 @@ services:
       USER_MGMT_DB_PASSWORD: ${USER_MGMT_DB_PASSWORD:-user_mgmt_pass}
       USER_MGMT_DB_DBNAME: ${USER_MGMT_DB_DBNAME:-user_management_db}
       USER_MGMT_DB_SSLMODE: ${USER_MGMT_DB_SSLMODE:-disable}
-      USER_MGMT_WEB_API_HOST: ${USER_MGMT_WEB_API_HOST:-0.0.0.0}
+      USER_MGMT_WEB_API_HOST: ${USER_MGMT_WEB_API_HOST:-0.0.0.0:8001}
       USER_MGMT_API_HOST: ${USER_MGMT_API_HOST:-user-mgmt-api}
       USER_MGMT_DISCOVERY_SERVICE_URL: ${DISCOVERY_SERVICE_URL:-http://discovery-service:8091}
       USER_MGMT_DISCOVERY_SERVICE_HOST: ${USER_MGMT_DISCOVERY_SERVICE_HOST:-user-mgmt-api}
@@ -882,7 +980,11 @@ services:
 volumes:
   message_broker_data:
   discovery_redis_data:
-  gateway_redis_data:
+  # Redis Cluster volumes for gateway
+  redis_insight_data:
+  gateway_redis_node_0_data:
+  gateway_redis_node_1_data:
+  gateway_redis_node_2_data:
   user_mgmt_postgres_data:
   inventory_postgres_data:
   ghost_postgres_data:
